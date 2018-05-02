@@ -1,5 +1,8 @@
 #include "TitleScene.h"
 #include "DiffSelectScene.h"
+#include "CharaSelectScene.h"
+#include "TopScroll.h"
+
 //‰¹‚ð‚È‚ç‚·‚½‚ß‚Éinclude
 #include "SimpleAudioEngine.h"
 
@@ -77,7 +80,7 @@ void TitleScene::pushStart(Ref *pSender)
 	CCLOG("Pushƒ{ƒ^ƒ“");
 
 	// ‘JˆÚô‚Ì‰æ–Ê‚ð²Ý½ÀÝ½
-	Scene *pScene = DiffSelectScene::createScene();
+	Scene *pScene = CharaSelectScene::createScene();
 
 	/* 0.5•b‚©‚¯‚ÄŽŸ‰æ–Ê‚É‘JˆÚ
 	// (ŽžŠÔ,‘JˆÚæ,F(ƒIƒvƒVƒ‡ƒ“))
@@ -86,8 +89,8 @@ void TitleScene::pushStart(Ref *pSender)
 	Director::getInstance()->replaceScene(transition);*/
 
 	// –Í—l¶‚©‚ç‚¾‚ñ‚¾‚ñ...
-	Director::getInstance()->replaceScene(TransitionFadeTR::create(0.7f, DiffSelectScene::createScene()));
-	CCDirector::sharedDirector()->replaceScene(CCTransitionFadeTR::create(2.0f, DiffSelectScene::createScene()));
+	Director::getInstance()->replaceScene(TransitionFadeTR::create(0.7f, CharaSelectScene::createScene()));
+	CCDirector::sharedDirector()->replaceScene(CCTransitionFadeTR::create(2.0f, CharaSelectScene::createScene()));
 
 
 }

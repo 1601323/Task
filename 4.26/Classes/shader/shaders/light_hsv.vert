@@ -18,7 +18,10 @@ varying vec2 v_texCoord;
 
 void main() {
 	// ﾎﾟｼﾞｼｮﾝ情報に座標調整の変数代入
+	// 頂点データの設定
     gl_Position = CC_PMatrix * a_position;	
+	// フラグメントシェーダーに渡す色情報
     v_fragmentColor = a_color;
+	// フラグメントシェーダーに渡すテクスチャの情報
     v_texCoord = a_texCoord;
 } );
