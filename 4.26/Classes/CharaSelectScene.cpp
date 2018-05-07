@@ -1,12 +1,16 @@
 #include "CharaSelectScene.h"
 #include "FightScene.h"
 #include "Imput.h"
+#include <algorithm>
 
 #define PI 3.14159265359f  
 #define RADIUS 100  
 #define FLATTEN_RATE 0.4f  
 
 USING_NS_CC;
+
+// 実態作るよ
+std::vector<CharaName> CharaSelectScene::CharaData;
 
 Scene *CharaSelectScene::createScene()
 {
@@ -52,10 +56,10 @@ bool CharaSelectScene::init()
 	// https://iscene.jimdo.com/2015/02/04/cocos2d-x-ver-3-x-c-iphone-android-%E3%81%AE%E9%96%8B%E7%99%BA%E5%9F%BA%E7%A4%8E%E8%AC%9B%E5%BA%A7-%E7%9B%AE-%E6%AC%A1/
 
  	this->items.clear();
-	this->items.pushBack(Label::createWithSystemFont("1", "Arial", 80));
-	this->items.pushBack(Label::createWithSystemFont("2", "Arial", 80));
-	this->items.pushBack(Label::createWithSystemFont("3", "Arial", 80));
-	this->items.pushBack(Label::createWithSystemFont("4", "Arial", 80));
+	this->items.push_back(CCSprite::create("PL_Attacker.png"));
+	this->items.push_back(CCSprite::create("PL_Shield.png"));
+	this->items.push_back(CCSprite::create("PL_Magic.png"));
+	this->items.push_back(CCSprite::create("PL_Healer.png"));
 
 	// 円状に等間隔で配置
 	for (auto item : items)
@@ -102,6 +106,12 @@ void CharaSelectScene::arrange()
 		this->items.at(i)->setOpacity(opacity);
 		this->items.at(i)->setZOrder(diameterY - y);
 	}
+	//そーとするよ(´・ω・`)
+	auto tmpVector = items;
+	std::sort(tmpVector.begin(), tmpVector.end(), [](const Node* a, const Node* b)
+	{return a->getScale() < b->getScale(); });
+	Top = tmpVector.front();
+
 }
 
 // 背景
@@ -113,35 +123,35 @@ void CharaSelectScene::CharaSelectBackGroudn()
 	Point origin = Director::getInstance()->getVisibleOrigin();
 
 	//// 背景画像 //////
-	CCSprite* pSprite = CCSprite::create("haikei.png");
-	// 表示座標指定
-	pSprite->setPosition(ccp(winSize.width / 2, winSize.height / 2));
-	// 追加
-	this->addChild(pSprite, 0);
+	//CCSprite* pSprite = CCSprite::create("haikei.png");
+	//// 表示座標指定
+	//pSprite->setPosition(ccp(winSize.width / 2, winSize.height / 2));
+	//// 追加
+	//this->addChild(pSprite, 0);
 
-	CCSprite* frame = CCSprite::create("frame.png");
-	// 表示座標指定
-	frame->setPosition(ccp(400,1150));
-	// 追加
-	//this->addChild(frame, 0);
+	//CCSprite* frame = CCSprite::create("frame.png");
+	//// 表示座標指定
+	//frame->setPosition(ccp(400,1150));
+	//// 追加
+	////this->addChild(frame, 0);
 
 	////// キャラ追加　//////
-	// 剣士
-	CCSprite* pl_Attac = CCSprite::create("PL_Attacker.png");
-	pl_Attac->setPosition(ccp(120, winSize.height / 2));
-	this->addChild(pl_Attac, 2);
-	// 大男
-	CCSprite* pl_Shield = CCSprite::create("PL_Shield.png");
-	pl_Shield->setPosition(ccp(300, winSize.height / 2));
-	this->addChild(pl_Shield, 2);
-	// 魔法使い
-	CCSprite* pl_Magic = CCSprite::create("PL_Magic.png");
-	pl_Magic->setPosition(ccp(500, winSize.height / 2));
-	this->addChild(pl_Magic, 2);
-	// ヒーラー
-	CCSprite* pl_Heal = CCSprite::create("PL_Healer.png");
-	pl_Heal->setPosition(ccp(680, winSize.height / 2));
-	this->addChild(pl_Heal, 2);
+	//// 剣士
+	//CCSprite* pl_Attac = CCSprite::create("PL_Attacker.png");
+	//pl_Attac->setPosition(ccp(120, winSize.height / 2));
+	//this->addChild(pl_Attac, 2);
+	//// 大男
+	//CCSprite* pl_Shield = CCSprite::create("PL_Shield.png");
+	//pl_Shield->setPosition(ccp(300, winSize.height / 2));
+	//this->addChild(pl_Shield, 2);
+	//// 魔法使い
+	//CCSprite* pl_Magic = CCSprite::create("PL_Magic.png");
+	//pl_Magic->setPosition(ccp(500, winSize.height / 2));
+	//this->addChild(pl_Magic, 2);
+	//// ヒーラー
+	//CCSprite* pl_Heal = CCSprite::create("PL_Healer.png");
+	//pl_Heal->setPosition(ccp(680, winSize.height / 2));
+	//this->addChild(pl_Heal, 2);
 
 
 	// タイトル配置
@@ -155,6 +165,60 @@ void CharaSelectScene::CharaSelectBackGroudn()
 	this->addChild(lbl_Select, 1);
 }
 
+// Clickしたらデータ入れるよ
+void CharaSelectScene::CharaClick()
+{
+	// 画面サイズ取得
+	Size winSize = Director::getInstance()->getVisibleSize();
+	// ここら辺の範囲2かいタップしたら
+	///*はんいタップがよいのでは　中央*/
+	if ((winSize.width / 2 - 100 < winSize.width / 2 + 50) && (winSize.height / 2 - 100 < winSize.height / 2 + 50))
+	{
+		auto touch = EventListenerTouchOneByOne::create();
+		touch->onTouchBegan = [&](Touch *touch, Event *unused_event)
+		{
+			int i = 0;
+			for (i = 0; i < items.size(); i++)
+			{
+				// 
+				if (items[i] == Top)
+				{
+					// 
+					break;
+				}
+			}
+			CharaData.push_back(static_cast<CharaName> (i));
+			return true;
+		};
+		Director::getInstance()->getEventDispatcher()->addEventListenerWithFixedPriority(;
+			//	// ほかのやつは暗くする
+			//	if ()
+			//	{
+
+			//		/*タップした奴　拡大率で今前のやつを判断
+
+			//		その番号をpushback*/
+			//		//push_back
+			//		CharaData.push_back;
+			//	}
+	}
+	/*
+	どれが一番拡大しているかわかるように
+	そしたら暗くするのものいけるよ　きっと
+	*/
+
+	// 0123にそろえましょうか
+	//static_cast<CharaData>(1234のやつ-1);
+
+	//pushback
+	//CharaData.push_back();
+}
+
+// キャラ情報取得
+const std::vector<CharaName>& CharaSelectScene::GetCharaData()
+{
+	return CharaData;
+}
 
 // 画面遷移
 void CharaSelectScene::pushStart(Ref * pSender)
