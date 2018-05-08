@@ -2,6 +2,7 @@
 #include "FightScene.h"
 #include "Imput.h"
 #include <algorithm>
+#include "cocos2d.h"
 
 #define PI 3.14159265359f  
 #define RADIUS 100  
@@ -47,16 +48,10 @@ bool CharaSelectScene::init()
 	// 追加
 	this->addChild(menu, 3);
 
-
-	// 文字表示  
-	/*http://developer.wonderpla.net/entry/blog/engineer/Cocos2dx_Carousel/*/
-	//http://hayateasdf.hatenablog.com/entry/2017/12/21/190434#10-%E6%95%B5%E3%81%AE%E4%BD%9C%E6%88%90
-	//https://iscene.jimdo.com/2015/02/23/cocos2d-x-ver-3-x-top%E3%83%9A%E3%83%BC%E3%82%B8-tableview-%E7%94%BB%E5%83%8F%E8%A1%A8%E7%A4%BA%E7%B7%A8/
-	// cocos いろんなのが載ってるサイト
-	// https://iscene.jimdo.com/2015/02/04/cocos2d-x-ver-3-x-c-iphone-android-%E3%81%AE%E9%96%8B%E7%99%BA%E5%9F%BA%E7%A4%8E%E8%AC%9B%E5%BA%A7-%E7%9B%AE-%E6%AC%A1/
+	PL_Attacker = Sprite::create("PL_Attacker.png");
 
  	this->items.clear();
-	this->items.push_back(CCSprite::create("PL_Attacker.png"));
+	this->items.push_back(PL_Attacker);
 	this->items.push_back(CCSprite::create("PL_Shield.png"));
 	this->items.push_back(CCSprite::create("PL_Magic.png"));
 	this->items.push_back(CCSprite::create("PL_Healer.png"));
@@ -78,8 +73,6 @@ bool CharaSelectScene::init()
 		this->arrange();
 	};
 	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
-
-
 	return true;
 }
 
@@ -87,8 +80,8 @@ bool CharaSelectScene::init()
 void CharaSelectScene::arrange()
 {
 	// 円状に等間隔で配置
-	float theta = 360.0f / items.size();
-	float baseAngle = this->angle + 270.0f;
+	float theta = 360.0f / items.size()+(items.size()/2);
+	float baseAngle = this->angle + 270.0f;							// 加算すると円の奥行増えるよ
 	for (int i = 0; i < items.size(); i++)
 	{
 		// 270 度の位置が正面にくるように  
@@ -101,7 +94,7 @@ void CharaSelectScene::arrange()
 		float scale		= (diameterY - y) / diameterY;				// y座標に応じて変化するよ
 		GLubyte opacity = 255 - (y + radiusY);
 
-		this->items.at(i)->setPosition(Vec2(x+420, y+420));
+		this->items.at(i)->setPosition(Vec2(x+420, y+450));
 		this->items.at(i)->setScale(scale);
 		this->items.at(i)->setOpacity(opacity);
 		this->items.at(i)->setZOrder(diameterY - y);
@@ -122,38 +115,6 @@ void CharaSelectScene::CharaSelectBackGroudn()
 	// マルチれぞーしょん対応か
 	Point origin = Director::getInstance()->getVisibleOrigin();
 
-	//// 背景画像 //////
-	//CCSprite* pSprite = CCSprite::create("haikei.png");
-	//// 表示座標指定
-	//pSprite->setPosition(ccp(winSize.width / 2, winSize.height / 2));
-	//// 追加
-	//this->addChild(pSprite, 0);
-
-	//CCSprite* frame = CCSprite::create("frame.png");
-	//// 表示座標指定
-	//frame->setPosition(ccp(400,1150));
-	//// 追加
-	////this->addChild(frame, 0);
-
-	////// キャラ追加　//////
-	//// 剣士
-	//CCSprite* pl_Attac = CCSprite::create("PL_Attacker.png");
-	//pl_Attac->setPosition(ccp(120, winSize.height / 2));
-	//this->addChild(pl_Attac, 2);
-	//// 大男
-	//CCSprite* pl_Shield = CCSprite::create("PL_Shield.png");
-	//pl_Shield->setPosition(ccp(300, winSize.height / 2));
-	//this->addChild(pl_Shield, 2);
-	//// 魔法使い
-	//CCSprite* pl_Magic = CCSprite::create("PL_Magic.png");
-	//pl_Magic->setPosition(ccp(500, winSize.height / 2));
-	//this->addChild(pl_Magic, 2);
-	//// ヒーラー
-	//CCSprite* pl_Heal = CCSprite::create("PL_Healer.png");
-	//pl_Heal->setPosition(ccp(680, winSize.height / 2));
-	//this->addChild(pl_Heal, 2);
-
-
 	// タイトル配置
 	// 配置文字
 	auto lbl_Select = Label::createWithSystemFont("CharaSelect", "HiraKakuProN-W6", 100);
@@ -165,33 +126,48 @@ void CharaSelectScene::CharaSelectBackGroudn()
 	this->addChild(lbl_Select, 1);
 }
 
+// クリック開始時に呼ばれる
+//bool CharaSelectScene::onTouchBegan(Touch *touch, Event *unused_event)
+//{
+//	cocos2d::CCSprite* m_pSprite;
+//
+//	// touch座標取得
+//	Vec2 touch_pos = touch->getLocation();
+//	// スプライトのAABBを取得
+//	Rect rect_spr = m_pSprite->getBoundingBox();
+//
+//	// スプライトにTouch座標が含まれているかどうか
+//	bool hit = rect_spr.containsPoint(touch_pos);
+//
+//	if (hit)
+//	{
+//		log("touch sprite!!!");
+//	}
+//	return true;
+//}
+
+
 // Clickしたらデータ入れるよ
 void CharaSelectScene::CharaClick()
 {
-	// 画面サイズ取得
-	Size winSize = Director::getInstance()->getVisibleSize();
-	// ここら辺の範囲2かいタップしたら
-	///*はんいタップがよいのでは　中央*/
-	if ((winSize.width / 2 - 100 < winSize.width / 2 + 50) && (winSize.height / 2 - 100 < winSize.height / 2 + 50))
+	// どれが一番前にいるのかを分かるように調べよう→暗くする処理楽だよ
+	// 0123にそろえましょうか　//static_cast<CharaData>(1234のやつ-1);
+
+	//if()
 	{
-		auto touch = EventListenerTouchOneByOne::create();
-		touch->onTouchBegan = [&](Touch *touch, Event *unused_event)
+	// ここら辺の範囲2かいタップしたら
+		int i = 0;
+		for (i = 0; i < items.size(); i++)
 		{
-			int i = 0;
-			for (i = 0; i < items.size(); i++)
+			// 
+			if (items[i] == Top)
 			{
-				// 
-				if (items[i] == Top)
-				{
-					// 
-					break;
-				}
+				break;
 			}
+			// 追加
 			CharaData.push_back(static_cast<CharaName> (i));
-			return true;
-		};
-		Director::getInstance()->getEventDispatcher()->addEventListenerWithFixedPriority(;
-			//	// ほかのやつは暗くする
+		}
+			// 選択外の者は暗くする
 			//	if ()
 			//	{
 
@@ -201,17 +177,7 @@ void CharaSelectScene::CharaClick()
 			//		//push_back
 			//		CharaData.push_back;
 			//	}
-	}
-	/*
-	どれが一番拡大しているかわかるように
-	そしたら暗くするのものいけるよ　きっと
-	*/
-
-	// 0123にそろえましょうか
-	//static_cast<CharaData>(1234のやつ-1);
-
-	//pushback
-	//CharaData.push_back();
+	};
 }
 
 // キャラ情報取得
@@ -219,6 +185,7 @@ const std::vector<CharaName>& CharaSelectScene::GetCharaData()
 {
 	return CharaData;
 }
+
 
 // 画面遷移
 void CharaSelectScene::pushStart(Ref * pSender)
@@ -235,3 +202,26 @@ void CharaSelectScene::pushStart(Ref * pSender)
 	// 遷移実行 アニメーション
 	Director::getInstance()->replaceScene(transition);
 }
+
+
+
+/*
+http://takachan.hatenablog.com/entry/2017/08/08/002844
+https://iscene.jimdo.com/2015/02/04/cocos2d-x-ver-3-x-c-iphone-android-%E3%81%AE%E9%96%8B%E7%99%BA%E5%9F%BA%E7%A4%8E%E8%AC%9B%E5%BA%A7-%E7%9B%AE-%E6%AC%A1/
+http://hayateasdf.hatenablog.com/entry/2017/12/21/190434#10-%E6%95%B5%E3%81%AE%E4%BD%9C%E6%88%90
+https://qiita.com/isaoeka/items/dee8159e2a0c2a37a662
+http://brbranch.jp/blog/201607/cocos2d-x/shader/
+http://buildman.xyz/blog/cocos2dx-beginner-10/
+https://teratail.com/questions/72658
+http://www.fujimi-labo.com/2016/11/29/cocos2d-x8_1/
+http://rinov.jp/cocos-doujo-dx/index.html
+https://qiita.com/HamachiTaro/items/f7df7fc101e7e1222afc
+http://brbranch.jp/blog/201312/cocos2d-x/convert_to_node_space/
+
+// 文字表示
+//http://developer.wonderpla.net/entry/blog/engineer/Cocos2dx_Carousel
+//http://hayateasdf.hatenablog.com/entry/2017/12/21/190434#10-%E6%95%B5%E3%81%AE%E4%BD%9C%E6%88%90
+//https://iscene.jimdo.com/2015/02/23/cocos2d-x-ver-3-x-top%E3%83%9A%E3%83%BC%E3%82%B8-tableview-%E7%94%BB%E5%83%8F%E8%A1%A8%E7%A4%BA%E7%B7%A8/
+// cocos いろんなのが載ってるサイト
+// https://iscene.jimdo.com/2015/02/04/cocos2d-x-ver-3-x-c-iphone-android-%E3%81%AE%E9%96%8B%E7%99%BA%E5%9F%BA%E7%A4%8E%E8%AC%9B%E5%BA%A7-%E7%9B%AE-%E6%AC%A1/
+*/
