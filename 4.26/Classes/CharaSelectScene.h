@@ -28,11 +28,17 @@ public:
 	void pushStart(Ref *pSender);
 	// 選択されたキャラ情報格納
 	static const std::vector<CharaName>& GetCharaData();
+
 private:
 	Node* Top;
+	Sprite* PL_Attacker;
+	Sprite *PL_Shield;
+	Sprite *PL_Magic;
+	Sprite *PL_Healer;
 	void CharaClick();
 	// 保存する用のデータ
 	static std::vector<CharaName> CharaData;
+	//bool onTouchBegan(Touch *touch, Event *unused_event);
 };
 
 #endif // Title
