@@ -3,6 +3,7 @@
 #include "Imput.h"
 #include <algorithm>
 #include "cocos2d.h"
+#include "DmEffect.h"
 
 #define PI 3.14159265359f  
 #define RADIUS 100  
@@ -73,6 +74,23 @@ bool CharaSelectScene::init()
 		this->arrange();
 	};
 	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
+
+	// ダメージ表示のやつ
+	/*srand((unsigned int)time(nullptr));
+
+	auto listner = EventListenerTouchOneByOne::create();
+
+	listener->onTouchBegan = [this](Touch* touch, Event* event)
+	{
+		DmEffect* effect = DmEffect::create();
+		effect->setPosition(Vec2(touch->getLocation().x + 30 ,touch->getLocation().y));
+		effect->showEffect(rand() % 9999);
+		this->addChild(effect);
+
+		return true;
+	};
+	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listner, this);*/
+
 	return true;
 }
 
