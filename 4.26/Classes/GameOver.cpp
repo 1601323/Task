@@ -3,6 +3,7 @@
 #include "cocos2d.h"
 #include "SimpleAudioEngine.h"
 
+
 USING_NS_CC;
 
 Scene *GameOver::createScene()
@@ -42,12 +43,16 @@ bool GameOver::init()
 	// 追加
 	this->addChild(menu, 1);
 
-	// 魔法陣のやつ
-	//MagicEffect();
-	// touchしたところに追従するよ
-	//SwordEffect();
 
-	LightEffect();
+	
+
+	// 魔法陣のやつ
+	MagicEffect();
+	// touchしたところに追従するよ
+	SwordEffect();
+	// 波紋
+	//Ripple();
+	Test();
 	return true;
 }
 
@@ -62,13 +67,20 @@ void GameOver::ClearBackGroudn()
 
 	// タイトル配置
 	// 配置文字
-	auto lbl_Select = Label::createWithSystemFont("(^^)/", "HiraKakuProN-W6", 100);
+	auto lbl_Select = Label::createWithSystemFont("Nemui!!!!!!!!!!!!!!!!!!", "HiraKakuProN-W6", 100);
 	// 配置場所
 	lbl_Select->setPosition(Point(origin.x + winSize.width / 2,
 		origin.y + winSize.height - lbl_Select->getContentSize().height));
 
 	// Select追加
 	this->addChild(lbl_Select, 1);
+
+	// player表示
+	Sprite *plyaer = Sprite::create("PL_Healer.png");
+	plyaer->setPosition(winSize.width/2,winSize.height/2-100);
+	addChild(plyaer,1);
+
+
 }
 
 // 画面遷移
@@ -90,19 +102,24 @@ void GameOver::pushStart(Ref * pSender)
 // 魔法陣表示
 void GameOver::MagicEffect()
 {
+	// 画面サイズ取得
+	Size winSize = Director::getInstance()->getVisibleSize();
+	// マルチれぞーしょん対応か
+	Point origin = Director::getInstance()->getVisibleOrigin();
+
 	// 魔法陣のやつやりまっせ！！
 	// つぶして奥行表現
 	Node *fram = Node::create();
 	fram->setAnchorPoint(Vec2::ANCHOR_MIDDLE);
-	fram->setPosition(Director::getInstance()->getVisibleSize() / 2);
+	fram->setPosition(winSize.width / 2-200, winSize.height / 2 -450);
 	fram->setScaleY(0.5);
 	this->addChild(fram);
 	// 魔法陣
 	Sprite *magic = Sprite::create("sample.png");		// 画像読み込み
 	magic->setAnchorPoint(Vec2::ANCHOR_MIDDLE);			// オブジェクトの基準点を中心に
-	magic->setPosition(fram->getContentSize() / 2);		// 座標セット
+	magic->setPosition(winSize.width/2-200, winSize.height/2 -450);		// 座標セット
 	magic->setScale(0.0f);								// 大きさセット
-	fram->addChild(magic);
+	fram->addChild(magic,0);
 
 	// アニメーション
 	FiniteTimeAction *action1 = Spawn::create(RotateBy::create(0.2f, 90.0f),	/*ｽﾞｽﾞｽﾞっと大きく*/
@@ -158,12 +175,45 @@ void GameOver::SwordEffect()
 	};
 	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
 }
-
-//
-void GameOver::LightEffect()
+// 波紋のやーつ
+void GameOver::Ripple()
 {
-	auto light = DirectionLight::create(Vec3(-1.0f, -1.0f, 0.0f), Color3B::RED);
-	light->setPosition(500,500);
-	addChild(light);
+	//	色の加算合成 後からつうじゅうするやつ
+
+	// 波紋のスピード
+	unsigned int rippleSpeed  = 7;
+	// 中心の波紋のスピード
+	unsigned int rippleCenter = 500;
+
+	Ripple3D* action;
+	// スプライトを作成
+	Sprite *fish = Sprite::create("sample.png");
+	fish->setPosition(Vec2(320, 568));
+
+	// 波紋を広げるアニメーション作成()　
+	//CCRipple3D::create ((float)時間,(CCSize)グリッドサイズ,(CCPoint)波紋の中心位置,(float)半径,(int)波の数,(float)振幅 );
+	
+	action = Ripple3D::create(10, cocos2d::Size(150, 150), Vec2(640 / 2, 1136 / 2), rippleCenter, rippleSpeed, 100);
+	// NodeGrid作成
+	NodeGrid *nodeGrid = NodeGrid::create();
+	nodeGrid->addChild(fish);
+	nodeGrid->runAction(action);
+
+	this->addChild(nodeGrid);
 }
+
+void GameOver::Test()
+{
+	// 画面サイズ取得
+	Size VisibleSize = Director::getInstance()->getVisibleSize();
+	// 塗りつぶした円（＝大きな点）
+	DrawNode *dot = DrawNode::create();
+	dot->drawDot(Vec2::ZERO, 50, Color4F::YELLOW);
+	dot->setPosition(VisibleSize.width/2,VisibleSize.height/2 + 200);
+	this->addChild(dot,2);
+}
+
+
+
+
 

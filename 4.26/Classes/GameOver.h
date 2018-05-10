@@ -17,15 +17,17 @@ public:
 	// スタートボタン押下時の処理宣言 戻る Object →　Ref に変更
 	void pushStart(Ref *pSender);
 private:
-	int m_iCount;
+	int m_iCount = 0;
 	// 魔法陣表示
 	void MagicEffect();
 	// 回復
 	void RecoveryEffect();
 	// 剣
 	void SwordEffect();
-	// 光
-	void LightEffect();
+	// 破門
+	void Ripple();
+	// test
+	void Test();
 	
 };
 

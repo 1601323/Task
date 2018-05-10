@@ -1,0 +1,10 @@
+<TextureAtlas imagePath="sprites.png">
+	<SubTexture name="effect_cure01_0000.png" x="297" y="99" width="97" height="98"/>
+	<SubTexture name="effect_cure01_0001.png" x="99" y="0" width="97" height="97"/>
+	<SubTexture name="effect_cure01_0002.png" x="0" y="99" width="97" height="98"/>
+	<SubTexture name="effect_cure01_0003.png" x="0" y="0" width="97" height="97"/>
+	<SubTexture name="effect_cure01_0004.png" x="99" y="99" width="97" height="98"/>
+	<SubTexture name="effect_cure01_0005.png" x="297" y="0" width="97" height="97"/>
+	<SubTexture name="effect_cure01_0006.png" x="198" y="99" width="97" height="98"/>
+	<SubTexture name="effect_cure01_0007.png" x="198" y="0" width="97" height="97"/>
+</TextureAtlas>
