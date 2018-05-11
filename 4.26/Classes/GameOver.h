@@ -17,16 +17,35 @@ public:
 	// スタートボタン押下時の処理宣言 戻る Object →　Ref に変更
 	void pushStart(Ref *pSender);
 private:
-	int m_iCount;
+	float m_ctime = 0;
+	int m_iCount = 0;
 	// 魔法陣表示
 	void MagicEffect();
 	// 回復
 	void RecoveryEffect();
 	// 剣
 	void SwordEffect();
-	// 光
-	void LightEffect();
-	
+	float fadeSpeed		    = 0.8f;	// フェード時間
+	unsigned int startSpeed = 1;	// 表示開始までの移動速度
+	unsigned int imageSize	= 20;			// 画像サイズ
+	// 色
+	// 破門
+	void Ripple();
+	// test
+	void Shadow();
+	// grow表現
+	bool glow();
+	void callBackTime(GLProgram* glProgram,Uniform* uniform);
+	void callbackColor(GLProgram* glProgram, Uniform* uniform);
+	//アルファ
+	void test();
+	// パーティクル表現
+	void particle();
+	// スプライト赤
+	void sampleSprite();
+	// グラデーション
+	void changeGradation();
+
 };
 
 #endif //Select
