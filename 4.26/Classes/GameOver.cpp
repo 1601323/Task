@@ -2,6 +2,8 @@
 #include "TitleScene.h"
 #include "cocos2d.h"
 #include "SimpleAudioEngine.h"
+#include "shader/Shaders.hpp"
+#include "shader/shaderaction/ChangeColorBy.hpp"
 
 
 USING_NS_CC;
@@ -59,6 +61,33 @@ bool GameOver::init()
 	//sampleSprite();
 
 	changeGradation();
+
+	// add "HelloWorld" splash screen"
+	auto sprite = Sprite::create("HelloWorld.png");
+
+	// position the sprite on the center of the screen
+	sprite->setPosition(Vec2(winSize.width / 2 + origin.x,
+		winSize.height / 2 + origin.y));
+
+	auto spr2 = Sprite::create("HelloWorld.png");
+	spr2->setPosition(Vec2(winSize.width / 2 + origin.x - 100,
+		winSize.height / 2 + origin.y));
+
+	auto change = ChangeColorBy::create(ChangeColorType::HSV,
+		Vec3(1.0, -1.0, 1.0), false, 1.0);
+	sprite->runAction(Sequence::create(DelayTime::create(5.0), change,
+		FadeOut::create(0.5), NULL));
+	{
+		auto s = GLProgram::createWithByteArrays(cocos2d::LightHsvShaderVert,
+			cocos2d::LightHsvShaderFrag);
+		auto state = GLProgramState::getOrCreateWithGLProgram(s);
+		spr2->setGLProgramState(state);
+		state->setUniformVec3("u_color", Vec3(0.0, 0.0, 0.0));
+	}
+
+	this->addChild(sprite, 0);
+	this->addChild(spr2, 1);
+
 	return true;
 }
 
