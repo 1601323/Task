@@ -38,35 +38,52 @@ bool ChangeColorBy::initWithDuration(const ChangeColorType &type,const cocos2d::
     return true;
 }
 
-void ChangeColorBy::update(float f) {
-    auto diff = m_reverse ? sinf(f * M_PI) : f;
-    auto color = m_color * diff;
+// 更新
+void ChangeColorBy::update(float f)
+{
+	// 違い true: /false: 
+    auto diff   = m_reverse ? sinf(f * M_PI) : f;
+    auto color  = m_color * diff;
     auto shader = getTarget()->getGLProgramState();
-    if (shader) {
+    if (shader)
+	{
+		// 色セット
         shader->setUniformVec3("u_color", color);
     }
 }
 
-void ChangeColorBy::startWithTarget(cocos2d::Node *target) {
-    if (m_type == ChangeColorType::RGB) {
+void ChangeColorBy::startWithTarget(cocos2d::Node *target) 
+{
+	// RGBの場合
+    if (m_type == ChangeColorType::RGB) 
+	{
         setShaderWithTarget(target, LightRgbShaderVert, LightRgbShaderFrag);
-    } else {
+    } 
+	// HSVの場合
+	else 
+	{
         setShaderWithTarget(target, LightHsvShaderVert, LightHsvShaderFrag);
     }
+	// アクション実行
     ActionInterval::startWithTarget(target);
 }
 
-ActionInterval *ChangeColorBy::clone() const {
+// 複製
+ActionInterval *ChangeColorBy::clone() const 
+{
     return ChangeColorBy::create(m_type, m_color, m_reverse, _duration);
 }
 
-void ChangeColorBy::setShaderWithTarget(cocos2d::Node *target,
-                                        const GLchar *vert,
-                                        const GLchar *flag) {
-    if (target == nullptr) {
+// ターゲットの設定
+void ChangeColorBy::setShaderWithTarget(cocos2d::Node *target,const GLchar *vert,const GLchar *flag) 
+{
+    if (target == nullptr) 
+	{
         return;
     }
-    auto s = GLProgram::createWithByteArrays(vert, flag);
+	// バイト配列をもつ頂点とフラグメントで初期化
+    auto s	   = GLProgram::createWithByteArrays(vert, flag);
+	// 作成
     auto state = GLProgramState::getOrCreateWithGLProgram(s);
     target->setGLProgramState(state);
 }
