@@ -1,34 +1,39 @@
-//
-//  ChangeColorBy.cpp
-//  TestProject
-//
-//  Created by Kazuki Oda on 2016/07/24.
-//
-//
-
 #include "../Shaders.hpp"
 #include "ChangeColorBy.hpp"
+
 USING_NS_CC;
-ChangeColorBy *ChangeColorBy::create(const ChangeColorType &type,
-                                     const cocos2d::Vec3 &color, bool doReverse,
-                                     float duration) {
+
+// https://github.com/brbranch/cocos2dxv3Brightness
+// http://pg-boxer.cocolog-nifty.com/nikukyu/cat21931722/index.html
+// http://brbranch.jp/blog/201607/cocos2d-x/shader/
+
+// 
+ChangeColorBy *ChangeColorBy::create(const ChangeColorType &type,const cocos2d::Vec3 &color, bool doReverse,float duration) 
+{	
+	// 色変換のクラス生成
     auto ref = new ChangeColorBy();
-    if (ref && ref->initWithDuration(type, color, doReverse, duration)) {
+    if (ref && ref->initWithDuration(type, color, doReverse, duration)) 
+	{
+		// autorelease:オブジェクトをAutoreleasePoolに登録。自動的に破棄されるようになる。
         ref->autorelease();
         return ref;
     }
+	//安全ににdeleteしてくれる
+	// http://brbranch.jp/blog/201308/cocos2d-x/cocos2dxmacros/
     CC_SAFE_DELETE(ref);
     return nullptr;
 }
 
-bool ChangeColorBy::initWithDuration(const ChangeColorType &type,
-                                     const cocos2d::Vec3 &color, bool doReverse,
-                                     float duration) {
-    if (!ActionInterval::initWithDuration(duration)) {
+// 
+bool ChangeColorBy::initWithDuration(const ChangeColorType &type,const cocos2d::Vec3 &color, bool doReverse,float duration) 
+{
+	// 
+    if (!ActionInterval::initWithDuration(duration)) 
+	{
         return false;
     }
-    m_type = type;
-    m_color = color;
+    m_type	  = type;
+    m_color   = color;
     m_reverse = doReverse;
     return true;
 }
