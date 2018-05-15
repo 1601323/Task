@@ -1,6 +1,9 @@
 #include "../Shaders.hpp"
 #include "ChangeColorBy.hpp"
 
+/*http://glslsandbox.com/e#46939.4
+*/
+
 USING_NS_CC;
 
 // https://github.com/brbranch/cocos2dxv3Brightness
@@ -8,7 +11,7 @@ USING_NS_CC;
 // http://brbranch.jp/blog/201607/cocos2d-x/shader/
 
 // 
-ChangeColorBy *ChangeColorBy::create(const ChangeColorType &type,const cocos2d::Vec3 &color, bool doReverse,float duration) 
+ChangeColorBy *ChangeColorBy::create(const ChangeColorType &type,const cocos2d::Vec3 &color, bool doReverse,float duration)
 {	
 	// êFïœä∑ÇÃÉNÉâÉXê∂ê¨
     auto ref = new ChangeColorBy();

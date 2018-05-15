@@ -1,5 +1,4 @@
-﻿
-#ifndef ChangeColorBy_hpp
+﻿#ifndef ChangeColorBy_hpp
 #define ChangeColorBy_hpp
 
 #include <stdio.h>

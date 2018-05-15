@@ -57,34 +57,36 @@ bool GameOver::init()
 	//test();
 	// パーティクル表現
 	//particle();
-
 	//sampleSprite();
+	//changeGradation();
 
-	changeGradation();
 
-	// add "HelloWorld" splash screen"
+	// シェーダいじっくったマンーーー
+	
+	// 画像の追加(変化なし)
 	auto sprite = Sprite::create("HelloWorld.png");
-
-	// position the sprite on the center of the screen
-	sprite->setPosition(Vec2(winSize.width / 2 + origin.x,
-		winSize.height / 2 + origin.y));
-
+	// 座標指定
+	sprite->setPosition(Vec2(winSize.width / 2 + origin.x,winSize.height / 2 + origin.y - 200));
+	// 画像の追加(変化あり)
 	auto spr2 = Sprite::create("HelloWorld.png");
-	spr2->setPosition(Vec2(winSize.width / 2 + origin.x - 100,
-		winSize.height / 2 + origin.y));
+	// 座標指定
+	spr2->setPosition(Vec2(winSize.width / 2,winSize.height / 2 + origin.y + 200));
 
-	auto change = ChangeColorBy::create(ChangeColorType::HSV,
-		Vec3(1.0, -1.0, 1.0), false, 1.0);
-	sprite->runAction(Sequence::create(DelayTime::create(5.0), change,
-		FadeOut::create(0.5), NULL));
+
+	auto change = ChangeColorBy::create(ChangeColorType::HSV,Vec3(1.0, -1.0, 1.0), false, 1.0);
+	sprite->runAction(Sequence::create(DelayTime::create(5.0), change,FadeOut::create(0.5), NULL));
 	{
-		auto s = GLProgram::createWithByteArrays(cocos2d::LightHsvShaderVert,
-			cocos2d::LightHsvShaderFrag);
-		auto state = GLProgramState::getOrCreateWithGLProgram(s);
+		// shaderの作成
+		// 呼び出し(shaderファイルの読み込み)
+		auto readShader = GLProgram::createWithByteArrays(cocos2d::LightHsvShaderVert,cocos2d::LightHsvShaderFrag);
+		auto state		= GLProgramState::getOrCreateWithGLProgram(readShader);
+		// ｽﾌﾟﾗｲﾄに設定
 		spr2->setGLProgramState(state);
+		// 変数の設定(u_color内に設定されるよ)
 		state->setUniformVec3("u_color", Vec3(0.0, 0.0, 0.0));
 	}
 
+	// 追加
 	this->addChild(sprite, 0);
 	this->addChild(spr2, 1);
 
