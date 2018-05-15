@@ -3,13 +3,12 @@
 
 #include <stdio.h>
 #include "cocos2d.h"
-
-namespace cocos2d
-{ // フラグメントシェーダー（GLSL）を読込んでリンクする
+namespace cocos2d {
+	// shaderで定義した名前をここで定義
 	extern const GLchar* LightRgbShaderVert;
 	extern const GLchar* LightRgbShaderFrag;
 	extern const GLchar* LightHsvShaderVert;
 	extern const GLchar* LightHsvShaderFrag;
 };
 
-#endif /*Shaders_hpp*/
+#endif
