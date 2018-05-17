@@ -17,8 +17,8 @@ public:
 	// スタートボタン押下時の処理宣言 戻る Object →　Ref に変更
 	void pushStart(Ref *pSender);
 private:
+	int m_iCount  = 0;
 	float m_ctime = 0;
-	int m_iCount = 0;
 	// 魔法陣表示
 	void MagicEffect();
 	// 回復
@@ -45,7 +45,12 @@ private:
 	void sampleSprite();
 	// グラデーション
 	void changeGradation();
-
+	// shaderスプライトを光らせる
+	void glowSprite();
+	// オーラ出させる
+	void auraEffect();
+	// ブラーをかける
+	void blur();
 };
 
 #endif //Select

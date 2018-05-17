@@ -10,4 +10,7 @@ namespace cocos2d
 
 #include "shaders/light_hsv.frag"
 #include "shaders/light_hsv.vert"
+#include "shaders/glow.fsh"
+#include "shaders/blur.vert"
+#include "shaders/blur.frag"
 };
