@@ -9,6 +9,13 @@ namespace cocos2d {
 	extern const GLchar* LightRgbShaderFrag;
 	extern const GLchar* LightHsvShaderVert;
 	extern const GLchar* LightHsvShaderFrag;
+	// aura‚Ì‚â‚Â
+	extern const GLchar* GlowFsh;
+
+	extern const GLchar* RainbowFrag;
+	// ƒuƒ‰[—p
+	extern const GLchar* BlurShaderVert;
+	extern const GLchar* BlurShaderFrag;
 };
 
 #endif
