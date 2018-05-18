@@ -46,8 +46,8 @@ bool GameOver::init()
 	this->addChild(menu, 1);
 
 	
-	MagicEffect();		// 魔法陣のやつ
-	//SwordEffect();		// touchしたところに追従するよ
+	MagicEffect();			// 魔法陣のやつ
+	//SwordEffect();			// touchしたところに追従するよ
 	//Ripple();				// 波紋
 	//Shadow();				// 影
 	//test();				// アルファ
@@ -58,12 +58,6 @@ bool GameOver::init()
 	//auraEffect();			// オーラ ×
 	//blur();
 	return true;
-}
-
-// ブラー
-void GameOver::blur()
-{
-
 }
 
 // オーラ
@@ -151,23 +145,19 @@ void GameOver::ClearBackGroudn()
 	// マルチれぞーしょん対応か
 	Point origin = Director::getInstance()->getVisibleOrigin();
 
-
 	// タイトル配置
 	// 配置文字
 	auto lbl_Select = Label::createWithSystemFont("Nemui!!!!!!!!!!!!!!!!!!", "HiraKakuProN-W6", 100);
 	// 配置場所
-	lbl_Select->setPosition(Point(origin.x + winSize.width / 2,
-		origin.y + winSize.height - lbl_Select->getContentSize().height));
+	lbl_Select->setPosition(Point(origin.x + winSize.width / 2,origin.y + winSize.height - lbl_Select->getContentSize().height));
 
 	// Select追加
 	this->addChild(lbl_Select, 1);
 
 	// player表示
-	/*Sprite *plyaer = Sprite::create("PL_Healer.png");
+	Sprite *plyaer = Sprite::create("PL_Healer.png");
 	plyaer->setPosition(winSize.width/2,winSize.height/2-100);
-	addChild(plyaer,1);*/
-
-
+	addChild(plyaer,1);
 }
 
 // 画面遷移
@@ -231,17 +221,22 @@ void GameOver::MagicEffect()
 		ScaleTo::create(0.2f, 3.0f),											/*だんだん大きく*/
 		FadeOut::create(0.2f), NULL);											/*ﾌｪｲﾄｱｳﾄ*/
 																				// 繰り返し呼ぶ
+	
 	CallFunc *reset = CallFunc::create([magic]() {
 		// リピートの為にリセット
 		magic->setScale(0.0f);
 		magic->setOpacity(255);
 	});
+
 	// 複数のアニメーションを連続で行う
 	magic->runAction(RepeatForever::create(Sequence::create(action1,
 		action2,
 		action3,
 		reset,
+
+		
 		DelayTime::create(1.0f), NULL)));		// 一定時間後に生成
+	magic->setColor(Color3B(0, 255, 90));
 
 }
 // 回復表示
@@ -356,8 +351,7 @@ void GameOver::Shadow()
 }
 
 // grow表現
-// https://qiita.com/isaoeka/items/dee8159e2a0c2a37a662
-
+/* https://qiita.com/isaoeka/items/dee8159e2a0c2a37a662　*/
 bool GameOver::glow()
 {
 	//画像サイズ取得

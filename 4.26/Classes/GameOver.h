@@ -27,7 +27,7 @@ private:
 	void SwordEffect();
 	float fadeSpeed		    = 0.8f;	// フェード時間
 	unsigned int startSpeed = 1;	// 表示開始までの移動速度
-	unsigned int imageSize	= 20;			// 画像サイズ
+	unsigned int imageSize	= 20;	// 画像サイズ
 	// 色
 	// 破門
 	void Ripple();
@@ -49,8 +49,6 @@ private:
 	void glowSprite();
 	// オーラ出させる
 	void auraEffect();
-	// ブラーをかける
-	void blur();
 };
 
 #endif //Select
