@@ -31,11 +31,17 @@ public:
 
 private:
 	Node* Top;
-	Sprite* PL_Attacker;
-	Sprite *PL_Shield;
-	Sprite *PL_Magic;
-	Sprite *PL_Healer;
-	void CharaClick();
+	// キャラ情報
+	Sprite* PL_Attacker;	// ｱﾀｯｶｰ(小男)
+	Sprite *PL_Shield;		// 守備(大男)
+	Sprite *PL_Magic;		// 魔法使い(ツイン)
+	Sprite *PL_Healer;		// 回復(ｹﾓﾐﾐ)
+	void getSize();			// 画像サイズ取得,ﾏﾙﾁﾚｿﾞｰｼｮﾝ対応か？
+	void CharaClick();		// クリックしたらデータが入るよ
+	void charaDraw();		// キャラ表示
+	void swipeRotation();	// スワイプに合わせて回転
+	void DrawBox();			// □表示
+	void fontsDraw();		// 文字描画
 	// 保存する用のデータ
 	static std::vector<CharaName> CharaData;
 	//bool onTouchBegan(Touch *touch, Event *unused_event);
