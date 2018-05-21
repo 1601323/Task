@@ -5,8 +5,12 @@
 #include "shader/Shaders.hpp"
 #include "shader/shaderaction/ChangeColorBy.hpp"
 
+// ローディング画面
+/*　https://www.indetail.co.jp/blog/cocos2d-x3/ 　*/
 
 USING_NS_CC;
+
+typedef void (GameOver::*SEL_SCHEDULE)(float);
 
 Scene *GameOver::createScene()
 {
@@ -45,8 +49,12 @@ bool GameOver::init()
 	// 追加
 	this->addChild(menu, 1);
 
-	
-	MagicEffect();			// 魔法陣のやつ
+
+	//keyData();
+	// 毎フレーム呼び出し　/*　https://qiita.com/s0hno/items/739b8da8d0ee1375c2cd　*/
+	this->scheduleUpdate();
+	scaling();
+	//MagicEffect();			// 魔法陣のやつ
 	//SwordEffect();			// touchしたところに追従するよ
 	//Ripple();				// 波紋
 	//Shadow();				// 影
@@ -57,7 +65,96 @@ bool GameOver::init()
 	//glowSprite();			// スプライトを光らせる
 	//auraEffect();			// オーラ ×
 	//blur();
+	//objExtinctionEffect	// エフェクト消えた表現
 	return true;
+}
+
+// 更新
+void GameOver::update(float delta)
+{
+	keyData();
+//	test1();
+	
+}
+
+
+//
+void GameOver::scaling()
+{
+	//画像サイズ取得
+	Size winSize = Director::getInstance()->getWinSize();
+	// マルチれぞーしょん対応か
+	Point origin = Director::getInstance()->getVisibleOrigin();
+
+
+	// 配置文字
+	auto label = Label::createWithSystemFont("Swipe", "fonts/HGRSGU.TTC", 30);
+	// 配置場所
+	label->setPosition(90,300);
+
+	// Select追加
+	this->addChild(label, 1);
+
+	//// 指定フォントの読み込み(フォント名,サイズ,)
+	//TTFConfig ttfConfig("fonts/HGRSGU.TTC", 45);
+	//// 表示
+	//auto label = Label::createWithTTF(ttfConfig,"スワイプでうごくよ");
+	//// 色指定
+	//label->enableGlow(Color4B::GREEN); //色を設定
+	//// 座標指定
+	//label->setPosition(winSize.width / 2, winSize.height / 2);
+	//								 
+	//this->addChild(label, 10);
+
+	auto act1 = ScaleTo::create(0.5f, 0.5f);  // 0.5秒で1.5倍に拡大
+	auto act2 = ScaleTo::create(0.5f, 1.0f);  // 0.5秒で元のサイズに戻す
+	label->runAction(RepeatForever::create(Sequence::create(act1, act2, NULL)));  //  延々繰り返し
+}
+
+// テスト
+void GameOver::test1()
+{
+	/* http://pierre-net.com/post-717/ */
+	// 画面サイズ取得
+	Size visibleSize = Director::getInstance()->getVisibleSize();
+	// マルチれぞーしょん対応か
+	Point origin = Director::getInstance()->getVisibleOrigin();
+
+	// Rect画像切り取る関数(切り取り座標X,Y,幅、高さ)
+	// 切れてるとき
+	if (keydown_flg == 0)
+	{
+		Sprite *enemyUp = Sprite::create("EM_Zombi.png", Rect(0, 0, 335, 200));
+		enemyUp->setColor(Color3B(255,0,0));
+		enemyUp->setPosition(visibleSize.width / 2, visibleSize.height / 2 +100);
+		this->addChild(enemyUp);
+	}
+	// 通常時
+	else
+	{
+		Sprite *enemy = Sprite::create("EM_Zombi.png");
+		enemy->setPosition(visibleSize.width/2 , visibleSize.height/2 );
+		this->addChild(enemy);
+		
+	}
+}
+
+void GameOver::keyData()
+{
+	auto listener = cocos2d::EventListenerKeyboard::create();
+	listener->onKeyPressed = [this](cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event* keyEvent) {
+		if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_SPACE)
+		{
+			keydown_flg = 1;
+			cocos2d::log("1");
+		}
+		else if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_0)
+		{
+			keydown_flg = 0;
+			cocos2d::log("0");
+		}
+	};
+	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
 }
 
 // オーラ
@@ -96,6 +193,23 @@ void GameOver::auraEffect()
 	glProgramState->setUniformCallback("u_outlineColor", CC_CALLBACK_2(GameOver::callbackColor, this));
 
 	addChild(sprite,1);
+}
+
+// エフェクト消えた時のやつ
+void GameOver::objExtinctionEffect()
+{
+	//画像サイズ取得
+	Size winSize = Director::getInstance()->getWinSize();
+	// マルチれぞーしょん対応か
+	Point origin = Director::getInstance()->getVisibleOrigin();
+
+	CCParticleExplosion* p = CCParticleExplosion::create(); // 爆発的なエフェクトの初期化
+	p->setDuration(0.05);									// エフェクトが停止するまでの時間 
+	p->setScale(0.2f);										// エフェクト大きさ
+	p->setSpeed(800);										// エフェクトの動く速さ
+	p->setPosition(winSize.width / 2, winSize.height / 2);  // エフェクトの発生地点
+	// エフェクトの表示
+	this->addChild(p, 8); // addChild するとすぐ表示
 }
 
 // スプライトを光らせる
@@ -154,10 +268,10 @@ void GameOver::ClearBackGroudn()
 	// Select追加
 	this->addChild(lbl_Select, 1);
 
-	// player表示
-	Sprite *plyaer = Sprite::create("PL_Healer.png");
-	plyaer->setPosition(winSize.width/2,winSize.height/2-100);
-	addChild(plyaer,1);
+	//// player表示
+	//Sprite *plyaer = Sprite::create("EM_Zombi.png");
+	//plyaer->setPosition(winSize.width/2,winSize.height/2-100);
+	//addChild(plyaer,1);
 }
 
 // 画面遷移

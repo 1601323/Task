@@ -1,10 +1,19 @@
 #include "CharaSelectScene.h"
+
+
+/*
+http://vivi.dyndns.org/blog/archives/605
+https://freegame-mugen.jp/roleplaying/game_6860.html
+https://qiita.com/s0hno/items/739b8da8d0ee1375c2cd
+
+*/
 #include "FightScene.h"
 #include "GameOver.h"
 #include "Imput.h"
 #include <algorithm>
 #include "cocos2d.h"
 #include "DmEffect.h"
+#pragma execution_character_set("utf-8")
 
 #define PI 3.14159265359f  
 #define RADIUS 100  
@@ -74,6 +83,35 @@ bool CharaSelectScene::init()
 		return true;
 	};
 	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listner, this);*/
+
+	//画像サイズ取得
+	Size winSize = Director::getInstance()->getWinSize();
+	// マルチれぞーしょん対応か
+	Point origin = Director::getInstance()->getVisibleOrigin();
+
+
+	// 配置文字
+	auto label = Label::createWithSystemFont("Swipe", "fonts/HGRSGU.TTC", 30);
+	// 配置場所
+	label->setPosition(90, 300);
+
+	// Select追加
+	this->addChild(label, 1);
+
+	//// 指定フォントの読み込み(フォント名,サイズ,)
+	//TTFConfig ttfConfig("fonts/HGRSGU.TTC", 45);
+	//// 表示
+	//auto label = Label::createWithTTF(ttfConfig,"スワイプでうごくよ");
+	//// 色指定
+	//label->enableGlow(Color4B::GREEN); //色を設定
+	//// 座標指定
+	//label->setPosition(winSize.width / 2, winSize.height / 2);
+	//								 
+	//this->addChild(label, 10);
+
+	auto act1 = ScaleTo::create(0.5f, 0.5f);  // 0.5秒で1.5倍に拡大
+	auto act2 = ScaleTo::create(0.5f, 1.0f);  // 0.5秒で元のサイズに戻す
+	label->runAction(RepeatForever::create(Sequence::create(act1, act2, NULL)));  //  延々繰り返し
 
 	return true;
 }

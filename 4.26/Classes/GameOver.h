@@ -49,6 +49,16 @@ private:
 	void glowSprite();
 	// オーラ出させる
 	void auraEffect();
+	// ｵﾌﾞｼﾞｪｸﾄ消えた時の表現
+	void objExtinctionEffect();
+	//
+	void test1();
+	int keydown_flg = 1;
+	void keyData();
+	// アップデート
+	void update(float delta);
+
+	void scaling();
 };
 
 #endif //Select
