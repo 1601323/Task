@@ -53,11 +53,11 @@ bool GameOver::init()
 	//keyData();
 	// 毎フレーム呼び出し　/*　https://qiita.com/s0hno/items/739b8da8d0ee1375c2cd　*/
 	this->scheduleUpdate();
-	scaling();
+	//scaling();
 	//MagicEffect();			// 魔法陣のやつ
 	//SwordEffect();			// touchしたところに追従するよ
 	//Ripple();				// 波紋
-	//Shadow();				// 影
+	Shadow();				// 影
 	//test();				// アルファ
 	//particle();			// パーティクル表現
 	//sampleSprite();		// スプライト赤になってるよ
@@ -86,29 +86,6 @@ void GameOver::scaling()
 	// マルチれぞーしょん対応か
 	Point origin = Director::getInstance()->getVisibleOrigin();
 
-
-	// 配置文字
-	auto label = Label::createWithSystemFont("Swipe", "fonts/HGRSGU.TTC", 30);
-	// 配置場所
-	label->setPosition(90,300);
-
-	// Select追加
-	this->addChild(label, 1);
-
-	//// 指定フォントの読み込み(フォント名,サイズ,)
-	//TTFConfig ttfConfig("fonts/HGRSGU.TTC", 45);
-	//// 表示
-	//auto label = Label::createWithTTF(ttfConfig,"スワイプでうごくよ");
-	//// 色指定
-	//label->enableGlow(Color4B::GREEN); //色を設定
-	//// 座標指定
-	//label->setPosition(winSize.width / 2, winSize.height / 2);
-	//								 
-	//this->addChild(label, 10);
-
-	auto act1 = ScaleTo::create(0.5f, 0.5f);  // 0.5秒で1.5倍に拡大
-	auto act2 = ScaleTo::create(0.5f, 1.0f);  // 0.5秒で元のサイズに戻す
-	label->runAction(RepeatForever::create(Sequence::create(act1, act2, NULL)));  //  延々繰り返し
 }
 
 // テスト
@@ -457,10 +434,10 @@ void GameOver::Shadow()
 
 	//クリッピング作成
 	ClippingNode* clipping = ClippingNode::create();
-	clipping->setStencil(light); //切り抜き範囲を設定
-	clipping->addChild(shadowSprite); //クリッピングの上に切り抜くSpriteを配置
-	clipping->setInverted(true); //切り抜いた部分以外を表示するか(true)切り抜いた部分を表示するか(false)
-	clipping->setAlphaThreshold(0.1f);//アルファのしきい値を設定
+	clipping->setStencil(light);						//切り抜き範囲を設定
+	clipping->addChild(shadowSprite);					//クリッピングの上に切り抜くSpriteを配置
+	clipping->setInverted(true);						//切り抜いた部分以外を表示するか(true)切り抜いた部分を表示するか(false)
+	clipping->setAlphaThreshold(0.1f);					//アルファのしきい値を設定
 	this->addChild(clipping, 1);
 }
 

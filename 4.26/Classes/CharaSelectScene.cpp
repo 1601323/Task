@@ -1,25 +1,25 @@
 #include "CharaSelectScene.h"
-
-
-/*
-http://vivi.dyndns.org/blog/archives/605
-https://freegame-mugen.jp/roleplaying/game_6860.html
-https://qiita.com/s0hno/items/739b8da8d0ee1375c2cd
-
-*/
 #include "FightScene.h"
 #include "GameOver.h"
 #include "Imput.h"
 #include <algorithm>
 #include "cocos2d.h"
-#include "DmEffect.h"
+
 #pragma execution_character_set("utf-8")
 
-#define PI 3.14159265359f  
-#define RADIUS 100  
-#define FLATTEN_RATE 0.4f  
-#define PL_POS_OFFSET_X 420		// プレイヤー表示のオフセット
-#define PL_POS_OFFSET_Y 650		// プレイヤー表示のオフセット
+const int TEXT_OFFSET	 = 480;					// text表示のオフセット値
+const int DIV_NUM		 = 4;
+const int DIV_ANGLE		 = 360 / DIV_NUM;
+const int DIV_ANGLE_HALF = DIV_ANGLE / 2;
+// 角度関係で使うよ
+const int RADIUS = 100;
+const float PI = 3.14159265359f;
+const float FLATTEN_RATE = 0.4f;
+const unsigned int PL_POS_OFFSET_X = 420;		// プレイヤー表示のオフセット
+const unsigned int PL_POS_OFFSET_Y = 650;		// プレイヤー表示のオフセット
+// 拡縮用
+const float LIMIT_TIME	 = 0.9f;					// 秒指定[戻る際]
+const float DOUBLE_SCALE = 0.5f;					// 何倍か[拡大率指定]
 
 USING_NS_CC;
 
@@ -67,7 +67,8 @@ bool CharaSelectScene::init()
 	// 四角描画
 	DrawBox();
 	fontsDraw();
-	
+
+	this->scheduleUpdate();
 	// ダメージ表示のやつ
 	/*srand((unsigned int)time(nullptr));
 
@@ -84,36 +85,105 @@ bool CharaSelectScene::init()
 	};
 	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listner, this);*/
 
+	return true;
+}
+
+// 更新
+void CharaSelectScene::update(float delta)
+{
+	charaText();
+}
+
+// プレイヤー説明文
+void CharaSelectScene::charaText()
+{
 	//画像サイズ取得
 	Size winSize = Director::getInstance()->getWinSize();
 	// マルチれぞーしょん対応か
 	Point origin = Director::getInstance()->getVisibleOrigin();
+	// フォント指定
+	TTFConfig ttfConfig("fonts/HGRSGU.TTC", 45);
+	// 色指定
+	auto textColor = Color3B(0,100,50);
 
+	auto label1 = Label::createWithTTF(ttfConfig,
+		"剣一本で多彩な攻撃\n防御を捨ててでも火力をとる\n諸刃の剣士");
+	auto label2 = Label::createWithTTF(ttfConfig,
+		"魔法で生成した盾で見方を守る\n自らもダメージを受けるが\n仲間を守る唯一無二の盾");
+	auto label3 = Label::createWithTTF(ttfConfig,
+		"魔法攻撃で敵を攻撃するもよし\n見方を強化してサポートしてもよし\n二つの顔を持つマジシャン");
+	auto label4 = Label::createWithTTF(ttfConfig,
+		"回復のスペシャリストと思いきや\n敵の弱体化もお任せ\nデバフ系ヒーラー");
 
-	// 配置文字
-	auto label = Label::createWithSystemFont("Swipe", "fonts/HGRSGU.TTC", 30);
-	// 配置場所
-	label->setPosition(90, 300);
+	// アタッカー
+	if (Top == PL_Attacker)
+	{
+		this->removeChildByTag(101);
+		// タグ設定
+		label1->setTag(101);  
+		label1->setColor(textColor);
+		// 座標設定
+		label1->setPosition(winSize.width / 2, winSize.height / 2 + TEXT_OFFSET);
+		// タグチェック
+		if (int tag = label1->getTag() != 1)
+		{
+			this->addChild(label1, 6);
+		}
+	}
+	// シールド
+	else if (Top == PL_Shield)
+	{
+		this->removeChildByTag(101);
+		// タグ設定
+		label2->setTag(101); 
+		// 色設定
+		label2->setColor(textColor);
+		// 座標設定
+		label2->setPosition(winSize.width / 2, winSize.height / 2 + TEXT_OFFSET);
+		// タグチェック
+		if (int tag = label2->getTag() != 1)
+		{
+			this->addChild(label2, 6);
+		}
+	}
+	// 魔法
+	else if (Top == PL_Magic)
+	{
+		this->removeChildByTag(101);
+		// タグ設定
+		label3->setTag(101); 
+		// 色設定
+		label3->setColor(textColor);
+		// 座標設定
+		label3->setPosition(winSize.width / 2, winSize.height / 2 + TEXT_OFFSET);
+		// タグチェック
+		if (int tag = label3->getTag() != 1)
+		{
+			this->addChild(label3, 6);
+		}
 
-	// Select追加
-	this->addChild(label, 1);
+	}
+	// 回復
+	else if (Top == PL_Healer)
+	{
+		this->removeChildByTag(101);
+		// タグ設定
+		label4->setTag(101); 
+		// 色設定
+		label4->setColor(textColor);
+		// 座標設定
+		label4->setPosition(winSize.width / 2, winSize.height / 2 + TEXT_OFFSET);
+		// タグチェック
+		if (int tag = label4->getTag() != 1)
+		{
+			this->addChild(label4, 6);
+		}
 
-	//// 指定フォントの読み込み(フォント名,サイズ,)
-	//TTFConfig ttfConfig("fonts/HGRSGU.TTC", 45);
-	//// 表示
-	//auto label = Label::createWithTTF(ttfConfig,"スワイプでうごくよ");
-	//// 色指定
-	//label->enableGlow(Color4B::GREEN); //色を設定
-	//// 座標指定
-	//label->setPosition(winSize.width / 2, winSize.height / 2);
-	//								 
-	//this->addChild(label, 10);
-
-	auto act1 = ScaleTo::create(0.5f, 0.5f);  // 0.5秒で1.5倍に拡大
-	auto act2 = ScaleTo::create(0.5f, 1.0f);  // 0.5秒で元のサイズに戻す
-	label->runAction(RepeatForever::create(Sequence::create(act1, act2, NULL)));  //  延々繰り返し
-
-	return true;
+	}
+	else
+	{
+		log("ｴﾗｰ起きてますよ");
+	}
 }
 
 // 画像サイズ取得
@@ -128,20 +198,42 @@ void CharaSelectScene::getSize()
 // キャラ表示
 void CharaSelectScene::charaDraw()
 {
+	//画像サイズ取得
+	Size winSize = Director::getInstance()->getWinSize();
+	// マルチれぞーしょん対応か
+	Point origin = Director::getInstance()->getVisibleOrigin();
+
 	PL_Attacker = Sprite::create("PL_Attacker.png");
-	PL_Shield	= Sprite::create("PL_Shield.png");
-	PL_Magic	= Sprite::create("PL_Magic.png");
-	PL_Healer	= Sprite::create("PL_Healer.png");
+	PL_Shield = Sprite::create("PL_Shield.png");
+	PL_Magic = Sprite::create("PL_Magic.png");
+	PL_Healer = Sprite::create("PL_Healer.png");
 
 	this->items.clear();
 	this->items.push_back(PL_Attacker);
 	this->items.push_back(PL_Shield);
 	this->items.push_back(PL_Magic);
 	this->items.push_back(PL_Healer);
+	//this->items.clear();
+	//this->items.push_back(Sprite::create("PL_Attacker.png"));
+	//this->items.push_back(Sprite::create("PL_Shield.png"));
+	//this->items.push_back(Sprite::create("PL_Magic.png"));
+	//this->items.push_back(Sprite::create("PL_Healer.png"));
+
+	if (!Top)
+	{
+		////黒い四角形スプライト
+		Sprite* shadowSprite = Sprite::create();
+		shadowSprite->setTextureRect(Rect(0.0f, 0.0f, winSize.width, winSize.height));
+		shadowSprite->setColor(Color3B::BLACK);
+		shadowSprite->setOpacity(200);
+		shadowSprite->setPosition(Point(winSize.width / 2, winSize.height / 2));
+	}
 
 	// 円状に等間隔で配置
-	for (auto item : items)
-		this->addChild(item,0);
+	for (auto& item : items)
+	{
+		this->addChild(item, 0);
+	}
 
 	this->angle = 0.0f;
 	this->arrange();
@@ -173,7 +265,9 @@ void CharaSelectScene::arrange()
 	//そーとするよ(´・ω・`)
 	auto tmpVector = items;
 	std::sort(tmpVector.begin(), tmpVector.end(), [](const Node* a, const Node* b)
-	{return a->getScale() < b->getScale(); });
+	// 先に大きいのtrue /　begin > end ←初めに大きいもの来る＝大きい順になる  
+	{return a->getScale() > b->getScale(); });
+	// TOPに一番多きものが入る
 	Top = tmpVector.front();
 
 }
@@ -183,11 +277,29 @@ void CharaSelectScene::swipeRotation()
 {
 	// スワイプに合わせて回転
 	EventListenerTouchOneByOne *listener = EventListenerTouchOneByOne::create();
+	// クリックしたとき
 	listener->onTouchBegan = [](Touch *touch, Event *event) { return true; };
+	// 移動量[スワイプ]
 	listener->onTouchMoved = [&](Touch *touch, Event *event)
 	{
 		float delta = touch->getLocation().x - touch->getPreviousLocation().x;
 		this->angle += delta;
+		this->arrange();
+	};
+	// 離した
+	listener->onTouchEnded = [&](Touch *touch, Event *event)
+	{
+		// 補正つけますよ
+		// 正の値
+		if (angle>0.f)
+		{
+			this->angle = (((((static_cast<int>(this->angle)) + DIV_ANGLE_HALF) % 360) / DIV_ANGLE) * DIV_ANGLE);
+		}
+		// 負の値
+		else
+		{
+			this->angle = ((((static_cast<int>(this->angle - 360) % 360 - DIV_ANGLE_HALF) % 360) / DIV_ANGLE) * DIV_ANGLE);
+		}
 		this->arrange();
 	};
 	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
@@ -201,27 +313,18 @@ void CharaSelectScene::fontsDraw()
 	// マルチれぞーしょん対応か
 	Point origin = Director::getInstance()->getVisibleOrigin();
 
-	// 指定したフォントの描画
+	// スワイプの動いているとこ
+	// 配置文字
+	auto swipeLabel = Label::createWithSystemFont("スワイプで動くよ", "fonts/HGRSGU.TTC", 30);
+	// 配置場所
+	swipeLabel->setPosition(100, 300);
+	swipeLabel->setColor(Color3B(200,150,0));
 
-
-	// 指定フォントの読み込み(フォント名,サイズ,)
-	TTFConfig ttfConfig("fonts/HGRSGU.TTC", 45, GlyphCollection::DYNAMIC);
-	// 表示
-	auto label = Label::createWithTTF(ttfConfig,
-		"魔法攻撃で敵を攻撃するもよし\n見方を強化してサポートするもよし、\n2つの顔を持つマジシャン");
-	// 色指定
-	label->setColor(Color3B(0, 0, 0));
-	// 座標指定
-	label->setPosition(winSize.width / 2, winSize.height / 2 + 480);
-	// 行間隔調整
-	//label->setLineHeight(/*幅の値*/);
-
-	// 光彩のようなエフェクトかける
-	TTFConfig ttfConfigEffect(ttfConfig);
-	ttfConfigEffect.distanceFieldEnabled = true; //trueにする
-	label->enableGlow(Color4B::GREEN); //色を設定
-	// 追加
-	this->addChild(label, 6);
+	// Select追加
+	this->addChild(swipeLabel, 1);
+	auto act1 = ScaleTo::create(LIMIT_TIME, DOUBLE_SCALE);   // 0.9秒で0.5倍に拡大
+	auto act2 = ScaleTo::create(LIMIT_TIME, 1.0f);			 // 0.9秒で元のサイズに戻す
+	swipeLabel->runAction(RepeatForever::create(Sequence::create(act1, act2, NULL)));  //  延々繰り返し
 }
 
 // 背景
@@ -231,84 +334,40 @@ void CharaSelectScene::CharaSelectBackGroudn()
 	Size winSize = Director::getInstance()->getWinSize();
 	// マルチれぞーしょん対応か
 	Point origin = Director::getInstance()->getVisibleOrigin();
-
-	// タイトル配置
-	// 配置文字
-	//auto lbl_Select = Label::createWithSystemFont("CharaSelect", "HiraKakuProN-W6", 100);
-	// 配置場所
-	//lbl_Select->setPosition(Point(origin.x + winSize.width / 2,origin.y + winSize.height - lbl_Select->getContentSize().height));
-
-	// Select追加
-	//this->addChild(lbl_Select, 1);
-
-	// x座標, y座標, width, height
-	Rect rect = Rect(150,180, 1280, 280);
-	Sprite* square = Sprite::create();
-	square->setTextureRect(rect);
-	square->setPosition(180,1120 );
-	square->setColor(Color3B(82,162,197));
-	this->addChild(square,2);
-
-	Rect rect2 = Rect(150, 180, 1250, 250);
-	Sprite* square2 = Sprite::create();
-	square2->setTextureRect(rect2);
-	square2->setPosition(180, 1120);
-	square2->setColor(Color3B(255, 255, 255));
-	this->addChild(square2, 5);
 }
-
-// クリック開始時に呼ばれる
-//bool CharaSelectScene::onTouchBegan(Touch *touch, Event *unused_event)
-//{
-//	cocos2d::CCSprite* m_pSprite;
-//
-//	// touch座標取得
-//	Vec2 touch_pos = touch->getLocation();
-//	// スプライトのAABBを取得
-//	Rect rect_spr = m_pSprite->getBoundingBox();
-//
-//	// スプライトにTouch座標が含まれているかどうか
-//	bool hit = rect_spr.containsPoint(touch_pos);
-//
-//	if (hit)
-//	{
-//		log("touch sprite!!!");
-//	}
-//	return true;
-//}
 
 // Clickしたらデータ入れるよ
-void CharaSelectScene::CharaClick()
-{
-	// どれが一番前にいるのかを分かるように調べよう→暗くする処理楽だよ
-	// 0123にそろえましょうか　//static_cast<CharaData>(1234のやつ-1);
-
-	//if()
-	{
-	// ここら辺の範囲2かいタップしたら
-		int i = 0;
-		for (i = 0; i < items.size(); i++)
-		{
-			// 
-			if (items[i] == Top)
-			{
-				break;
-			}
-			// 追加
-			CharaData.push_back(static_cast<CharaName> (i));
-		}
-			// 選択外の者は暗くする
-			//	if ()
-			//	{
-
-			//		/*タップした奴　拡大率で今前のやつを判断
-
-			//		その番号をpushback*/
-			//		//push_back
-			//		CharaData.push_back;
-			//	}
-	};
-}
+//void CharaSelectScene::CharaClick()
+//{
+//	// どれが一番前にいるのかを分かるように調べよう→暗くする処理楽だよ
+//	// 0123にそろえましょうか　//static_cast<CharaData>(1234のやつ-1);
+//
+//	if(Top)
+//	{
+//	// ここら辺の範囲2かいタップしたら
+//		int i = 0;
+//		for (i = 0; i < items.size(); i++)
+//		{
+//			// 
+//			if (items[i] == Top)
+//			{
+//				break;
+//			}
+//			// 追加
+//			CharaData.push_back(static_cast<CharaName> (i));
+//		}
+//			// 選択外の者は暗くする
+//				if (!Top)
+//				{
+//
+//					/*タップした奴　拡大率で今前のやつを判断
+//
+//					その番号をpushback*/
+//					//push_back
+//					CharaData.push_back;
+//				}
+//	};
+//}
 
 // キャラ情報取得
 const std::vector<CharaName>& CharaSelectScene::GetCharaData()
@@ -335,15 +394,7 @@ void CharaSelectScene::pushStart(Ref * pSender)
 // 四角表示
 void CharaSelectScene::DrawBox()
 {
-	// 矩形
-	// x座標, y座標, width, height
-	/*Rect rect = Rect(10,10, 1500, 280);
-	Sprite* square = Sprite::create();
-	square->setTextureRect(rect);
-	square->setPosition(100,100 );
-	this->addChild(square,2);*/
-
-	CCSprite *Box = CCSprite::create("nc25818.png");
+	/*CCSprite *Box = CCSprite::create("nc25818.png");
 	Box->setScale(2);
 	Box->setPosition(130,130);
 	addChild(Box,2);
@@ -361,8 +412,23 @@ void CharaSelectScene::DrawBox()
 	CCSprite *Box3 = CCSprite::create("nc25818.png");
 	Box3->setScale(2);
 	Box3->setPosition(670, 130);
-	addChild(Box3, 2);
+	addChild(Box3, 2);*/
 
+
+	CCSprite *Box = CCSprite::create("nc25818.png");
+	Box->setScale(2);
+	Box->setPosition(210, 130);
+	addChild(Box, 2);
+
+	CCSprite *Box1 = CCSprite::create("nc25818.png");
+	Box1->setScale(2);
+	Box1->setPosition(390, 130);
+	addChild(Box1, 2);
+
+	CCSprite *Box2 = CCSprite::create("nc25818.png");
+	Box2->setScale(2);
+	Box2->setPosition(570, 130);
+	addChild(Box2, 2);
 }
 
 /*　URL
@@ -384,4 +450,11 @@ http://brbranch.jp/blog/201312/cocos2d-x/convert_to_node_space/
 //https://iscene.jimdo.com/2015/02/23/cocos2d-x-ver-3-x-top%E3%83%9A%E3%83%BC%E3%82%B8-tableview-%E7%94%BB%E5%83%8F%E8%A1%A8%E7%A4%BA%E7%B7%A8/
 // cocos いろんなのが載ってるサイト
 // https://iscene.jimdo.com/2015/02/04/cocos2d-x-ver-3-x-c-iphone-android-%E3%81%AE%E9%96%8B%E7%99%BA%E5%9F%BA%E7%A4%8E%E8%AC%9B%E5%BA%A7-%E7%9B%AE-%E6%AC%A1/
+
+
+http://vivi.dyndns.org/blog/archives/605
+https://freegame-mugen.jp/roleplaying/game_6860.html
+https://qiita.com/s0hno/items/739b8da8d0ee1375c2cd
+
+
 */
