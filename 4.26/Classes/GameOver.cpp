@@ -54,10 +54,10 @@ bool GameOver::init()
 	// 毎フレーム呼び出し　/*　https://qiita.com/s0hno/items/739b8da8d0ee1375c2cd　*/
 	this->scheduleUpdate();
 	//scaling();
-	//MagicEffect();			// 魔法陣のやつ
+	MagicEffect();			// 魔法陣のやつ
 	//SwordEffect();			// touchしたところに追従するよ
 	//Ripple();				// 波紋
-	Shadow();				// 影
+	//Shadow();				// 影
 	//test();				// アルファ
 	//particle();			// パーティクル表現
 	//sampleSprite();		// スプライト赤になってるよ
@@ -101,7 +101,7 @@ void GameOver::test1()
 	// 切れてるとき
 	if (keydown_flg == 0)
 	{
-		Sprite *enemyUp = Sprite::create("EM_Zombi.png", Rect(0, 0, 335, 200));
+		Sprite *enemyUp = Sprite::create("Enemy/EM_Zombi.png", Rect(0, 0, 335, 200));
 		enemyUp->setColor(Color3B(255,0,0));
 		enemyUp->setPosition(visibleSize.width / 2, visibleSize.height / 2 +100);
 		this->addChild(enemyUp);
@@ -109,7 +109,7 @@ void GameOver::test1()
 	// 通常時
 	else
 	{
-		Sprite *enemy = Sprite::create("EM_Zombi.png");
+		Sprite *enemy = Sprite::create("Enemy/EM_Zombi.png");
 		enemy->setPosition(visibleSize.width/2 , visibleSize.height/2 );
 		this->addChild(enemy);
 		

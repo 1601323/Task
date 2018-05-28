@@ -1,3 +1,0 @@
-// shaderいろんなのあるよ　サンプルコード付き
-http://glslsandbox.com/
-

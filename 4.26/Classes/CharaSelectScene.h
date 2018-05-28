@@ -47,7 +47,6 @@ private:
 	void charaText();		 // きゃら説明文
 	// 保存する用のデータ
 	static std::vector<CharaName> CharaData;
-
 };
 
 #endif // Title

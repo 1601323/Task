@@ -12,14 +12,14 @@ const int DIV_NUM		 = 4;
 const int DIV_ANGLE		 = 360 / DIV_NUM;
 const int DIV_ANGLE_HALF = DIV_ANGLE / 2;
 // 角度関係で使うよ
-const int RADIUS = 100;
+const int RADIUS = 200;
 const float PI = 3.14159265359f;
 const float FLATTEN_RATE = 0.4f;
 const unsigned int PL_POS_OFFSET_X = 420;		// プレイヤー表示のオフセット
 const unsigned int PL_POS_OFFSET_Y = 650;		// プレイヤー表示のオフセット
 // 拡縮用
-const float LIMIT_TIME	 = 0.9f;					// 秒指定[戻る際]
-const float DOUBLE_SCALE = 0.5f;					// 何倍か[拡大率指定]
+const float LIMIT_TIME	 = 0.9f;				// 秒指定[戻る際]
+const float DOUBLE_SCALE = 0.5f;				// 何倍か[拡大率指定]
 
 USING_NS_CC;
 
@@ -44,9 +44,6 @@ bool CharaSelectScene::init()
 
 	// バックグランド
 	CharaSelectBackGroudn();
-	// 画像サイズ取得
-	getSize();		
-
 	// ボタン配置
 	// 通常時,押した時
 	// 押した時のｱｸｼｮﾝ
@@ -59,16 +56,14 @@ bool CharaSelectScene::init()
 	menu->setPosition(Point::ZERO);
 	// 追加
 	this->addChild(menu, 8);
+	
+	charaDraw();			// キャラ表示
+	swipeRotation();		// スワイプに合わせて回転
+	DrawBox();				// 四角描画
+	fontsDraw();			// 文字描画
 
-	// キャラ表示
-	charaDraw();
-	// スワイプに合わせて回転
-	swipeRotation();
-	// 四角描画
-	DrawBox();
-	fontsDraw();
+	this->scheduleUpdate();	// 更新	
 
-	this->scheduleUpdate();
 	// ダメージ表示のやつ
 	/*srand((unsigned int)time(nullptr));
 
@@ -114,7 +109,7 @@ void CharaSelectScene::charaText()
 		"魔法攻撃で敵を攻撃するもよし\n見方を強化してサポートしてもよし\n二つの顔を持つマジシャン");
 	auto label4 = Label::createWithTTF(ttfConfig,
 		"回復のスペシャリストと思いきや\n敵の弱体化もお任せ\nデバフ系ヒーラー");
-
+	
 	// アタッカー
 	if (Top == PL_Attacker)
 	{
@@ -203,10 +198,10 @@ void CharaSelectScene::charaDraw()
 	// マルチれぞーしょん対応か
 	Point origin = Director::getInstance()->getVisibleOrigin();
 
-	PL_Attacker = Sprite::create("PL_Attacker.png");
-	PL_Shield = Sprite::create("PL_Shield.png");
-	PL_Magic = Sprite::create("PL_Magic.png");
-	PL_Healer = Sprite::create("PL_Healer.png");
+	PL_Attacker = Sprite::create("Player/PL_Attacker.png");
+	PL_Shield   = Sprite::create("Player/PL_Shield.png");
+	PL_Magic    = Sprite::create("Player/PL_Magic.png");
+	PL_Healer   = Sprite::create("Player/PL_Healer.png");
 
 	this->items.clear();
 	this->items.push_back(PL_Attacker);
@@ -219,6 +214,7 @@ void CharaSelectScene::charaDraw()
 	//this->items.push_back(Sprite::create("PL_Magic.png"));
 	//this->items.push_back(Sprite::create("PL_Healer.png"));
 
+	// 選択されてないもの半透明に
 	if (!Top)
 	{
 		////黒い四角形スプライト
@@ -234,7 +230,6 @@ void CharaSelectScene::charaDraw()
 	{
 		this->addChild(item, 0);
 	}
-
 	this->angle = 0.0f;
 	this->arrange();
 }
@@ -334,6 +329,13 @@ void CharaSelectScene::CharaSelectBackGroudn()
 	Size winSize = Director::getInstance()->getWinSize();
 	// マルチれぞーしょん対応か
 	Point origin = Director::getInstance()->getVisibleOrigin();
+
+	// 背景画像追加
+	Sprite* backImage = Sprite::create("BackImage/ST_CharSerect2.png");
+	// 配置座標
+	backImage->setPosition(winSize.width / 2, winSize.height / 2);
+	// 追加
+	this->addChild(backImage);
 }
 
 // Clickしたらデータ入れるよ
@@ -419,12 +421,10 @@ void CharaSelectScene::DrawBox()
 	Box->setScale(2);
 	Box->setPosition(210, 130);
 	addChild(Box, 2);
-
 	CCSprite *Box1 = CCSprite::create("nc25818.png");
 	Box1->setScale(2);
 	Box1->setPosition(390, 130);
 	addChild(Box1, 2);
-
 	CCSprite *Box2 = CCSprite::create("nc25818.png");
 	Box2->setScale(2);
 	Box2->setPosition(570, 130);
