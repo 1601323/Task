@@ -72,7 +72,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
     director->setAnimationInterval(1.0f / 60);
 
     // Set the design resolution
-    glview->setDesignResolutionSize(designResolutionSize.width, designResolutionSize.height, ResolutionPolicy::EXACT_FIT);
+    glview->setDesignResolutionSize(designResolutionSize.width, designResolutionSize.height, ResolutionPolicy::SHOW_ALL);
 
 	// ‘¶İ‚ğ–Y‚ê‚é‚ñ‚¾....‰æ–Ê‰ğ‘œ“x‚¨‚©‚µ‚­‚È‚é
 

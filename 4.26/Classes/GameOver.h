@@ -47,9 +47,9 @@ private:
 	void changeGradation();
 	// shaderスプライトを光らせる
 	void glowSprite();
+	// ｵﾌﾞｼﾞｪｸﾄ消えた時の
 	// オーラ出させる
 	void auraEffect();
-	// ｵﾌﾞｼﾞｪｸﾄ消えた時の表現
 	void objExtinctionEffect();
 	//
 	void test1();
