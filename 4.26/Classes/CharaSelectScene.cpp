@@ -13,10 +13,10 @@ const int DIV_ANGLE		 = 360 / DIV_NUM;
 const int DIV_ANGLE_HALF = DIV_ANGLE / 2;
 // 角度関係で使うよ
 const int RADIUS = 200;
-const float PI = 3.14159265359f;
+const float PI	= 3.14159265359f;
 const float FLATTEN_RATE = 0.4f;
 const unsigned int PL_POS_OFFSET_X = 420;		// プレイヤー表示のオフセット
-const unsigned int PL_POS_OFFSET_Y = 650;		// プレイヤー表示のオフセット
+const unsigned int PL_POS_OFFSET_Y = 820;		// プレイヤー表示のオフセット
 // 拡縮用
 const float LIMIT_TIME	 = 0.9f;				// 秒指定[戻る際]
 const float DOUBLE_SCALE = 0.5f;				// 何倍か[拡大率指定]
@@ -44,24 +44,22 @@ bool CharaSelectScene::init()
 
 	// バックグランド
 	CharaSelectBackGroudn();
-	// ボタン配置
-	// 通常時,押した時
-	// 押した時のｱｸｼｮﾝ
+	// ボタン配置 (通常時,押した時,押した時のｱｸｼｮﾝ)
 	auto startButton = MenuItemImage::create("CloseNormal.png", "CloseSelected.png", CC_CALLBACK_1(CharaSelectScene::pushStart, this));
 
 	// ボタンの配置
 	startButton->setPosition(50,1200);
 	// メニュー作成(自動obj)
 	auto menu = Menu::create(startButton, NULL);
+	// 座標配置
 	menu->setPosition(Point::ZERO);
 	// 追加
 	this->addChild(menu, 8);
 	
 	charaDraw();			// キャラ表示
 	swipeRotation();		// スワイプに合わせて回転
-	DrawBox();				// 四角描画
+	drawBox();				// 四角描画
 	fontsDraw();			// 文字描画
-
 	this->scheduleUpdate();	// 更新	
 
 	// ダメージ表示のやつ
@@ -86,7 +84,26 @@ bool CharaSelectScene::init()
 // 更新
 void CharaSelectScene::update(float delta)
 {
-	charaText();
+	
+}
+
+// クリック判定
+void CharaSelectScene::clickCheck()
+{
+	// クリックしたとき
+	_listener->onTouchBegan = [&](Touch *touch, Event *event)
+	{
+		return true;
+	};
+	// 移動
+	_listener->onTouchMoved = [&](Touch *touch, Event *event)
+	{
+	};
+	// 離した
+	_listener->onTouchEnded = [&](Touch *touch, Event *event)
+	{
+	};
+	//this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(_listener, this);
 }
 
 // プレイヤー説明文
@@ -99,8 +116,8 @@ void CharaSelectScene::charaText()
 	// フォント指定
 	TTFConfig ttfConfig("fonts/HGRSGU.TTC", 45);
 	// 色指定
-	auto textColor = Color3B(0,100,50);
-
+	auto textColor = Color3B(0,0,50);
+	// テキスト
 	auto label1 = Label::createWithTTF(ttfConfig,
 		"剣一本で多彩な攻撃\n防御を捨ててでも火力をとる\n諸刃の剣士");
 	auto label2 = Label::createWithTTF(ttfConfig,
@@ -181,13 +198,45 @@ void CharaSelectScene::charaText()
 	}
 }
 
-// 画像サイズ取得
-void CharaSelectScene::getSize()
+// 文字描画
+void CharaSelectScene::fontsDraw()
 {
 	//画像サイズ取得
 	Size winSize = Director::getInstance()->getWinSize();
 	// マルチれぞーしょん対応か
 	Point origin = Director::getInstance()->getVisibleOrigin();
+
+	// スワイプの動いているとこ
+	// 配置文字
+	auto swipeLabel = Label::createWithSystemFont("スワイプで動くよ", "fonts/HGRSGU.TTC", 30);
+	// 配置場所
+	swipeLabel->setPosition(100, 300);
+	swipeLabel->setColor(Color3B(200, 150, 0));
+
+	// Select追加
+	this->addChild(swipeLabel, 1);
+	auto act1 = ScaleTo::create(LIMIT_TIME, DOUBLE_SCALE);   // 0.9秒で0.5倍に拡大
+	auto act2 = ScaleTo::create(LIMIT_TIME, 1.0f);			 // 0.9秒で元のサイズに戻す
+	swipeLabel->runAction(RepeatForever::create(Sequence::create(act1, act2, NULL)));  //  延々繰り返し
+
+	// 説明文表示
+	_listener->onTouchBegan = [&](Touch *touch, Event *event)
+	{
+		charaText();
+		log("何かおしたぜ大将！！");
+		return true;
+	};
+	// 移動
+	_listener->onTouchMoved = [&](Touch *touch, Event *event)
+	{
+		this->removeChildByTag(101);
+	};
+	// 離した
+	_listener->onTouchEnded = [&](Touch *touch, Event *event)
+	{
+
+	};
+	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(_listener, this);
 }
 
 // キャラ表示
@@ -199,9 +248,9 @@ void CharaSelectScene::charaDraw()
 	Point origin = Director::getInstance()->getVisibleOrigin();
 
 	PL_Attacker = Sprite::create("Player/PL_Attacker.png");
-	PL_Shield   = Sprite::create("Player/PL_Shield.png");
-	PL_Magic    = Sprite::create("Player/PL_Magic.png");
-	PL_Healer   = Sprite::create("Player/PL_Healer.png");
+	PL_Shield = Sprite::create("Player/PL_Shield.png");
+	PL_Magic = Sprite::create("Player/PL_Magic.png");
+	PL_Healer = Sprite::create("Player/PL_Healer.png");
 
 	this->items.clear();
 	this->items.push_back(PL_Attacker);
@@ -232,6 +281,7 @@ void CharaSelectScene::charaDraw()
 	}
 	this->angle = 0.0f;
 	this->arrange();
+
 }
 
 // アレンジ　回転とか
@@ -264,7 +314,6 @@ void CharaSelectScene::arrange()
 	{return a->getScale() > b->getScale(); });
 	// TOPに一番多きものが入る
 	Top = tmpVector.front();
-
 }
 
 // スワイプに合わせて回転
@@ -298,28 +347,6 @@ void CharaSelectScene::swipeRotation()
 		this->arrange();
 	};
 	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
-}
-
-// 文字描画
-void CharaSelectScene::fontsDraw()
-{
-	//画像サイズ取得
-	Size winSize = Director::getInstance()->getWinSize();
-	// マルチれぞーしょん対応か
-	Point origin = Director::getInstance()->getVisibleOrigin();
-
-	// スワイプの動いているとこ
-	// 配置文字
-	auto swipeLabel = Label::createWithSystemFont("スワイプで動くよ", "fonts/HGRSGU.TTC", 30);
-	// 配置場所
-	swipeLabel->setPosition(100, 300);
-	swipeLabel->setColor(Color3B(200,150,0));
-
-	// Select追加
-	this->addChild(swipeLabel, 1);
-	auto act1 = ScaleTo::create(LIMIT_TIME, DOUBLE_SCALE);   // 0.9秒で0.5倍に拡大
-	auto act2 = ScaleTo::create(LIMIT_TIME, 1.0f);			 // 0.9秒で元のサイズに戻す
-	swipeLabel->runAction(RepeatForever::create(Sequence::create(act1, act2, NULL)));  //  延々繰り返し
 }
 
 // 背景
@@ -394,40 +421,19 @@ void CharaSelectScene::pushStart(Ref * pSender)
 }
 
 // 四角表示
-void CharaSelectScene::DrawBox()
+void CharaSelectScene::drawBox()
 {
-	/*CCSprite *Box = CCSprite::create("nc25818.png");
-	Box->setScale(2);
-	Box->setPosition(130,130);
-	addChild(Box,2);
-
-	CCSprite *Box1 = CCSprite::create("nc25818.png");
-	Box1->setScale(2);
-	Box1->setPosition(310, 130);
-	addChild(Box1, 2);
-
-	CCSprite *Box2 = CCSprite::create("nc25818.png");
-	Box2->setScale(2);
-	Box2->setPosition(490, 130);
-	addChild(Box2, 2);
-
-	CCSprite *Box3 = CCSprite::create("nc25818.png");
-	Box3->setScale(2);
-	Box3->setPosition(670, 130);
-	addChild(Box3, 2);*/
-
-
-	CCSprite *Box = CCSprite::create("nc25818.png");
-	Box->setScale(2);
-	Box->setPosition(210, 130);
+	CCSprite *Box = CCSprite::create("PL_CharFlame01.png");
+	Box->setScale(1.5f);
+	Box->setPosition(165, 140);
 	addChild(Box, 2);
-	CCSprite *Box1 = CCSprite::create("nc25818.png");
-	Box1->setScale(2);
-	Box1->setPosition(390, 130);
+	CCSprite *Box1 = CCSprite::create("PL_CharFlame01.png");
+	Box1->setScale(1.5f);
+	Box1->setPosition(390, 140);
 	addChild(Box1, 2);
-	CCSprite *Box2 = CCSprite::create("nc25818.png");
-	Box2->setScale(2);
-	Box2->setPosition(570, 130);
+	CCSprite *Box2 = CCSprite::create("PL_CharFlame01.png");
+	Box2->setScale(1.5f);
+	Box2->setPosition(615, 140);
 	addChild(Box2, 2);
 }
 

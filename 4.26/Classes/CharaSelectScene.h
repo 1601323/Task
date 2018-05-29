@@ -29,6 +29,7 @@ public:
 	// 選択されたキャラ情報格納
 	static const std::vector<CharaName>& GetCharaData();
 
+
 private:
 	Node* Top;
 	// キャラ情報
@@ -37,16 +38,17 @@ private:
 	Sprite *PL_Magic;		 // 魔法使い(ツイン)
 	Sprite *PL_Healer;		 // 回復(ｹﾓﾐﾐ)
 	void update(float delta);// アップデート
-	void getSize();			 // 画像サイズ取得,ﾏﾙﾁﾚｿﾞｰｼｮﾝ対応か？
-	void CharaClick();		 // クリックしたらデータが入るよ
 	void charaDraw();		 // キャラ表示
 	void swipeRotation();	 // スワイプに合わせて回転
-	void DrawBox();			 // □表示
+	void drawBox();			 // □表示
 	void fontsDraw();		 // 文字描画
 	void arrange();			 // アレンジ						
 	void charaText();		 // きゃら説明文
+	void clickCheck();			 // clickされたら呼ばれる
 	// 保存する用のデータ
 	static std::vector<CharaName> CharaData;
+	// click判定
+	EventListenerTouchOneByOne *_listener = EventListenerTouchOneByOne::create();
 };
 
 #endif // Title
