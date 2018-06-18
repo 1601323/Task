@@ -7,19 +7,26 @@
 
 #pragma execution_character_set("utf-8")
 
-const int TEXT_OFFSET	 = 480;					// text表示のオフセット値
-const int DIV_NUM		 = 4;
-const int DIV_ANGLE		 = 360 / DIV_NUM;
-const int DIV_ANGLE_HALF = DIV_ANGLE / 2;
+const int PL_TAG		  = 101;				// タグ用
+const int TEXT_OFFSET	  = 480;				// text表示のオフセット値
+const int DIV_NUM		  = 4;
+const int DIV_ANGLE		  = 360 / DIV_NUM;
+const int DIV_ANGLE_HALF  = DIV_ANGLE / 2;
+const int BUTTON_POS_X	  = 50;					// ボタンの配置座標X
+const int BUTTON_POS_Y	  = 1200;				// ボタンの配置座標Y
+const int FONT_SIZE		  = 45;					// プレイヤー説明文用の文字ｻｲｽﾞ
+const int PL_TEXT_RECT_X  = 250;				// プレイヤー用の板の配置位置X
+const int PL_TEXT_RECT_Y  = 750;				// プレイヤー用の板の配置位置Y
 // 角度関係で使うよ
-const int RADIUS = 200;
-const float PI	= 3.14159265359f;
-const float FLATTEN_RATE = 0.4f;
+const int RADIUS		  = 200;
+const float PI			  = 3.14159265359f;
+const float FLATTEN_RATE  = 0.4f;
 const unsigned int PL_POS_OFFSET_X = 420;		// プレイヤー表示のオフセット
 const unsigned int PL_POS_OFFSET_Y = 820;		// プレイヤー表示のオフセット
 // 拡縮用
-const float LIMIT_TIME	 = 0.9f;				// 秒指定[戻る際]
-const float DOUBLE_SCALE = 0.5f;				// 何倍か[拡大率指定]
+const float LIMIT_TIME	  = 0.9f;				// 秒指定[戻る際]
+const float DOUBLE_SCALE  = 0.5f;				// 何倍か[拡大率指定]
+const float WAIT_TIME	  = 0.6f;
 
 USING_NS_CC;
 
@@ -48,7 +55,7 @@ bool CharaSelectScene::init()
 	auto startButton = MenuItemImage::create("CloseNormal.png", "CloseSelected.png", CC_CALLBACK_1(CharaSelectScene::pushStart, this));
 
 	// ボタンの配置
-	startButton->setPosition(50,1200);
+	startButton->setPosition(BUTTON_POS_X, BUTTON_POS_Y);
 	// メニュー作成(自動obj)
 	auto menu = Menu::create(startButton, NULL);
 	// 座標配置
@@ -58,8 +65,8 @@ bool CharaSelectScene::init()
 	
 	charaDraw();			// キャラ表示
 	swipeRotation();		// スワイプに合わせて回転
-	drawBox();				// 四角描画
 	fontsDraw();			// 文字描画
+	objHit();
 	this->scheduleUpdate();	// 更新	
 
 	// ダメージ表示のやつ
@@ -84,7 +91,6 @@ bool CharaSelectScene::init()
 // 更新
 void CharaSelectScene::update(float delta)
 {
-	
 }
 
 // クリック判定
@@ -114,7 +120,7 @@ void CharaSelectScene::charaText()
 	// マルチれぞーしょん対応か
 	Point origin = Director::getInstance()->getVisibleOrigin();
 	// フォント指定
-	TTFConfig ttfConfig("fonts/HGRSGU.TTC", 45);
+	TTFConfig ttfConfig("fonts/HGRSGU.TTC", FONT_SIZE);
 	// 色指定
 	auto textColor = Color3B(0,0,50);
 	// テキスト
@@ -130,9 +136,9 @@ void CharaSelectScene::charaText()
 	// アタッカー
 	if (Top == PL_Attacker)
 	{
-		this->removeChildByTag(101);
+		this->removeChildByTag(PL_TAG);
 		// タグ設定
-		label1->setTag(101);  
+		label1->setTag(PL_TAG);
 		label1->setColor(textColor);
 		// 座標設定
 		label1->setPosition(winSize.width / 2, winSize.height / 2 + TEXT_OFFSET);
@@ -145,9 +151,9 @@ void CharaSelectScene::charaText()
 	// シールド
 	else if (Top == PL_Shield)
 	{
-		this->removeChildByTag(101);
+		this->removeChildByTag(PL_TAG);
 		// タグ設定
-		label2->setTag(101); 
+		label2->setTag(PL_TAG);
 		// 色設定
 		label2->setColor(textColor);
 		// 座標設定
@@ -161,9 +167,9 @@ void CharaSelectScene::charaText()
 	// 魔法
 	else if (Top == PL_Magic)
 	{
-		this->removeChildByTag(101);
+		this->removeChildByTag(PL_TAG);
 		// タグ設定
-		label3->setTag(101); 
+		label3->setTag(PL_TAG);
 		// 色設定
 		label3->setColor(textColor);
 		// 座標設定
@@ -178,9 +184,9 @@ void CharaSelectScene::charaText()
 	// 回復
 	else if (Top == PL_Healer)
 	{
-		this->removeChildByTag(101);
+		this->removeChildByTag(PL_TAG);
 		// タグ設定
-		label4->setTag(101); 
+		label4->setTag(PL_TAG);
 		// 色設定
 		label4->setColor(textColor);
 		// 座標設定
@@ -220,21 +226,31 @@ void CharaSelectScene::fontsDraw()
 	swipeLabel->runAction(RepeatForever::create(Sequence::create(act1, act2, NULL)));  //  延々繰り返し
 
 	// 説明文表示
-	_listener->onTouchBegan = [&](Touch *touch, Event *event)
+	_listener->onTouchBegan = [&](Touch * touch, Event *event)
 	{
-		charaText();
-		log("何かおしたぜ大将！！");
+		touchPos = touch->getLocation();
+		//指定Rect内をクリックしたら説明文表示
+		if (pl_rect.containsPoint(touchPos))
+		{
+			charaText();
+			log("説明文たぜ大将！！");
+		}
+		else if (box_rect.containsPoint(touchPos))
+		{
+			// チーム編成キャンセルするとき用
+			log("チームメンバーが編成されたぜ大将!!");
+		}
+		else {}
 		return true;
 	};
 	// 移動
 	_listener->onTouchMoved = [&](Touch *touch, Event *event)
 	{
-		this->removeChildByTag(101);
+		this->removeChildByTag(PL_TAG);
 	};
 	// 離した
 	_listener->onTouchEnded = [&](Touch *touch, Event *event)
 	{
-
 	};
 	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(_listener, this);
 }
@@ -248,9 +264,9 @@ void CharaSelectScene::charaDraw()
 	Point origin = Director::getInstance()->getVisibleOrigin();
 
 	PL_Attacker = Sprite::create("Player/PL_Attacker.png");
-	PL_Shield = Sprite::create("Player/PL_Shield.png");
-	PL_Magic = Sprite::create("Player/PL_Magic.png");
-	PL_Healer = Sprite::create("Player/PL_Healer.png");
+	PL_Shield   = Sprite::create("Player/PL_Shield.png");
+	PL_Magic    = Sprite::create("Player/PL_Magic.png");
+	PL_Healer   = Sprite::create("Player/PL_Healer.png");
 
 	this->items.clear();
 	this->items.push_back(PL_Attacker);
@@ -281,6 +297,47 @@ void CharaSelectScene::charaDraw()
 	}
 	this->angle = 0.0f;
 	this->arrange();
+
+	Box = CCSprite::create("PL_CharFlame01.png");
+	Box->setScale(1.5f);
+	Box->setPosition(165, 140);
+	addChild(Box, 2);
+	CCSprite *Box1 = CCSprite::create("PL_CharFlame01.png");
+	Box1->setScale(1.5f);
+	Box1->setPosition(390, 140);
+	addChild(Box1, 2);
+	CCSprite *Box2 = CCSprite::create("PL_CharFlame01.png");
+	Box2->setScale(1.5f);
+	Box2->setPosition(615, 140);
+	addChild(Box2, 2);
+
+}
+
+// 当たり判定用
+void CharaSelectScene::objHit()
+{
+	//画像サイズ取得
+	Size winSize = Director::getInstance()->getWinSize();
+
+	// プレイヤー用のクリック判定用板
+	pl_rect   = Rect(0, 0, PL_TEXT_RECT_X, PL_TEXT_RECT_Y);		// 範囲
+	pl_square = Sprite::create();								// 生成
+	pl_square->setTextureRect(pl_rect);							// テクスチャ指定
+	pl_square->setPosition(430, winSize.height / 2);			// 座標配置
+	//this->addChild(pl_square);									// 追加
+
+	// プレイヤーのRect取得
+	pl_rect = Rect(pl_square->getPosition().x - pl_square->getContentSize().width / 2,
+				   pl_square->getPosition().y - pl_square->getContentSize().height / 2,
+				   pl_square->getContentSize().width,
+				   pl_square->getContentSize().height);
+
+	// チーム編成用枠判定
+	box_rect = Rect(Box->getPosition().x - Box->getContentSize().width,
+					Box->getPosition().y - Box->getContentSize().height,
+					Box->getContentSize().width,
+					Box->getContentSize().height);
+
 
 }
 
@@ -414,27 +471,10 @@ void CharaSelectScene::pushStart(Ref * pSender)
 
 	// 0.6秒かけて次画面に遷移
 	// (時間,遷移先,色(オプション))
-	TransitionFade *transition = TransitionFade::create(0.6, pScene);
+	TransitionFade *transition = TransitionFade::create(WAIT_TIME, pScene);
 
 	// 遷移実行 アニメーション
 	Director::getInstance()->replaceScene(transition);
-}
-
-// 四角表示
-void CharaSelectScene::drawBox()
-{
-	CCSprite *Box = CCSprite::create("PL_CharFlame01.png");
-	Box->setScale(1.5f);
-	Box->setPosition(165, 140);
-	addChild(Box, 2);
-	CCSprite *Box1 = CCSprite::create("PL_CharFlame01.png");
-	Box1->setScale(1.5f);
-	Box1->setPosition(390, 140);
-	addChild(Box1, 2);
-	CCSprite *Box2 = CCSprite::create("PL_CharFlame01.png");
-	Box2->setScale(1.5f);
-	Box2->setPosition(615, 140);
-	addChild(Box2, 2);
 }
 
 /*　URL

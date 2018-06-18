@@ -37,18 +37,26 @@ private:
 	Sprite *PL_Shield;		 // 守備(大男)
 	Sprite *PL_Magic;		 // 魔法使い(ツイン)
 	Sprite *PL_Healer;		 // 回復(ｹﾓﾐﾐ)
+	// 当たり判定用
+	Vec2 touchPos;			 // 現在の座標
+	Sprite *pl_square;		 // プレイヤーのスプライト
+	Sprite *teamBox;		 // チーム編成用
+	Rect pl_rect;			 // プレイヤーのRect
+	Rect box_rect;			 // チーム編成用
+
 	void update(float delta);// アップデート
 	void charaDraw();		 // キャラ表示
 	void swipeRotation();	 // スワイプに合わせて回転
-	void drawBox();			 // □表示
 	void fontsDraw();		 // 文字描画
 	void arrange();			 // アレンジ						
 	void charaText();		 // きゃら説明文
-	void clickCheck();			 // clickされたら呼ばれる
+	void clickCheck();		 // clickされたら呼ばれる
+	void objHit();			 // 当たり判定用
 	// 保存する用のデータ
 	static std::vector<CharaName> CharaData;
 	// click判定
 	EventListenerTouchOneByOne *_listener = EventListenerTouchOneByOne::create();
+	CCSprite *Box;
 };
 
 #endif // Title
