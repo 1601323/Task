@@ -7,16 +7,25 @@
 
 #pragma execution_character_set("utf-8")
 
-const int PL_TAG		  = 101;				// タグ用
-const int TEXT_OFFSET	  = 480;				// text表示のオフセット値
+//Ve2に変更しとけばーか
+
 const int DIV_NUM		  = 4;
 const int DIV_ANGLE		  = 360 / DIV_NUM;
 const int DIV_ANGLE_HALF  = DIV_ANGLE / 2;
-const int BUTTON_POS_X	  = 50;					// ボタンの配置座標X
-const int BUTTON_POS_Y	  = 1200;				// ボタンの配置座標Y
-const int FONT_SIZE		  = 45;					// プレイヤー説明文用の文字ｻｲｽﾞ
-const int PL_TEXT_RECT_X  = 250;				// プレイヤー用の板の配置位置X
-const int PL_TEXT_RECT_Y  = 750;				// プレイヤー用の板の配置位置Y
+
+const unsigned int PL_TAG		  = 101;		// タグ用
+const unsigned int TEXT_OFFSET    = 480;		// text表示のオフセット値
+
+const unsigned int BUTTON_POS_X	  = 50;			// ボタンの配置座標X
+const unsigned int BUTTON_POS_Y	  = 1200;		// ボタンの配置座標Y
+const unsigned int FONT_SIZE	  = 45;			// プレイヤー説明文用の文字ｻｲｽﾞ
+const unsigned int PL_TEXT_RECT_X = 250;		// プレイヤー用の板の配置位置X
+const unsigned int PL_TEXT_RECT_Y = 750;		// プレイヤー用の板の配置位置Y
+const unsigned int TEAM_BOX_X	  = 165;		// チーム編成用のboxの配置位開X
+const unsigned int TEAM_BOX_Y	  = 140;		// チーム編成用のboxの配置位置Y
+const unsigned int TEAM_BOX_OFFSET_X = 225;		// チーム編成用のboxのオフセット
+
+
 // 角度関係で使うよ
 const int RADIUS		  = 200;
 const float PI			  = 3.14159265359f;
@@ -26,7 +35,8 @@ const unsigned int PL_POS_OFFSET_Y = 820;		// プレイヤー表示のオフセット
 // 拡縮用
 const float LIMIT_TIME	  = 0.9f;				// 秒指定[戻る際]
 const float DOUBLE_SCALE  = 0.5f;				// 何倍か[拡大率指定]
-const float WAIT_TIME	  = 0.6f;
+const float WAIT_TIME	  = 0.6f;				// 待機時間
+const float BOX_SCALE	  = 1.2;				// チーム編成用のBOXの拡大率
 
 USING_NS_CC;
 
@@ -62,11 +72,22 @@ bool CharaSelectScene::init()
 	menu->setPosition(Point::ZERO);
 	// 追加
 	this->addChild(menu, 8);
+
+	// touchイベント
+	auto touchEventGet = EventListenerTouchOneByOne::create();
+	touchEventGet->onTouchBegan = CC_CALLBACK_2(CharaSelectScene::TouchBegan, this);
+	touchEventGet->onTouchMoved = CC_CALLBACK_2(CharaSelectScene::TouchMove, this);
+	touchEventGet->onTouchEnded = CC_CALLBACK_2(CharaSelectScene::TouchEnd, this);
+	// 登録
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(touchEventGet, this);
+
 	
+	Draw();					// 表示(キャラ以外)
+	fontsDraw();			// 文字描画
 	charaDraw();			// キャラ表示
 	swipeRotation();		// スワイプに合わせて回転
-	fontsDraw();			// 文字描画
-	objHit();
+	objHit();				// 当たり判定
+
 	this->scheduleUpdate();	// 更新	
 
 	// ダメージ表示のやつ
@@ -88,28 +109,117 @@ bool CharaSelectScene::init()
 	return true;
 }
 
+// 押した瞬間
+bool CharaSelectScene::TouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)
+{
+	touchPos = touch->getLocation();
+	//指定Rect内をクリックしたら説明文表示
+	if (pl_rect.containsPoint(touchPos))
+	{
+		clickCnt += 1;
+		log("説明文たぜ大将！！");
+		charaText();
+		if (clickCnt > 2)
+		{
+			log("チームが編成されたぜ");
+			testChara();
+			clickCnt = 2;
+		}
+	}
+	// チーム編成の箱をクリックしたとき
+	else if (box_rect.containsPoint(touchPos))
+	{
+		// チーム編成キャンセル
+		if (clickCnt>2  )
+		{
+			log("メンバー編成し直したぜ大将!!");
+			Pl_BOX->removeFromParentAndCleanup(true);
+		}
+	}
+	// その他
+	else {}
+	return true;
+}
+// スワイプ中
+void CharaSelectScene::TouchMove(cocos2d::Touch* touch, cocos2d::Event* event)
+{
+	this->removeChildByTag(PL_TAG);
+}
+// 離した瞬間
+void CharaSelectScene::TouchEnd(cocos2d::Touch* touch, cocos2d::Event* event)
+{
+
+}
+
 // 更新
 void CharaSelectScene::update(float delta)
 {
 }
 
-// クリック判定
-void CharaSelectScene::clickCheck()
+// キャラ表示
+void CharaSelectScene::charaDraw()
 {
-	// クリックしたとき
-	_listener->onTouchBegan = [&](Touch *touch, Event *event)
+	//画像サイズ取得
+	Size winSize = Director::getInstance()->getWinSize();
+	// マルチれぞーしょん対応か
+	Point origin = Director::getInstance()->getVisibleOrigin();
+
+	PL_Attacker = Sprite::create("Player/PL_Attacker.png");
+	PL_Shield   = Sprite::create("Player/PL_Shield.png");
+	PL_Magic    = Sprite::create("Player/PL_Magic.png");
+	PL_Healer   = Sprite::create("Player/PL_Healer.png");
+
+	this->items.clear();
+	this->items.push_back(PL_Attacker);
+	this->items.push_back(PL_Shield);
+	this->items.push_back(PL_Magic);
+	this->items.push_back(PL_Healer);
+	//this->items.clear();
+	//this->items.push_back(Sprite::create("PL_Attacker.png"));
+	//this->items.push_back(Sprite::create("PL_Shield.png"));
+	//this->items.push_back(Sprite::create("PL_Magic.png"));
+	//this->items.push_back(Sprite::create("PL_Healer.png"));
+
+	// 選択されてないもの半透明に
+	if (!Top)
 	{
-		return true;
-	};
-	// 移動
-	_listener->onTouchMoved = [&](Touch *touch, Event *event)
+		////黒い四角形スプライト
+		Sprite* shadowSprite = Sprite::create();
+		shadowSprite->setTextureRect(Rect(0.0f, 0.0f, winSize.width, winSize.height));
+		shadowSprite->setColor(Color3B::BLACK);
+		shadowSprite->setOpacity(200);
+		shadowSprite->setPosition(Point(winSize.width / 2, winSize.height / 2));
+	}
+
+	// 円状に等間隔で配置
+	for (auto& item : items)
 	{
-	};
-	// 離した
-	_listener->onTouchEnded = [&](Touch *touch, Event *event)
-	{
-	};
-	//this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(_listener, this);
+		this->addChild(item, 0);
+	}
+	this->angle = 0.0f;
+	this->arrange();
+}
+
+// 文字描画
+void CharaSelectScene::fontsDraw()
+{
+	//画像サイズ取得
+	Size winSize = Director::getInstance()->getWinSize();
+	// マルチれぞーしょん対応か
+	Point origin = Director::getInstance()->getVisibleOrigin();
+
+	// スワイプの動いているとこ
+	// 配置文字
+	auto swipeLabel = Label::createWithSystemFont("スワイプで動くよ", "fonts/HGRSGU.TTC", 30);
+	// 配置場所
+	swipeLabel->setPosition(100, 300);
+	swipeLabel->setColor(Color3B(200, 150, 0));
+
+	// Select追加
+	this->addChild(swipeLabel, 1);
+	auto act1 = ScaleTo::create(LIMIT_TIME, DOUBLE_SCALE);   // 0.9秒で0.5倍に拡大
+	auto act2 = ScaleTo::create(LIMIT_TIME, 1.0f);			 // 0.9秒で元のサイズに戻す
+	swipeLabel->runAction(RepeatForever::create(Sequence::create(act1, act2, NULL)));  //  延々繰り返し
 }
 
 // プレイヤー説明文
@@ -196,7 +306,6 @@ void CharaSelectScene::charaText()
 		{
 			this->addChild(label4, 6);
 		}
-
 	}
 	else
 	{
@@ -204,113 +313,46 @@ void CharaSelectScene::charaText()
 	}
 }
 
-// 文字描画
-void CharaSelectScene::fontsDraw()
+// 表示 チーム編成の箱
+void CharaSelectScene::Draw()
 {
-	//画像サイズ取得
-	Size winSize = Director::getInstance()->getWinSize();
-	// マルチれぞーしょん対応か
-	Point origin = Director::getInstance()->getVisibleOrigin();
-
-	// スワイプの動いているとこ
-	// 配置文字
-	auto swipeLabel = Label::createWithSystemFont("スワイプで動くよ", "fonts/HGRSGU.TTC", 30);
-	// 配置場所
-	swipeLabel->setPosition(100, 300);
-	swipeLabel->setColor(Color3B(200, 150, 0));
-
-	// Select追加
-	this->addChild(swipeLabel, 1);
-	auto act1 = ScaleTo::create(LIMIT_TIME, DOUBLE_SCALE);   // 0.9秒で0.5倍に拡大
-	auto act2 = ScaleTo::create(LIMIT_TIME, 1.0f);			 // 0.9秒で元のサイズに戻す
-	swipeLabel->runAction(RepeatForever::create(Sequence::create(act1, act2, NULL)));  //  延々繰り返し
-
-	// 説明文表示
-	_listener->onTouchBegan = [&](Touch * touch, Event *event)
-	{
-		touchPos = touch->getLocation();
-		//指定Rect内をクリックしたら説明文表示
-		if (pl_rect.containsPoint(touchPos))
-		{
-			charaText();
-			log("説明文たぜ大将！！");
-		}
-		else if (box_rect.containsPoint(touchPos))
-		{
-			// チーム編成キャンセルするとき用
-			log("チームメンバーが編成されたぜ大将!!");
-		}
-		else {}
-		return true;
-	};
-	// 移動
-	_listener->onTouchMoved = [&](Touch *touch, Event *event)
-	{
-		this->removeChildByTag(PL_TAG);
-	};
-	// 離した
-	_listener->onTouchEnded = [&](Touch *touch, Event *event)
-	{
-	};
-	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(_listener, this);
-}
-
-// キャラ表示
-void CharaSelectScene::charaDraw()
-{
-	//画像サイズ取得
-	Size winSize = Director::getInstance()->getWinSize();
-	// マルチれぞーしょん対応か
-	Point origin = Director::getInstance()->getVisibleOrigin();
-
-	PL_Attacker = Sprite::create("Player/PL_Attacker.png");
-	PL_Shield   = Sprite::create("Player/PL_Shield.png");
-	PL_Magic    = Sprite::create("Player/PL_Magic.png");
-	PL_Healer   = Sprite::create("Player/PL_Healer.png");
-
-	this->items.clear();
-	this->items.push_back(PL_Attacker);
-	this->items.push_back(PL_Shield);
-	this->items.push_back(PL_Magic);
-	this->items.push_back(PL_Healer);
-	//this->items.clear();
-	//this->items.push_back(Sprite::create("PL_Attacker.png"));
-	//this->items.push_back(Sprite::create("PL_Shield.png"));
-	//this->items.push_back(Sprite::create("PL_Magic.png"));
-	//this->items.push_back(Sprite::create("PL_Healer.png"));
-
-	// 選択されてないもの半透明に
-	if (!Top)
-	{
-		////黒い四角形スプライト
-		Sprite* shadowSprite = Sprite::create();
-		shadowSprite->setTextureRect(Rect(0.0f, 0.0f, winSize.width, winSize.height));
-		shadowSprite->setColor(Color3B::BLACK);
-		shadowSprite->setOpacity(200);
-		shadowSprite->setPosition(Point(winSize.width / 2, winSize.height / 2));
-	}
-
-	// 円状に等間隔で配置
-	for (auto& item : items)
-	{
-		this->addChild(item, 0);
-	}
-	this->angle = 0.0f;
-	this->arrange();
-
 	Box = CCSprite::create("PL_CharFlame01.png");
-	Box->setScale(1.5f);
-	Box->setPosition(165, 140);
+	Box->setScale(BOX_SCALE);
+	Box->setPosition(TEAM_BOX_X, TEAM_BOX_Y);
 	addChild(Box, 2);
-	CCSprite *Box1 = CCSprite::create("PL_CharFlame01.png");
-	Box1->setScale(1.5f);
-	Box1->setPosition(390, 140);
+	Box1 = CCSprite::create("PL_CharFlame01.png");
+	Box1->setScale(BOX_SCALE);
+	Box1->setPosition(TEAM_BOX_X + TEAM_BOX_OFFSET_X, TEAM_BOX_Y);
 	addChild(Box1, 2);
 	CCSprite *Box2 = CCSprite::create("PL_CharFlame01.png");
-	Box2->setScale(1.5f);
-	Box2->setPosition(615, 140);
+	Box2->setScale(BOX_SCALE);
+	Box2->setPosition(TEAM_BOX_X +TEAM_BOX_OFFSET_X*2, TEAM_BOX_Y);
 	addChild(Box2, 2);
+}
 
+// 背景
+void CharaSelectScene::CharaSelectBackGroudn()
+{
+	//画像サイズ取得
+	Size winSize = Director::getInstance()->getWinSize();
+	// マルチれぞーしょん対応か
+	Point origin = Director::getInstance()->getVisibleOrigin();
+
+	// 背景画像追加
+	Sprite* backImage = Sprite::create("BackImage/ST_CharSerect2.png");
+	// 配置座標
+	backImage->setPosition(winSize.width / 2, winSize.height / 2);
+	// 追加
+	this->addChild(backImage);
+}
+
+// test表示
+void CharaSelectScene::testChara()
+{
+	Pl_BOX = Sprite::create("Player/PL_Attacker_face01.png");
+	Pl_BOX->setScale(BOX_SCALE);
+	Pl_BOX->setPosition(165, 140);
+	addChild(Pl_BOX, 3);
 }
 
 // 当たり判定用
@@ -324,21 +366,19 @@ void CharaSelectScene::objHit()
 	pl_square = Sprite::create();								// 生成
 	pl_square->setTextureRect(pl_rect);							// テクスチャ指定
 	pl_square->setPosition(430, winSize.height / 2);			// 座標配置
-	//this->addChild(pl_square);									// 追加
+	//this->addChild(pl_square);								// 追加
 
 	// プレイヤーのRect取得
-	pl_rect = Rect(pl_square->getPosition().x - pl_square->getContentSize().width / 2,
+	pl_rect = Rect(pl_square->getPosition().x - pl_square->getContentSize().width /  2,
 				   pl_square->getPosition().y - pl_square->getContentSize().height / 2,
 				   pl_square->getContentSize().width,
 				   pl_square->getContentSize().height);
 
 	// チーム編成用枠判定
-	box_rect = Rect(Box->getPosition().x - Box->getContentSize().width,
-					Box->getPosition().y - Box->getContentSize().height,
+	box_rect = Rect(Box->getPosition().x - Box->getContentSize().width / 2,
+					Box->getPosition().y - Box->getContentSize().height / 2,
 					Box->getContentSize().width,
 					Box->getContentSize().height);
-
-
 }
 
 // アレンジ　回転とか
@@ -406,23 +446,14 @@ void CharaSelectScene::swipeRotation()
 	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
 }
 
-// 背景
-void CharaSelectScene::CharaSelectBackGroudn()
+// キャラ情報取得
+const std::vector<CharaName>& CharaSelectScene::GetCharaData()
 {
-	//画像サイズ取得
-	Size winSize = Director::getInstance()->getWinSize();
-	// マルチれぞーしょん対応か
-	Point origin = Director::getInstance()->getVisibleOrigin();
-
-	// 背景画像追加
-	Sprite* backImage = Sprite::create("BackImage/ST_CharSerect2.png");
-	// 配置座標
-	backImage->setPosition(winSize.width / 2, winSize.height / 2);
-	// 追加
-	this->addChild(backImage);
+	return CharaData;
 }
 
-// Clickしたらデータ入れるよ
+/*
+	// Clickしたらデータ入れるよ
 //void CharaSelectScene::CharaClick()
 //{
 //	// どれが一番前にいるのかを分かるように調べよう→暗くする処理楽だよ
@@ -455,11 +486,6 @@ void CharaSelectScene::CharaSelectBackGroudn()
 //	};
 //}
 
-// キャラ情報取得
-const std::vector<CharaName>& CharaSelectScene::GetCharaData()
-{
-	return CharaData;
-}
 
 // 画面遷移
 void CharaSelectScene::pushStart(Ref * pSender)
@@ -503,4 +529,10 @@ https://freegame-mugen.jp/roleplaying/game_6860.html
 https://qiita.com/s0hno/items/739b8da8d0ee1375c2cd
 
 
+*/
+
+
+// コインエフェクト表現
+/*
+http://takachan.hatenablog.com/entry/2017/08/28/213842
 */
