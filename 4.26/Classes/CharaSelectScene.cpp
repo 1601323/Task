@@ -7,8 +7,6 @@
 
 #pragma execution_character_set("utf-8")
 
-//Ve2に変更しとけばーか
-
 const int DIV_NUM		  = 4;
 const int DIV_ANGLE		  = 360 / DIV_NUM;
 const int DIV_ANGLE_HALF  = DIV_ANGLE / 2;
@@ -113,6 +111,15 @@ bool CharaSelectScene::init()
 bool CharaSelectScene::TouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)
 {
 	touchPos = touch->getLocation();
+
+	// 決定ボタンのところ
+	if (ok_rect.containsPoint(touchPos))
+	{
+		// 画像切り替え押した後のほう
+		ok->setSpriteFrame(Sprite::create("UI/Status/UI_Button_Wait02.png")->getSpriteFrame());
+
+	}
+
 	//指定Rect内をクリックしたら説明文表示
 	if (pl_rect.containsPoint(touchPos))
 	{
@@ -123,14 +130,14 @@ bool CharaSelectScene::TouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)
 		{
 			log("チームが編成されたぜ");
 			testChara();
-			clickCnt = 2;
+			clickCnt = 1;
 		}
 	}
 	// チーム編成の箱をクリックしたとき
 	else if (box_rect.containsPoint(touchPos))
 	{
 		// チーム編成キャンセル
-		if (clickCnt>2  )
+		if (clickCnt > 2 )
 		{
 			log("メンバー編成し直したぜ大将!!");
 			Pl_BOX->removeFromParentAndCleanup(true);
@@ -144,11 +151,19 @@ bool CharaSelectScene::TouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)
 void CharaSelectScene::TouchMove(cocos2d::Touch* touch, cocos2d::Event* event)
 {
 	this->removeChildByTag(PL_TAG);
+	// 動いているときはカウントしない
+	clickCnt = 0;
 }
 // 離した瞬間
 void CharaSelectScene::TouchEnd(cocos2d::Touch* touch, cocos2d::Event* event)
 {
+	// 元のボタン画像に戻す
+	if (ok_rect.containsPoint(touchPos))
+	{
+		// 画像切り替え
+		ok->setSpriteFrame(Sprite::create("UI/Status/UI_Button_Wait01.png")->getSpriteFrame());
 
+	}
 }
 
 // 更新
@@ -318,7 +333,7 @@ void CharaSelectScene::Draw()
 {
 	Box = CCSprite::create("PL_CharFlame01.png");
 	Box->setScale(BOX_SCALE);
-	Box->setPosition(TEAM_BOX_X, TEAM_BOX_Y);
+	Box->setPosition(TEAM_BOX_X+44, TEAM_BOX_Y);
 	addChild(Box, 2);
 	Box1 = CCSprite::create("PL_CharFlame01.png");
 	Box1->setScale(BOX_SCALE);
@@ -326,8 +341,20 @@ void CharaSelectScene::Draw()
 	addChild(Box1, 2);
 	CCSprite *Box2 = CCSprite::create("PL_CharFlame01.png");
 	Box2->setScale(BOX_SCALE);
-	Box2->setPosition(TEAM_BOX_X +TEAM_BOX_OFFSET_X*2, TEAM_BOX_Y);
+	Box2->setPosition(TEAM_BOX_X +TEAM_BOX_OFFSET_X*2-44, TEAM_BOX_Y);
 	addChild(Box2, 2);
+
+	// Okボタン
+	ok = Sprite::create("UI/Status/UI_Button_Wait01.png");
+	ok->setPosition(660, 300);
+	ok->setScale(0.4);
+	this->addChild(ok, 19);
+
+	// OKボタン用文字
+	auto okLabel = Label::createWithSystemFont("O K", "fonts/HGRSGU.TTC", 30);
+	okLabel->setPosition(663, 300);
+	okLabel->setColor(Color3B(0, 0, 0));
+	addChild(okLabel,20);
 }
 
 // 背景
@@ -351,7 +378,7 @@ void CharaSelectScene::testChara()
 {
 	Pl_BOX = Sprite::create("Player/PL_Attacker_face01.png");
 	Pl_BOX->setScale(BOX_SCALE);
-	Pl_BOX->setPosition(165, 140);
+	Pl_BOX->setPosition(165+ 44, 140);
 	addChild(Pl_BOX, 3);
 }
 
@@ -379,6 +406,12 @@ void CharaSelectScene::objHit()
 					Box->getPosition().y - Box->getContentSize().height / 2,
 					Box->getContentSize().width,
 					Box->getContentSize().height);
+
+	// OKボタンのRect
+	ok_rect = Rect(ok->getPosition().x - (ok->getContentSize().width -136)/2,
+				  ok->getPosition().y - (ok->getContentSize().height-48) / 2,
+					ok->getContentSize().width*0.4,
+					ok->getContentSize().height*0.4);
 }
 
 // アレンジ　回転とか
