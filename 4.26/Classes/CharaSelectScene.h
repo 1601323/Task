@@ -39,8 +39,11 @@ private:
 	Vec2 touchPos;					// 現在の座標
 	Rect pl_rect;					// プレイヤーのRect
 	Rect box_rect;					// チーム編成用
+	Rect ok_rect;					// 
 	Sprite *pl_square;				// プレイヤーのスプライト
 	Sprite *teamBox;				// チーム編成用
+	Sprite *okButton;
+
 
 	void update(float delta);		// アップデート
 	void charaDraw();				// キャラ表示
@@ -62,12 +65,15 @@ private:
 	static std::vector<CharaName> CharaData;
 	// click判定
 	EventListenerTouchOneByOne *_listener = EventListenerTouchOneByOne::create();
+
+	// きれいに並べなおしておいてね
 	CCSprite *Box;
 	CCSprite *Box1;
 	unsigned int clickCnt = 0;	// クリック回数を保存
 
 	Sprite *Pl_BOX;
-
+	Sprite *effect;
+	Sprite *ok;
 };
 
 #endif // Title
