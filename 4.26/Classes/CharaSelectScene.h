@@ -74,6 +74,14 @@ private:
 	Sprite *Pl_BOX;
 	Sprite *effect;
 	Sprite *ok;
+
+	void clickAct();
+	// ¶¬ŒÂ”
+	const unsigned int minCnt = 8;
+	const unsigned int maxCnt = 20;
+
+
+
 };
 
 #endif // Title

@@ -117,24 +117,52 @@ bool CharaSelectScene::TouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)
 	{
 		// 画像切り替え押した後のほう
 		ok->setSpriteFrame(Sprite::create("UI/Status/UI_Button_Wait02.png")->getSpriteFrame());
-
 	}
 
-	//指定Rect内をクリックしたら説明文表示
-	if (pl_rect.containsPoint(touchPos))
+	if (Top)
 	{
-		clickCnt += 1;
-		log("説明文たぜ大将！！");
-		charaText();
-		if (clickCnt > 2)
+		//指定Rect内をクリックしたら説明文表示
+		if (pl_rect.containsPoint(touchPos))
 		{
-			log("チームが編成されたぜ");
-			testChara();
-			clickCnt = 1;
+			clickCnt += 1;
+			log("説明文たぜ大将！！");
+			charaText();
+			if (clickCnt > 2)
+			{
+				log("チームが編成されたぜ");
+				testChara();
+				clickCnt = 1;		
+				int i = 0;
+				for (i = 0; i<items.size(); i++)
+				{
+					if (items[i] == Top)
+					{
+						break;
+					}
+					// 追加
+					CharaData.push_back(static_cast<CharaName> (i));
+					log("追加しましたよ%d", i,Top);
+
+				}
+			}
 		}
 	}
+
+	////指定Rect内をクリックしたら説明文表示
+	//if (pl_rect.containsPoint(touchPos))
+	//{
+	//	clickCnt += 1;
+	//	log("説明文たぜ大将！！");
+	//	charaText();
+	//	if (clickCnt > 2)
+	//	{
+	//		log("チームが編成されたぜ");
+	//		testChara();
+	//		clickCnt = 1;
+	//	}
+	//}
 	// チーム編成の箱をクリックしたとき
-	else if (box_rect.containsPoint(touchPos))
+	if (box_rect.containsPoint(touchPos))
 	{
 		// チーム編成キャンセル
 		if (clickCnt > 2 )
@@ -147,6 +175,12 @@ bool CharaSelectScene::TouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)
 	else {}
 	return true;
 }
+
+void CharaSelectScene::clickAct()
+{
+
+}
+
 // スワイプ中
 void CharaSelectScene::TouchMove(cocos2d::Touch* touch, cocos2d::Event* event)
 {
@@ -486,7 +520,7 @@ const std::vector<CharaName>& CharaSelectScene::GetCharaData()
 }
 
 /*
-	// Clickしたらデータ入れるよ
+// Clickしたらデータ入れるよ
 //void CharaSelectScene::CharaClick()
 //{
 //	// どれが一番前にいるのかを分かるように調べよう→暗くする処理楽だよ
@@ -507,18 +541,17 @@ const std::vector<CharaName>& CharaSelectScene::GetCharaData()
 //			CharaData.push_back(static_cast<CharaName> (i));
 //		}
 //			// 選択外の者は暗くする
-//				if (!Top)
-//				{
+//			if (!Top)
+//			{
 //
-//					/*タップした奴　拡大率で今前のやつを判断
+//				タップした奴　拡大率で今前のやつを判断
 //
-//					その番号をpushback*/
+//				その番号をpushback
 //					//push_back
 //					CharaData.push_back;
 //				}
 //	};
-//}
-
+//}*/
 
 // 画面遷移
 void CharaSelectScene::pushStart(Ref * pSender)
