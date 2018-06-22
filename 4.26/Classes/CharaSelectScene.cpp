@@ -81,10 +81,10 @@ bool CharaSelectScene::init()
 
 	
 	Draw();					// 表示(キャラ以外)
-	fontsDraw();			// 文字描画
-	charaDraw();			// キャラ表示
-	swipeRotation();		// スワイプに合わせて回転
-	objHit();				// 当たり判定
+	FontsDraw();			// 文字描画
+	CharaDraw();			// キャラ表示
+	SwipeRotation();		// スワイプに合わせて回転
+	ObjHit();				// 当たり判定
 
 	this->scheduleUpdate();	// 更新	
 
@@ -110,28 +110,28 @@ bool CharaSelectScene::init()
 // 押した瞬間
 bool CharaSelectScene::TouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)
 {
-	touchPos = touch->getLocation();
+	_touchPos = touch->getLocation();
 
 	// 決定ボタンのところ
-	if (ok_rect.containsPoint(touchPos))
+	if (_ok_rect.containsPoint(_touchPos))
 	{
 		// 画像切り替え押した後のほう
-		ok->setSpriteFrame(Sprite::create("UI/Status/UI_Button_Wait02.png")->getSpriteFrame());
+		_ok->setSpriteFrame(Sprite::create("UI/Status/UI_Button_Wait02.png")->getSpriteFrame());
 	}
 
 	if (Top)
 	{
 		//指定Rect内をクリックしたら説明文表示
-		if (pl_rect.containsPoint(touchPos))
+		if (_pl_rect.containsPoint(_touchPos))
 		{
-			clickCnt += 1;
+			_clickCnt += 1;
 			log("説明文たぜ大将！！");
-			charaText();
-			if (clickCnt > 2)
+			CharaText();
+			if (_clickCnt > 2)
 			{
 				log("チームが編成されたぜ");
-				testChara();
-				clickCnt = 1;		
+				TestChara();
+				_clickCnt = 1;		
 				int i = 0;
 				for (i = 0; i<items.size(); i++)
 				{
@@ -162,23 +162,19 @@ bool CharaSelectScene::TouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)
 	//	}
 	//}
 	// チーム編成の箱をクリックしたとき
-	if (box_rect.containsPoint(touchPos))
+	if (_box_rect.containsPoint(_touchPos))
 	{
 		// チーム編成キャンセル
-		if (clickCnt > 2 )
+		if (_clickCnt > 2 )
 		{
 			log("メンバー編成し直したぜ大将!!");
-			Pl_BOX->removeFromParentAndCleanup(true);
+			_Pl_BOX->removeFromParentAndCleanup(true);
 		}
 	}
 	// その他
 	else {}
+
 	return true;
-}
-
-void CharaSelectScene::clickAct()
-{
-
 }
 
 // スワイプ中
@@ -186,43 +182,43 @@ void CharaSelectScene::TouchMove(cocos2d::Touch* touch, cocos2d::Event* event)
 {
 	this->removeChildByTag(PL_TAG);
 	// 動いているときはカウントしない
-	clickCnt = 0;
+	_clickCnt = 0;
 }
 // 離した瞬間
 void CharaSelectScene::TouchEnd(cocos2d::Touch* touch, cocos2d::Event* event)
 {
 	// 元のボタン画像に戻す
-	if (ok_rect.containsPoint(touchPos))
+	if (_ok_rect.containsPoint(_touchPos))
 	{
 		// 画像切り替え
-		ok->setSpriteFrame(Sprite::create("UI/Status/UI_Button_Wait01.png")->getSpriteFrame());
+		_ok->setSpriteFrame(Sprite::create("UI/Status/UI_Button_Wait01.png")->getSpriteFrame());
 
 	}
 }
 
 // 更新
-void CharaSelectScene::update(float delta)
+void CharaSelectScene::Update(float delta)
 {
 }
 
 // キャラ表示
-void CharaSelectScene::charaDraw()
+void CharaSelectScene::CharaDraw()
 {
 	//画像サイズ取得
 	Size winSize = Director::getInstance()->getWinSize();
 	// マルチれぞーしょん対応か
 	Point origin = Director::getInstance()->getVisibleOrigin();
 
-	PL_Attacker = Sprite::create("Player/PL_Attacker.png");
-	PL_Shield   = Sprite::create("Player/PL_Shield.png");
-	PL_Magic    = Sprite::create("Player/PL_Magic.png");
-	PL_Healer   = Sprite::create("Player/PL_Healer.png");
+	_PL_Attacker = Sprite::create("Player/PL_Attacker.png");
+	_PL_Shield   = Sprite::create("Player/PL_Shield.png");
+	_PL_Magic    = Sprite::create("Player/PL_Magic.png");
+	_PL_Healer   = Sprite::create("Player/PL_Healer.png");
 
 	this->items.clear();
-	this->items.push_back(PL_Attacker);
-	this->items.push_back(PL_Shield);
-	this->items.push_back(PL_Magic);
-	this->items.push_back(PL_Healer);
+	this->items.push_back(_PL_Attacker);
+	this->items.push_back(_PL_Shield);
+	this->items.push_back(_PL_Magic);
+	this->items.push_back(_PL_Healer);
 	//this->items.clear();
 	//this->items.push_back(Sprite::create("PL_Attacker.png"));
 	//this->items.push_back(Sprite::create("PL_Shield.png"));
@@ -246,11 +242,11 @@ void CharaSelectScene::charaDraw()
 		this->addChild(item, 0);
 	}
 	this->angle = 0.0f;
-	this->arrange();
+	this->Arrange();
 }
 
 // 文字描画
-void CharaSelectScene::fontsDraw()
+void CharaSelectScene::FontsDraw()
 {
 	//画像サイズ取得
 	Size winSize = Director::getInstance()->getWinSize();
@@ -272,7 +268,7 @@ void CharaSelectScene::fontsDraw()
 }
 
 // プレイヤー説明文
-void CharaSelectScene::charaText()
+void CharaSelectScene::CharaText()
 {
 	//画像サイズ取得
 	Size winSize = Director::getInstance()->getWinSize();
@@ -293,7 +289,7 @@ void CharaSelectScene::charaText()
 		"回復のスペシャリストと思いきや\n敵の弱体化もお任せ\nデバフ系ヒーラー");
 	
 	// アタッカー
-	if (Top == PL_Attacker)
+	if (Top == _PL_Attacker)
 	{
 		this->removeChildByTag(PL_TAG);
 		// タグ設定
@@ -308,7 +304,7 @@ void CharaSelectScene::charaText()
 		}
 	}
 	// シールド
-	else if (Top == PL_Shield)
+	else if (Top == _PL_Shield)
 	{
 		this->removeChildByTag(PL_TAG);
 		// タグ設定
@@ -324,7 +320,7 @@ void CharaSelectScene::charaText()
 		}
 	}
 	// 魔法
-	else if (Top == PL_Magic)
+	else if (Top == _PL_Magic)
 	{
 		this->removeChildByTag(PL_TAG);
 		// タグ設定
@@ -341,7 +337,7 @@ void CharaSelectScene::charaText()
 
 	}
 	// 回復
-	else if (Top == PL_Healer)
+	else if (Top == _PL_Healer)
 	{
 		this->removeChildByTag(PL_TAG);
 		// タグ設定
@@ -365,30 +361,30 @@ void CharaSelectScene::charaText()
 // 表示 チーム編成の箱
 void CharaSelectScene::Draw()
 {
-	Box = CCSprite::create("PL_CharFlame01.png");
-	Box->setScale(BOX_SCALE);
-	Box->setPosition(TEAM_BOX_X+44, TEAM_BOX_Y);
-	addChild(Box, 2);
-	Box1 = CCSprite::create("PL_CharFlame01.png");
-	Box1->setScale(BOX_SCALE);
-	Box1->setPosition(TEAM_BOX_X + TEAM_BOX_OFFSET_X, TEAM_BOX_Y);
-	addChild(Box1, 2);
-	CCSprite *Box2 = CCSprite::create("PL_CharFlame01.png");
-	Box2->setScale(BOX_SCALE);
-	Box2->setPosition(TEAM_BOX_X +TEAM_BOX_OFFSET_X*2-44, TEAM_BOX_Y);
-	addChild(Box2, 2);
+	_Box = CCSprite::create("PL_CharFlame01.png");
+	_Box->setScale(BOX_SCALE);
+	_Box->setPosition(TEAM_BOX_X+44, TEAM_BOX_Y);
+	addChild(_Box, 2);
+	_Box1 = CCSprite::create("PL_CharFlame01.png");
+	_Box1->setScale(BOX_SCALE);
+	_Box1->setPosition(TEAM_BOX_X + TEAM_BOX_OFFSET_X, TEAM_BOX_Y);
+	addChild(_Box1, 2);
+	CCSprite *_Box2 = CCSprite::create("PL_CharFlame01.png");
+	_Box2->setScale(BOX_SCALE);
+	_Box2->setPosition(TEAM_BOX_X +TEAM_BOX_OFFSET_X*2-44, TEAM_BOX_Y);
+	addChild(_Box2, 2);
 
 	// Okボタン
-	ok = Sprite::create("UI/Status/UI_Button_Wait01.png");
-	ok->setPosition(660, 300);
-	ok->setScale(0.4);
-	this->addChild(ok, 19);
+	_ok = Sprite::create("UI/Status/UI_Button_Wait01.png");
+	_ok->setPosition(660, 300);
+	_ok->setScale(0.4);
+	this->addChild(_ok, 19);
 
 	// OKボタン用文字
-	auto okLabel = Label::createWithSystemFont("O K", "fonts/HGRSGU.TTC", 30);
-	okLabel->setPosition(663, 300);
-	okLabel->setColor(Color3B(0, 0, 0));
-	addChild(okLabel,20);
+	auto _okLabel = Label::createWithSystemFont("O K", "fonts/HGRSGU.TTC", 30);
+	_okLabel->setPosition(663, 300);
+	_okLabel->setColor(Color3B(0, 0, 0));
+	addChild(_okLabel,20);
 }
 
 // 背景
@@ -408,48 +404,48 @@ void CharaSelectScene::CharaSelectBackGroudn()
 }
 
 // test表示
-void CharaSelectScene::testChara()
+void CharaSelectScene::TestChara()
 {
-	Pl_BOX = Sprite::create("Player/PL_Attacker_face01.png");
-	Pl_BOX->setScale(BOX_SCALE);
-	Pl_BOX->setPosition(165+ 44, 140);
-	addChild(Pl_BOX, 3);
+	_Pl_BOX = Sprite::create("Player/PL_Attacker_face01.png");
+	_Pl_BOX->setScale(BOX_SCALE);
+	_Pl_BOX->setPosition(165+ 44, 140);
+	addChild(_Pl_BOX, 3);
 }
 
 // 当たり判定用
-void CharaSelectScene::objHit()
+void CharaSelectScene::ObjHit()
 {
 	//画像サイズ取得
 	Size winSize = Director::getInstance()->getWinSize();
 
 	// プレイヤー用のクリック判定用板
-	pl_rect   = Rect(0, 0, PL_TEXT_RECT_X, PL_TEXT_RECT_Y);		// 範囲
-	pl_square = Sprite::create();								// 生成
-	pl_square->setTextureRect(pl_rect);							// テクスチャ指定
-	pl_square->setPosition(430, winSize.height / 2);			// 座標配置
+	_pl_rect   = Rect(0, 0, PL_TEXT_RECT_X, PL_TEXT_RECT_Y);		// 範囲
+	_pl_square = Sprite::create();								// 生成
+	_pl_square->setTextureRect(_pl_rect);							// テクスチャ指定
+	_pl_square->setPosition(430, winSize.height / 2);			// 座標配置
 	//this->addChild(pl_square);								// 追加
 
 	// プレイヤーのRect取得
-	pl_rect = Rect(pl_square->getPosition().x - pl_square->getContentSize().width /  2,
-				   pl_square->getPosition().y - pl_square->getContentSize().height / 2,
-				   pl_square->getContentSize().width,
-				   pl_square->getContentSize().height);
+	_pl_rect = Rect(_pl_square->getPosition().x - _pl_square->getContentSize().width /  2,
+				    _pl_square->getPosition().y - _pl_square->getContentSize().height / 2,
+				    _pl_square->getContentSize().width,
+				    _pl_square->getContentSize().height);
 
 	// チーム編成用枠判定
-	box_rect = Rect(Box->getPosition().x - Box->getContentSize().width / 2,
-					Box->getPosition().y - Box->getContentSize().height / 2,
-					Box->getContentSize().width,
-					Box->getContentSize().height);
+	_box_rect = Rect(_Box->getPosition().x - _Box->getContentSize().width / 2,
+					 _Box->getPosition().y - _Box->getContentSize().height / 2,
+					 _Box->getContentSize().width,
+					 _Box->getContentSize().height);
 
 	// OKボタンのRect
-	ok_rect = Rect(ok->getPosition().x - (ok->getContentSize().width -136)/2,
-				  ok->getPosition().y - (ok->getContentSize().height-48) / 2,
-					ok->getContentSize().width*0.4,
-					ok->getContentSize().height*0.4);
+	_ok_rect = Rect(_ok->getPosition().x - (_ok->getContentSize().width -136)/2,
+				    _ok->getPosition().y - (_ok->getContentSize().height-48) / 2,
+					_ok->getContentSize().width*0.4,
+					_ok->getContentSize().height*0.4);
 }
 
 // アレンジ　回転とか
-void CharaSelectScene::arrange()
+void CharaSelectScene::Arrange()
 {
 	// 円状に等間隔で配置
 	float theta = 360.0f / items.size()+(items.size()/2);
@@ -481,7 +477,7 @@ void CharaSelectScene::arrange()
 }
 
 // スワイプに合わせて回転
-void CharaSelectScene::swipeRotation()
+void CharaSelectScene::SwipeRotation()
 {
 	// スワイプに合わせて回転
 	EventListenerTouchOneByOne *listener = EventListenerTouchOneByOne::create();
@@ -492,7 +488,7 @@ void CharaSelectScene::swipeRotation()
 	{
 		float delta = touch->getLocation().x - touch->getPreviousLocation().x;
 		this->angle += delta;
-		this->arrange();
+		this->Arrange();
 	};
 	// 離した
 	listener->onTouchEnded = [&](Touch *touch, Event *event)
@@ -508,7 +504,7 @@ void CharaSelectScene::swipeRotation()
 		{
 			this->angle = ((((static_cast<int>(this->angle - 360) % 360 - DIV_ANGLE_HALF) % 360) / DIV_ANGLE) * DIV_ANGLE);
 		}
-		this->arrange();
+		this->Arrange();
 	};
 	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
 }
@@ -568,6 +564,7 @@ void CharaSelectScene::pushStart(Ref * pSender)
 	// 遷移実行 アニメーション
 	Director::getInstance()->replaceScene(transition);
 }
+
 
 /*　URL
 http://takachan.hatenablog.com/entry/2017/08/08/002844

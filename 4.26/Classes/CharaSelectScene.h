@@ -31,30 +31,30 @@ public:
 private:
 	Node* Top;
 	// キャラ情報
-	Sprite* PL_Attacker;			// ｱﾀｯｶｰ(小男)
-	Sprite *PL_Shield;				// 守備(大男)
-	Sprite *PL_Magic;				// 魔法使い(ツイン)
-	Sprite *PL_Healer;				// 回復(ｹﾓﾐﾐ)
+	Sprite *_PL_Attacker;			// ｱﾀｯｶｰ(小男)
+	Sprite *_PL_Shield;				// 守備(大男)
+	Sprite *_PL_Magic;				// 魔法使い(ツイン)
+	Sprite *_PL_Healer;				// 回復(ｹﾓﾐﾐ)
 	// 当たり判定用
-	Vec2 touchPos;					// 現在の座標
-	Rect pl_rect;					// プレイヤーのRect
-	Rect box_rect;					// チーム編成用
-	Rect ok_rect;					// 
-	Sprite *pl_square;				// プレイヤーのスプライト
-	Sprite *teamBox;				// チーム編成用
-	Sprite *okButton;
+	Vec2 _touchPos;					// 現在の座標
+	Rect _pl_rect;					// プレイヤーのRect
+	Rect _box_rect;					// チーム編成用
+	Rect _ok_rect;					// 
+	Sprite *_pl_square;				// プレイヤーのスプライト
+	Sprite *_teamBox;				// チーム編成用
+	Sprite *_okButton;
 
 
-	void update(float delta);		// アップデート
-	void charaDraw();				// キャラ表示
-	void fontsDraw();				// 文字描画
-	void charaText();				// きゃら説明文
+	void Update(float delta);		// アップデート
+	void CharaDraw();				// キャラ表示
+	void FontsDraw();				// 文字描画
+	void CharaText();				// きゃら説明文
 	void Draw();					// 表示	
 	void CharaSelectBackGroudn();	// 背景
-	void testChara();
-	void objHit();					// 当たり判定用
-	void arrange();					// アレンジ	
-	void swipeRotation();			// スワイプに合わせて回転
+	void TestChara();
+	void ObjHit();					// 当たり判定用
+	void Arrange();					// アレンジ	
+	void SwipeRotation();			// スワイプに合わせて回転
 					
 	// touchイベント
 	bool TouchBegan(cocos2d::Touch* touch, cocos2d::Event* event);	// 押した瞬間
@@ -67,19 +67,13 @@ private:
 	EventListenerTouchOneByOne *_listener = EventListenerTouchOneByOne::create();
 
 	// きれいに並べなおしておいてね
-	CCSprite *Box;
-	CCSprite *Box1;
-	unsigned int clickCnt = 0;	// クリック回数を保存
+	CCSprite *_Box;
+	CCSprite *_Box1;
+	unsigned int _clickCnt = 0;	// クリック回数を保存
 
-	Sprite *Pl_BOX;
-	Sprite *effect;
-	Sprite *ok;
-
-	void clickAct();
-	// 生成個数
-	const unsigned int minCnt = 8;
-	const unsigned int maxCnt = 20;
-
+	Sprite *_Pl_BOX;
+	Sprite *_effect;
+	Sprite *_ok;
 
 
 };
@@ -100,4 +94,95 @@ _listener->onTouchEnded = [&](Touch *touch, Event *event)
 };
 this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(_listener, this);
 
+*/
+
+/*
+	// 生成個数
+	const unsigned int minCnt = 8;		// 最小生成量
+	const unsigned int maxCnt = 20;		// 最大生成量
+										// 実行時間	
+	float minTime = 0.2f;
+	float maxTime = 0.35;
+	// 飛び跳ねる高さ
+	float minHeight = 12.0f;
+	float maxHeight = 22.0f;
+	// 広がる幅
+	float minX = -18.0f;
+	float maxX = 18.0;
+	// 広がる高さ
+	float minY = -14.0f;
+	float maxY = 0;
+	//Sprite *effect;
+
+// 指定した速度で開始
+	void runEffect(Sprite *effect);
+	// アニメーション実行
+	void setStart(const float min,const float max);
+	// 飛び跳ねる高さ
+	void setJumpHeight(const float min,const float max);
+	// 広がる範囲X
+	void setWidth(const float min,const float max);
+	// 広がる範囲Y
+	void setHeight(const float min,const float max);
+	// 最後に自分削除
+	void updateSelf();
+
+void CharaSelectScene::runEffect(Sprite *effect)
+{
+int max = random(this->minTime,this->maxTime);
+for (int i = 0; i < maxTime; i++)
+{
+effect = Sprite::create("effect_cure01_0000.png"); //"effect_cure01_0000.png"
+float baseTime = random(minTime, maxTime);
+float baseHeight = random(minHeight, maxHeight);
+float baseVecX = random(minX, maxX);
+float baseVecY = random(minY, maxY);
+
+// だんだんバウンド小さく
+// 時間、幅(X,Y)、高さ、要素数
+auto jump1 = JumpBy::create(baseTime,Vec2(baseVecX, baseVecY), baseHeight,1);
+auto jump2 = JumpBy::create(baseTime*0.8, Vec2(baseVecX/2, baseVecY/2), baseHeight/2, 1);
+auto jump3 = JumpBy::create(baseTime*0.6, Vec2(baseVecX/4, baseVecY/4), baseHeight/4, 1);
+
+auto dele = DelayTime::create(1.0f);
+auto lastFunc = CallFuncN::create([this](Node* node)
+{
+node->removeFromParentAndCleanup(true);
+this->updateSelf();
+});
+
+effect->runAction(Sequence::create(jump1, jump2, jump3, dele,nullptr));
+
+this->updateSelf();
+}
+}
+//
+void CharaSelectScene::updateSelf()
+{
+this->removeFromParentAndCleanup(true);
+}
+// アニメーション実行
+void CharaSelectScene::setStart(float min, const float max)
+{
+this->minTime = min;
+this->maxTime = max;
+}
+// 飛び跳ねる高さ
+void CharaSelectScene::setJumpHeight(float min, const float max)
+{
+this->minHeight = min;
+this->maxHeight = max;
+}
+// 広がり方X
+void CharaSelectScene::setWidth(float min, const float max)
+{
+this->minX = min;
+this->maxX = max;
+}
+// 広がり方Y
+void CharaSelectScene::setHeight(float min, const float max)
+{
+this->minY = min;
+this->maxY = max;
+}
 */
