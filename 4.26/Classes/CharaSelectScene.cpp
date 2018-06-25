@@ -1,6 +1,7 @@
 #include "CharaSelectScene.h"
 #include "FightScene.h"
 #include "GameOver.h"
+#include "TitleScene.h"
 #include "Imput.h"
 #include <algorithm>
 #include "cocos2d.h"
@@ -12,17 +13,17 @@ const int DIV_ANGLE		  = 360 / DIV_NUM;
 const int DIV_ANGLE_HALF  = DIV_ANGLE / 2;
 
 const unsigned int PL_TAG		  = 101;		// タグ用
-const unsigned int TEXT_OFFSET    = 480;		// text表示のオフセット値
+const unsigned int TEXT_OFFSET    = 510;		// text表示のオフセット値
 
-const unsigned int BUTTON_POS_X	  = 50;			// ボタンの配置座標X
-const unsigned int BUTTON_POS_Y	  = 1200;		// ボタンの配置座標Y
-const unsigned int FONT_SIZE	  = 45;			// プレイヤー説明文用の文字ｻｲｽﾞ
+const unsigned int NEXT_BUTTON_X  = 660;		// 次の画面遷移へのボタンの配置座標X
+const unsigned int NEXT_BUTTON_Y  = 65;			// 次の画面遷移へのボタンの配置座標Y
+
+const unsigned int FONT_SIZE	  = 38;			// プレイヤー説明文用の文字ｻｲｽﾞ
 const unsigned int PL_TEXT_RECT_X = 250;		// プレイヤー用の板の配置位置X
 const unsigned int PL_TEXT_RECT_Y = 750;		// プレイヤー用の板の配置位置Y
 const unsigned int TEAM_BOX_X	  = 165;		// チーム編成用のboxの配置位開X
-const unsigned int TEAM_BOX_Y	  = 140;		// チーム編成用のboxの配置位置Y
+const unsigned int TEAM_BOX_Y	  = 180;		// チーム編成用のboxの配置位置Y
 const unsigned int TEAM_BOX_OFFSET_X = 225;		// チーム編成用のboxのオフセット
-
 
 // 角度関係で使うよ
 const int RADIUS		  = 200;
@@ -60,16 +61,21 @@ bool CharaSelectScene::init()
 	// バックグランド
 	CharaSelectBackGroudn();
 	// ボタン配置 (通常時,押した時,押した時のｱｸｼｮﾝ)
-	auto startButton = MenuItemImage::create("CloseNormal.png", "CloseSelected.png", CC_CALLBACK_1(CharaSelectScene::pushStart, this));
+	auto _buttunNext = MenuItemImage::create("UI/Command/UI_Button_Next.png", "UI/Command/UI_Button_Next.png", CC_CALLBACK_1(CharaSelectScene::pushStart, this));
+	_buttunNext->setPosition(NEXT_BUTTON_X+30, NEXT_BUTTON_Y);		// 座標指定
+	_buttunNext->setScale(0.5);										// 大きさ調整
 
-	// ボタンの配置
-	startButton->setPosition(BUTTON_POS_X, BUTTON_POS_Y);
-	// メニュー作成(自動obj)
-	auto menu = Menu::create(startButton, NULL);
-	// 座標配置
-	menu->setPosition(Point::ZERO);
-	// 追加
-	this->addChild(menu, 8);
+	auto menu1 = Menu::create(_buttunNext, NULL);					// メニュー作成(自動obj)
+	menu1->setPosition(Point::ZERO);								// 座標配置
+	this->addChild(menu1, 8);										// 追加
+
+	auto _buttunBack = MenuItemImage::create("UI/Command/UI_Button_Back.png", "UI/Command/UI_Button_Back.png", CC_CALLBACK_1(CharaSelectScene::backStart, this));
+	_buttunBack->setPosition(NEXT_BUTTON_X - 550, NEXT_BUTTON_Y);	// 座標指定
+	_buttunBack->setScale(0.5);										// 大きさ調整	
+
+	auto menu2 = Menu::create(_buttunBack, NULL);					// メニュー作成(自動obj)
+	menu2->setPosition(Point::ZERO);								// 座標配置
+	this->addChild(menu2, 8);										// 追加
 
 	// touchイベント
 	auto touchEventGet = EventListenerTouchOneByOne::create();
@@ -81,7 +87,6 @@ bool CharaSelectScene::init()
 
 	
 	Draw();					// 表示(キャラ以外)
-	FontsDraw();			// 文字描画
 	CharaDraw();			// キャラ表示
 	SwipeRotation();		// スワイプに合わせて回転
 	ObjHit();				// 当たり判定
@@ -176,7 +181,6 @@ bool CharaSelectScene::TouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)
 
 	return true;
 }
-
 // スワイプ中
 void CharaSelectScene::TouchMove(cocos2d::Touch* touch, cocos2d::Event* event)
 {
@@ -245,27 +249,27 @@ void CharaSelectScene::CharaDraw()
 	this->Arrange();
 }
 
-// 文字描画
-void CharaSelectScene::FontsDraw()
-{
-	//画像サイズ取得
-	Size winSize = Director::getInstance()->getWinSize();
-	// マルチれぞーしょん対応か
-	Point origin = Director::getInstance()->getVisibleOrigin();
-
-	// スワイプの動いているとこ
-	// 配置文字
-	auto swipeLabel = Label::createWithSystemFont("スワイプで動くよ", "fonts/HGRSGU.TTC", 30);
-	// 配置場所
-	swipeLabel->setPosition(100, 300);
-	swipeLabel->setColor(Color3B(200, 150, 0));
-
-	// Select追加
-	this->addChild(swipeLabel, 1);
-	auto act1 = ScaleTo::create(LIMIT_TIME, DOUBLE_SCALE);   // 0.9秒で0.5倍に拡大
-	auto act2 = ScaleTo::create(LIMIT_TIME, 1.0f);			 // 0.9秒で元のサイズに戻す
-	swipeLabel->runAction(RepeatForever::create(Sequence::create(act1, act2, NULL)));  //  延々繰り返し
-}
+//// 文字描画
+//void CharaSelectScene::FontsDraw()
+//{
+//	//画像サイズ取得
+//	Size winSize = Director::getInstance()->getWinSize();
+//	// マルチれぞーしょん対応か
+//	Point origin = Director::getInstance()->getVisibleOrigin();
+//
+//	// スワイプの動いているとこ
+//	// 配置文字
+//	auto swipeLabel = Label::createWithSystemFont("スワイプで動くよ", "fonts/HGRSGU.TTC", 30);
+//	// 配置場所
+//	swipeLabel->setPosition(100, 300);
+//	swipeLabel->setColor(Color3B(200, 150, 0));
+//
+//	// Select追加
+//	this->addChild(swipeLabel, 1);
+//	auto act1 = ScaleTo::create(LIMIT_TIME, DOUBLE_SCALE);   // 0.9秒で0.5倍に拡大
+//	auto act2 = ScaleTo::create(LIMIT_TIME, 1.0f);			 // 0.9秒で元のサイズに戻す
+//	swipeLabel->runAction(RepeatForever::create(Sequence::create(act1, act2, NULL)));  //  延々繰り返し
+//}
 
 // プレイヤー説明文
 void CharaSelectScene::CharaText()
@@ -373,18 +377,6 @@ void CharaSelectScene::Draw()
 	_Box2->setScale(BOX_SCALE);
 	_Box2->setPosition(TEAM_BOX_X +TEAM_BOX_OFFSET_X*2-44, TEAM_BOX_Y);
 	addChild(_Box2, 2);
-
-	// Okボタン
-	_ok = Sprite::create("UI/Status/UI_Button_Wait01.png");
-	_ok->setPosition(660, 300);
-	_ok->setScale(0.4);
-	this->addChild(_ok, 19);
-
-	// OKボタン用文字
-	auto _okLabel = Label::createWithSystemFont("O K", "fonts/HGRSGU.TTC", 30);
-	_okLabel->setPosition(663, 300);
-	_okLabel->setColor(Color3B(0, 0, 0));
-	addChild(_okLabel,20);
 }
 
 // 背景
@@ -395,12 +387,18 @@ void CharaSelectScene::CharaSelectBackGroudn()
 	// マルチれぞーしょん対応か
 	Point origin = Director::getInstance()->getVisibleOrigin();
 
+	// 説明文の板配置
+	Sprite *_fontBoard = Sprite::create("UI/Status/UI_Status_Inters.png");
+	// 配置
+	_fontBoard->setPosition(winSize.width / 2, 1130);
+	this->addChild(_fontBoard, 1);
+
 	// 背景画像追加
-	Sprite* backImage = Sprite::create("BackImage/ST_CharSerect2.png");
+	Sprite* _backImage = Sprite::create("BackImage/ST_CharSerect2.png");
 	// 配置座標
-	backImage->setPosition(winSize.width / 2, winSize.height / 2);
+	_backImage->setPosition(winSize.width / 2, winSize.height / 2);
 	// 追加
-	this->addChild(backImage);
+	this->addChild(_backImage,0);
 }
 
 // test表示
@@ -436,12 +434,6 @@ void CharaSelectScene::ObjHit()
 					 _Box->getPosition().y - _Box->getContentSize().height / 2,
 					 _Box->getContentSize().width,
 					 _Box->getContentSize().height);
-
-	// OKボタンのRect
-	_ok_rect = Rect(_ok->getPosition().x - (_ok->getContentSize().width -136)/2,
-				    _ok->getPosition().y - (_ok->getContentSize().height-48) / 2,
-					_ok->getContentSize().width*0.4,
-					_ok->getContentSize().height*0.4);
 }
 
 // アレンジ　回転とか
@@ -462,7 +454,7 @@ void CharaSelectScene::Arrange()
 		float scale		= (diameterY - y) / diameterY;				// y座標に応じて変化するよ
 		GLubyte opacity = 255 - (y + radiusY);
 
-		this->items.at(i)->setPosition(Vec2(x+ PL_POS_OFFSET_X, y+ PL_POS_OFFSET_Y));
+		this->items.at(i)->setPosition(Vec2(x+ PL_POS_OFFSET_X, y+ PL_POS_OFFSET_Y + 20));
 		this->items.at(i)->setScale(scale);
 		this->items.at(i)->setOpacity(opacity);
 		this->items.at(i)->setZOrder(diameterY - y);
@@ -549,13 +541,28 @@ const std::vector<CharaName>& CharaSelectScene::GetCharaData()
 //	};
 //}*/
 
-// 画面遷移
+// 次画面遷移
 void CharaSelectScene::pushStart(Ref * pSender)
 {
 	CCLOG("Pushボタン");
 
 	// 遷移策の画面をｲﾝｽﾀﾝｽ
 	Scene *pScene = GameOver::createScene();
+
+	// 0.6秒かけて次画面に遷移
+	// (時間,遷移先,色(オプション))
+	TransitionFade *transition = TransitionFade::create(WAIT_TIME, pScene);
+
+	// 遷移実行 アニメーション
+	Director::getInstance()->replaceScene(transition);
+}
+// 前画面遷移
+void CharaSelectScene::backStart(Ref * pSender)
+{
+	CCLOG("Pushボタン");
+
+	// 遷移策の画面をｲﾝｽﾀﾝｽ
+	Scene *pScene = TitleScene::createScene();
 
 	// 0.6秒かけて次画面に遷移
 	// (時間,遷移先,色(オプション))
@@ -593,7 +600,6 @@ https://qiita.com/s0hno/items/739b8da8d0ee1375c2cd
 
 
 */
-
 
 // コインエフェクト表現
 /*

@@ -3,23 +3,28 @@
 #include "CharaSelectScene.h"
 #include "GameOver.h"
 #include "TopScroll.h"
+#include "cocos2d.h"
 
 const int DIV_NUM = 4;
 const int DIV_ANGLE = 360 / DIV_NUM;
 const int DIV_ANGLE_HALF = DIV_ANGLE / 2;
 
 // 角度調整
-const unsigned int RADIUS		   = 210;
+const unsigned int RADIUS		   = 150;		// 円の広がり
 const float PI					   = 3.14159265359f;
-const float FLATTEN_RATE		   = 0.4f;
-const unsigned int PL_POS_OFFSET_X = 420;		// プレイヤー表示のオフセット
-const unsigned int PL_POS_OFFSET_Y = 820;		// プレイヤー表示のオフセット
+const float FLATTEN_RATE		   = 0.1f;		// 奥行
+const unsigned int PL_POS_OFFSET_Y = 400;		// プレイヤー表示のオフセット
+const unsigned int PL_POS_OFFSET_X = 600;		// プレイヤー表示のオフセット
 
 // 拡大幅
 const float LIMIT_TIME			   = 0.9f;		// 秒指定[戻る際]
 const float DOUBLE_SCALE		   = 0.5f;		// 何倍か[拡大率指定]
 const float WAIT_TIME			   = 0.6f;		// 待機時間
 const float BOX_SCALE			   = 0.9;		// チーム編成用のBOXの拡大率
+
+
+const unsigned int BUTTON_POS_X = 50;			// ボタンの配置座標X
+const unsigned int BUTTON_POS_Y = 1200;			// ボタンの配置座標Y
 
 
 Scene *TitleScene::createScene()
@@ -50,17 +55,22 @@ bool TitleScene::init()
 	auto startButton = MenuItemImage::create("CloseNormal.png","CloseSelected.png", CC_CALLBACK_1(TitleScene::pushStart,this));
 
 	// ボタンの配置
-	startButton->setPosition(Point(winSize.width/2,winSize.height/2));
+	startButton->setPosition(BUTTON_POS_X, BUTTON_POS_Y);
 	// メニュー作成(自動obj)
 	auto menu = Menu::create(startButton,NULL);
 	menu->setPosition(Point::ZERO);
 	// 追加
 	this->addChild(menu,1);
 	
-	ActSelectDraw();			// キャラ表示
+	ActSelectDraw();		// キャラ表示
 	SwipeRotation();		// スワイプに合わせて回転
 
 	return true;
+}
+
+void TitleScene::Rotation(float _width, float _height, float _rote, const int _num)
+{
+
 }
 
 // 行動選択表示
@@ -97,29 +107,43 @@ void TitleScene::ActSelectDraw()
 	this->angle = 0.0f;
 	this->Arrange();
 }
-
+// 
 void TitleScene::Arrange()
 {
 	// 縦に回るようなの
 	float theta = 360.0f / items.size() + (items.size()/2);
-	float baseAngle = this->angle + 100.0;							// 加算すると円の奥行増えるよ
+	float baseAngle = this->angle ;							// 加算すると円の奥行増えるよ
 	for (int i = 0; i < items.size(); i++)
 	{
 		// 270 度の位置が正面にくるように  
-		float angle = theta   * i + baseAngle;
-		float radians = angle   * PI / 180.0f;
-		float x = RADIUS  * cos(radians);
-		float y = RADIUS  * sin(radians) * FLATTEN_RATE;	// 円の角度斜めにするよ
-		float radiusY = RADIUS  * FLATTEN_RATE;
-		float radiusX = RADIUS  * 0.9;
+		float angle		= theta   * i + baseAngle;
+		float radians	= angle   * PI / 180.0f;
+		float x			= RADIUS  * cos(radians);
+		float y			= RADIUS  * sin(radians) * FLATTEN_RATE;	// 円の角度斜めにするよ
+		float radiusY	= RADIUS  * FLATTEN_RATE;
 		float diameterY = radiusY * 2;
-		float scale = (radiusX - x) / radiusX;				// y座標に応じて変化するよ
-		GLubyte opacity = 100- (y + radiusY);
+		float scale		= (diameterY - y) / diameterY;				// y座標に応じて変化するよ
+		GLubyte opacity = 255 - (y + radiusY);
 
-		this->items.at(i)->setPosition(Vec2(x + PL_POS_OFFSET_X, y + PL_POS_OFFSET_Y));
+		this->items.at(i)->setPosition(Vec2(y + PL_POS_OFFSET_Y ,x + PL_POS_OFFSET_X));
 		this->items.at(i)->setScale(scale);
 		this->items.at(i)->setOpacity(opacity);
-		this->items.at(i)->setZOrder(diameterY - x);
+		this->items.at(i)->setZOrder(diameterY - y);
+
+		// 270 度の位置が正面にくるように  
+		//float angle = theta   * i + baseAngle;
+		//float radians = angle   * PI / 180.0f;
+		//float x = RADIUS  * cos(radians);
+		//float y = RADIUS  * sin(radians) * FLATTEN_RATE;	// 円の角度斜めにするよ
+		//float radiusY = RADIUS  * FLATTEN_RATE;
+		//float radiusX = RADIUS  * 0.9;
+		//float diameterY = radiusY * 2;
+		//float scale = (radiusX - x) / radiusX;				// y座標に応じて変化するよ
+		//GLubyte opacity = 100- (y + radiusY);
+		//this->items.at(i)->setPosition(Vec2(x + PL_POS_OFFSET_X, y + PL_POS_OFFSET_Y));
+		//this->items.at(i)->setScale(scale);
+		//this->items.at(i)->setOpacity(opacity);
+		//this->items.at(i)->setZOrder(diameterY - x);
 	}
 	//そーとするよ(´・ω・`)
 	auto tmpVector = items;
@@ -129,7 +153,7 @@ void TitleScene::Arrange()
 	// TOPに一番多きものが入る
 	Top = tmpVector.front();
 }
-
+// 
 void TitleScene::SwipeRotation()
 {
 	// スワイプに合わせて回転
@@ -161,7 +185,6 @@ void TitleScene::SwipeRotation()
 	};
 	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
 }
-
 // 背景
 void TitleScene::TitleBackGroudn()
 {
@@ -190,7 +213,6 @@ void TitleScene::TitleBackGroudn()
 	bgsprite->setPosition(winSize.width/2, winSize.height/2);
 	//this->addChild(bgsprite,0);
 }
-
 // 画面遷移
 void TitleScene::pushStart(Ref *pSender)
 {
