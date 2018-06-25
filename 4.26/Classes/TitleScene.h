@@ -28,11 +28,12 @@ private:
 
 	// スキル選択
 	Sprite *_ChoiceSkill;	// 選択スキル
-	//Sprite *_Skill;			// スキル
 
-	void ActSelectDraw();		// 表示
+	void ActSelectDraw();	// 表示
 	void Arrange();			// 角度調整
 	void SwipeRotation();	// 回転
+
+	void Rotation(float _width,float _height,float _rote,const int _num);	// 回転するぞ(横幅,縦幅,回転方向,個数)
 
 	EventListenerTouchOneByOne *_listener = EventListenerTouchOneByOne::create();
 };

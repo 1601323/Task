@@ -24,6 +24,7 @@ public:
 
 	// スタートボタン押下時の処理宣言 戻る Object →　Ref に変更
 	void pushStart(Ref *pSender);
+	void backStart(Ref *pSender);
 	// 選択されたキャラ情報格納
 	static const std::vector<CharaName>& GetCharaData();
 
@@ -47,11 +48,10 @@ private:
 
 	void Update(float delta);		// アップデート
 	void CharaDraw();				// キャラ表示
-	void FontsDraw();				// 文字描画
 	void CharaText();				// きゃら説明文
 	void Draw();					// 表示	
 	void CharaSelectBackGroudn();	// 背景
-	void TestChara();
+	void TestChara();				// 編成表示
 	void ObjHit();					// 当たり判定用
 	void Arrange();					// アレンジ	
 	void SwipeRotation();			// スワイプに合わせて回転
