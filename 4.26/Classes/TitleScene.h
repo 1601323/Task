@@ -28,13 +28,16 @@ private:
 
 	// スキル選択
 	Sprite *_ChoiceSkill;	// 選択スキル
-
 	void ActSelectDraw();	// 表示
 	void Arrange();			// 角度調整
 	void SwipeRotation();	// 回転
 
-	void Rotation(float _width,float _height,float _rote,const int _num);	// 回転するぞ(横幅,縦幅,回転方向,個数)
+	void RectDraw(const unsigned int x, const unsigned int y, const unsigned int _width, const unsigned int _height, const int posX, const int posY);
 
+	// touchイベント
+	bool TouchBegan(cocos2d::Touch* touch, cocos2d::Event* event);	// 押した瞬間
+	void TouchMove(cocos2d::Touch* touch, cocos2d::Event* event);	// スワイプ中
+	void TouchEnd(cocos2d::Touch* touch, cocos2d::Event* event);	// 離した瞬間
 	EventListenerTouchOneByOne *_listener = EventListenerTouchOneByOne::create();
 };
 

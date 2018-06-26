@@ -547,7 +547,7 @@ void CharaSelectScene::pushStart(Ref * pSender)
 	CCLOG("Pushボタン");
 
 	// 遷移策の画面をｲﾝｽﾀﾝｽ
-	Scene *pScene = GameOver::createScene();
+	Scene *pScene = FightScene::createScene();
 
 	// 0.6秒かけて次画面に遷移
 	// (時間,遷移先,色(オプション))

@@ -3,11 +3,14 @@
 #include "CharaSelectScene.h"
 #include "GameOver.h"
 #include "TopScroll.h"
+#include <algorithm>
 #include "cocos2d.h"
 
-const int DIV_NUM = 4;
-const int DIV_ANGLE = 360 / DIV_NUM;
+const int DIV_NUM		 = 4;
+const int DIV_CIRCLE	 = 360;		
+const int DIV_ANGLE		 = DIV_CIRCLE / DIV_NUM;
 const int DIV_ANGLE_HALF = DIV_ANGLE / 2;
+
 
 // 角度調整
 const unsigned int RADIUS		   = 150;		// 円の広がり
@@ -22,10 +25,8 @@ const float DOUBLE_SCALE		   = 0.5f;		// 何倍か[拡大率指定]
 const float WAIT_TIME			   = 0.6f;		// 待機時間
 const float BOX_SCALE			   = 0.9;		// チーム編成用のBOXの拡大率
 
-
 const unsigned int BUTTON_POS_X = 50;			// ボタンの配置座標X
 const unsigned int BUTTON_POS_Y = 1200;			// ボタンの配置座標Y
-
 
 Scene *TitleScene::createScene()
 {
@@ -64,13 +65,33 @@ bool TitleScene::init()
 	
 	ActSelectDraw();		// キャラ表示
 	SwipeRotation();		// スワイプに合わせて回転
+	Arrange();
 
+	// touchイベント
+	auto touchEventGet = EventListenerTouchOneByOne::create();
+	touchEventGet->onTouchBegan = CC_CALLBACK_2(TitleScene::TouchBegan, this);
+	touchEventGet->onTouchMoved = CC_CALLBACK_2(TitleScene::TouchMove, this);
+	touchEventGet->onTouchEnded = CC_CALLBACK_2(TitleScene::TouchEnd, this);
+
+	// 登録
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(touchEventGet, this);
 	return true;
 }
 
-void TitleScene::Rotation(float _width, float _height, float _rote, const int _num)
+// 押した瞬間
+bool TitleScene::TouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)
 {
+	return true;
+}
 
+// スワイプ中
+void TitleScene::TouchMove(cocos2d::Touch* touch, cocos2d::Event* event)
+{
+}
+
+// 離した瞬間
+void TitleScene::TouchEnd(cocos2d::Touch* touch, cocos2d::Event* event)
+{
 }
 
 // 行動選択表示
@@ -92,22 +113,16 @@ void TitleScene::ActSelectDraw()
 	this->items.push_back(_Item);
 	this->items.push_back(_Skill);
 
-	// 選択されてないも
-
-	//if ()
-	//{
-
-	//}
-
 	// 配置
 	for (auto& item :items)
 	{
 		this->addChild(item,0);
 	}
 	this->angle = 0.0f;
-	this->Arrange();
+	
 }
-// 
+
+// アレンジ
 void TitleScene::Arrange()
 {
 	// 縦に回るようなの
@@ -117,7 +132,7 @@ void TitleScene::Arrange()
 	{
 		// 270 度の位置が正面にくるように  
 		float angle		= theta   * i + baseAngle;
-		float radians	= angle   * PI / 180.0f;
+		float radians	= angle   * PI / 180.0;
 		float x			= RADIUS  * cos(radians);
 		float y			= RADIUS  * sin(radians) * FLATTEN_RATE;	// 円の角度斜めにするよ
 		float radiusY	= RADIUS  * FLATTEN_RATE;
@@ -129,21 +144,6 @@ void TitleScene::Arrange()
 		this->items.at(i)->setScale(scale);
 		this->items.at(i)->setOpacity(opacity);
 		this->items.at(i)->setZOrder(diameterY - y);
-
-		// 270 度の位置が正面にくるように  
-		//float angle = theta   * i + baseAngle;
-		//float radians = angle   * PI / 180.0f;
-		//float x = RADIUS  * cos(radians);
-		//float y = RADIUS  * sin(radians) * FLATTEN_RATE;	// 円の角度斜めにするよ
-		//float radiusY = RADIUS  * FLATTEN_RATE;
-		//float radiusX = RADIUS  * 0.9;
-		//float diameterY = radiusY * 2;
-		//float scale = (radiusX - x) / radiusX;				// y座標に応じて変化するよ
-		//GLubyte opacity = 100- (y + radiusY);
-		//this->items.at(i)->setPosition(Vec2(x + PL_POS_OFFSET_X, y + PL_POS_OFFSET_Y));
-		//this->items.at(i)->setScale(scale);
-		//this->items.at(i)->setOpacity(opacity);
-		//this->items.at(i)->setZOrder(diameterY - x);
 	}
 	//そーとするよ(´・ω・`)
 	auto tmpVector = items;
@@ -151,9 +151,10 @@ void TitleScene::Arrange()
 		// 先に大きいのtrue /　begin > end ←初めに大きいもの来る＝大きい順になる  
 	{return a->getScale() > b->getScale(); });
 	// TOPに一番多きものが入る
-	Top = tmpVector.front();
+	Top = tmpVector.front();	
 }
-// 
+
+// スワイプ
 void TitleScene::SwipeRotation()
 {
 	// スワイプに合わせて回転
@@ -165,7 +166,7 @@ void TitleScene::SwipeRotation()
 	{
 		float delta = touch->getLocation().y - touch->getPreviousLocation().y;
 		this->angle += delta;
-		this->Arrange();
+		Arrange();
 	};
 	// 離した
 	listener->onTouchEnded = [&](Touch *touch, Event *event)
@@ -181,10 +182,11 @@ void TitleScene::SwipeRotation()
 		{
 			this->angle = ((((static_cast<int>(this->angle - 360) % 360 - DIV_ANGLE_HALF) % 360) / DIV_ANGLE) * DIV_ANGLE);
 		}
-		this->Arrange();
+		Arrange();
 	};
 	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
 }
+
 // 背景
 void TitleScene::TitleBackGroudn()
 {
@@ -192,11 +194,6 @@ void TitleScene::TitleBackGroudn()
 	Size winSize = Director::getInstance()->getWinSize();
 	// マルチレゾリューション対応がどうとか
 	Point origin = Director::getInstance()->getVisibleOrigin();
-
-	//// バックカラー
-	//auto groundCollar = LayerColor::create(Color4B::BLUE,winSize.width,winSize.height);
-	//// バックグランドCollar第2:表示順
-	//this->addChild(groundCollar,0);
 
 	// タイトル配置
 	// 配置文字
@@ -208,11 +205,12 @@ void TitleScene::TitleBackGroudn()
 	this->addChild(lbl_Title,1);
 
 	// 背景画像追加
-	Sprite* bgsprite = Sprite::create("BackImage/Title.png");
+	Sprite* bgsprite = Sprite::create("BackImage/ST_Boss.png");
 	// 表示座標指定
 	bgsprite->setPosition(winSize.width/2, winSize.height/2);
-	//this->addChild(bgsprite,0);
+	this->addChild(bgsprite,0);
 }
+
 // 画面遷移
 void TitleScene::pushStart(Ref *pSender)
 {
@@ -222,15 +220,20 @@ void TitleScene::pushStart(Ref *pSender)
 	// 遷移策の画面をｲﾝｽﾀﾝｽ
 	Scene *pScene = CharaSelectScene::createScene();
 
-	/* 0.5秒かけて次画面に遷移
-	// (時間,遷移先,色(オプション))
-	//TransitionFade *transition = TransitionFade::create(0.6, pScene);
-	// 遷移実行 アニメーション
-	Director::getInstance()->replaceScene(transition);*/
-
 	// 模様左からだんだん...
 	Director::getInstance()->replaceScene(TransitionFadeTR::create(0.7f, CharaSelectScene::createScene()));
 	CCDirector::sharedDirector()->replaceScene(CCTransitionFadeTR::create(2.0f, CharaSelectScene::createScene()));
 
 
 }
+
+// 四角描画
+void TitleScene::RectDraw(const unsigned int x, const unsigned int y, const unsigned int _width, const unsigned int _height, const int posX, const int posY)
+{
+	Rect rect = Rect(x, y, _width, _height);
+	Sprite *square = Sprite::create();
+	square->setTextureRect(rect);
+	square->setPosition(posX, posY);
+	this->addChild(square, 5);
+}
+	
