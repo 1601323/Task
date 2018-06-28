@@ -115,6 +115,82 @@ bool CharaSelectScene::init()
 // 押した瞬間
 bool CharaSelectScene::TouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)
 {
+	//_touchPos = touch->getLocation();
+
+	//// 決定ボタンのところ
+	//if (_ok_rect.containsPoint(_touchPos))
+	//{
+	//	// 画像切り替え押した後のほう
+	//	_ok->setSpriteFrame(Sprite::create("UI/Status/UI_Button_Wait02.png")->getSpriteFrame());
+	//}
+
+	//if (Top)
+	//{
+	//	//指定Rect内をクリックしたら説明文表示
+	//	if (_pl_rect.containsPoint(_touchPos))
+	//	{
+	//		_clickCnt += 1;
+	//		log("説明文たぜ大将！！");
+	//		CharaText();
+	//		if (_clickCnt > 2)
+	//		{
+	//			log("チームが編成されたぜ");
+	//			TestChara();
+	//			_clickCnt = 1;		
+	//			int i = 0;
+	//			for (i = 0; i<items.size(); i++)
+	//			{
+	//				if (items[i] == Top)
+	//				{
+	//					break;
+	//				}
+	//				// 追加
+	//				CharaData.push_back(static_cast<CharaName> (i));
+	//				log("追加しましたよ%d", i,Top);
+
+	//			}
+	//		}
+	//	}
+	//}
+
+	//////指定Rect内をクリックしたら説明文表示
+	////if (pl_rect.containsPoint(touchPos))
+	////{
+	////	clickCnt += 1;
+	////	log("説明文たぜ大将！！");
+	////	charaText();
+	////	if (clickCnt > 2)
+	////	{
+	////		log("チームが編成されたぜ");
+	////		testChara();
+	////		clickCnt = 1;
+	////	}
+	////}
+	//// チーム編成の箱をクリックしたとき
+	//if (_box_rect.containsPoint(_touchPos))
+	//{
+	//	// チーム編成キャンセル
+	//	if (_clickCnt > 2 )
+	//	{
+	//		log("メンバー編成し直したぜ大将!!");
+	//		_Pl_BOX->removeFromParentAndCleanup(true);
+	//	}
+	//}
+	//// その他
+	//else {}
+
+	return true;
+}
+// スワイプ中
+void CharaSelectScene::TouchMove(cocos2d::Touch* touch, cocos2d::Event* event)
+{
+	this->removeChildByTag(PL_TAG);
+	// 動いているときはカウントしない
+	_clickCnt = 0;
+}
+// 離した瞬間
+void CharaSelectScene::TouchEnd(cocos2d::Touch* touch, cocos2d::Event* event)
+{
 	_touchPos = touch->getLocation();
 
 	// 決定ボタンのところ
@@ -130,13 +206,17 @@ bool CharaSelectScene::TouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)
 		if (_pl_rect.containsPoint(_touchPos))
 		{
 			_clickCnt += 1;
-			log("説明文たぜ大将！！");
-			CharaText();
+			if (_clickCnt > 1)
+			{
+				log("説明文たぜ大将！！");
+				CharaText();
+			}
+		
 			if (_clickCnt > 2)
 			{
 				log("チームが編成されたぜ");
 				TestChara();
-				_clickCnt = 1;		
+				_clickCnt = 1;
 				int i = 0;
 				for (i = 0; i<items.size(); i++)
 				{
@@ -146,31 +226,17 @@ bool CharaSelectScene::TouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)
 					}
 					// 追加
 					CharaData.push_back(static_cast<CharaName> (i));
-					log("追加しましたよ%d", i,Top);
+					log("追加しましたよ%d", i, Top);
 
 				}
 			}
 		}
 	}
-
-	////指定Rect内をクリックしたら説明文表示
-	//if (pl_rect.containsPoint(touchPos))
-	//{
-	//	clickCnt += 1;
-	//	log("説明文たぜ大将！！");
-	//	charaText();
-	//	if (clickCnt > 2)
-	//	{
-	//		log("チームが編成されたぜ");
-	//		testChara();
-	//		clickCnt = 1;
-	//	}
-	//}
 	// チーム編成の箱をクリックしたとき
 	if (_box_rect.containsPoint(_touchPos))
 	{
 		// チーム編成キャンセル
-		if (_clickCnt > 2 )
+		if (_clickCnt > 2)
 		{
 			log("メンバー編成し直したぜ大将!!");
 			_Pl_BOX->removeFromParentAndCleanup(true);
@@ -178,26 +244,13 @@ bool CharaSelectScene::TouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)
 	}
 	// その他
 	else {}
-
-	return true;
-}
-// スワイプ中
-void CharaSelectScene::TouchMove(cocos2d::Touch* touch, cocos2d::Event* event)
-{
-	this->removeChildByTag(PL_TAG);
-	// 動いているときはカウントしない
-	_clickCnt = 0;
-}
-// 離した瞬間
-void CharaSelectScene::TouchEnd(cocos2d::Touch* touch, cocos2d::Event* event)
-{
 	// 元のボタン画像に戻す
 	if (_ok_rect.containsPoint(_touchPos))
 	{
 		// 画像切り替え
 		_ok->setSpriteFrame(Sprite::create("UI/Status/UI_Button_Wait01.png")->getSpriteFrame());
-
 	}
+	else {}
 }
 
 // 更新
@@ -365,17 +418,20 @@ void CharaSelectScene::CharaText()
 // 表示 チーム編成の箱
 void CharaSelectScene::Draw()
 {
-	_Box = CCSprite::create("PL_CharFlame01.png");
-	_Box->setScale(BOX_SCALE);
-	_Box->setPosition(TEAM_BOX_X+44, TEAM_BOX_Y);
-	addChild(_Box, 2);
-	_Box1 = CCSprite::create("PL_CharFlame01.png");
-	_Box1->setScale(BOX_SCALE);
-	_Box1->setPosition(TEAM_BOX_X + TEAM_BOX_OFFSET_X, TEAM_BOX_Y);
-	addChild(_Box1, 2);
+	_Box			= CCSprite::create("PL_CharFlame01.png");
+	_Box1			= CCSprite::create("PL_CharFlame01.png");
 	CCSprite *_Box2 = CCSprite::create("PL_CharFlame01.png");
+
+	_Box ->setScale(BOX_SCALE);
+	_Box1->setScale(BOX_SCALE);
 	_Box2->setScale(BOX_SCALE);
-	_Box2->setPosition(TEAM_BOX_X +TEAM_BOX_OFFSET_X*2-44, TEAM_BOX_Y);
+
+	_Box ->setPosition(TEAM_BOX_X+44, TEAM_BOX_Y);
+	_Box1->setPosition(TEAM_BOX_X + TEAM_BOX_OFFSET_X, TEAM_BOX_Y);
+	_Box2->setPosition(TEAM_BOX_X + TEAM_BOX_OFFSET_X * 2 - 44, TEAM_BOX_Y);
+
+	addChild(_Box, 2);
+	addChild(_Box1, 2);
 	addChild(_Box2, 2);
 }
 
@@ -417,9 +473,9 @@ void CharaSelectScene::ObjHit()
 	Size winSize = Director::getInstance()->getWinSize();
 
 	// プレイヤー用のクリック判定用板
-	_pl_rect   = Rect(0, 0, PL_TEXT_RECT_X, PL_TEXT_RECT_Y);		// 範囲
+	_pl_rect   = Rect(0, 0, PL_TEXT_RECT_X, PL_TEXT_RECT_Y);	// 範囲
 	_pl_square = Sprite::create();								// 生成
-	_pl_square->setTextureRect(_pl_rect);							// テクスチャ指定
+	_pl_square->setTextureRect(_pl_rect);						// テクスチャ指定
 	_pl_square->setPosition(430, winSize.height / 2);			// 座標配置
 	//this->addChild(pl_square);								// 追加
 

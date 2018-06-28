@@ -25,14 +25,18 @@ private:
 	Sprite *_Defence;		// 防御
 	Sprite *_Item;			// アイテム
 	Sprite *_Skill;			// スキル
-
+	// 当たり判定用
+	Vec2 _touchPos;			// 現在座標
+	Rect _swipeRect;		// スワイプ用の判定範囲
+	Sprite *_swipe;
 	// スキル選択
 	Sprite *_ChoiceSkill;	// 選択スキル
 	void ActSelectDraw();	// 表示
 	void Arrange();			// 角度調整
 	void SwipeRotation();	// 回転
-
+	void ObjHit();			// 当たり判定用
 	void RectDraw(const unsigned int x, const unsigned int y, const unsigned int _width, const unsigned int _height, const int posX, const int posY);
+	void TouchArrange(Touch* _touch);		// タッチしたところエフェクト
 
 	// touchイベント
 	bool TouchBegan(cocos2d::Touch* touch, cocos2d::Event* event);	// 押した瞬間
