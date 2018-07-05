@@ -6,30 +6,43 @@
 #include <algorithm>
 #include "cocos2d.h"
 
+#pragma execution_character_set("utf-8")
+
 const int DIV_NUM		 = 4;
 const int DIV_CIRCLE	 = 360;		
 const int DIV_ANGLE		 = DIV_CIRCLE / DIV_NUM;
 const int DIV_ANGLE_HALF = DIV_ANGLE / 2;
 
 // 角度調整
-const unsigned int RADIUS		   = 150;		// 円の広がり
+const unsigned int RADIUS		   = 150;					// 円の広がり
 const float PI					   = 3.14159265359f;
-const float FLATTEN_RATE		   = 0.1f;		// 奥行
-const unsigned int PL_POS_OFFSET_Y = 400;		// プレイヤー表示のオフセット
-const unsigned int PL_POS_OFFSET_X = 600;		// プレイヤー表示のオフセット
+const float FLATTEN_RATE		   = 0.1f;					// 奥行
+const unsigned int PL_POS_OFFSET_Y = 400;					// プレイヤー表示のオフセット
+const unsigned int PL_POS_OFFSET_X = 600;					// プレイヤー表示のオフセット
 
 // 拡大幅
-const float LIMIT_TIME			   = 0.9f;		// 秒指定[戻る際]
-const float DOUBLE_SCALE		   = 0.5f;		// 何倍か[拡大率指定]
-const float WAIT_TIME			   = 0.6f;		// 待機時間
-const float BOX_SCALE			   = 0.9;		// チーム編成用のBOXの拡大率
+const float LIMIT_TIME			   = 0.9f;					// 秒指定[戻る際]
+const float DOUBLE_SCALE		   = 0.5f;					// 何倍か[拡大率指定]
+const float WAIT_TIME			   = 0.6f;					// 待機時間
+const float BOX_SCALE			   = 0.9;					// チーム編成用のBOXの拡大率
 
-const unsigned int BUTTON_POS_X	   = 50;			// ボタンの配置座標X
-const unsigned int BUTTON_POS_Y    = 1200;			// ボタンの配置座標Y
+const unsigned int BUTTON_POS_X	   = 50;					// ボタンの配置座標X
+const unsigned int BUTTON_POS_Y    = 1200;					// ボタンの配置座標Y
 
 // タッチ語のイベント用
 const float DELETE				   = 1.5f;
 const unsigned int TOUCH_RADIUS    = 25;
+
+// アレンジ用
+const int UPSIDECNT				= 3;						// 上に表示する個数
+const int DRAWCNT				= 6;						// 表示する個数(総数)
+const float DEFAULT_SCALE		= 1.f;						// 通常拡大率
+const float DIFF_SCALE			= 0.15f;					// 拡大率
+const float ROLE_Y_DIST			= 80.f;						// 回転する際の移動量(数字を大きくすると余計に動く)
+const GLubyte DEFAULT_OPACITY	= 255;						// 通常不透明度			
+const GLubyte DIFF_OPACITY		= 0;						// 不透明度
+const Vec2 POS					= Vec2(410, 650);			// 配置座標
+const Vec2 OFFSET				= Vec2(0, -100);			// オフセット(横へのひろがりかえれるよ)
 
 Scene *TitleScene::createScene()
 {
@@ -68,7 +81,9 @@ bool TitleScene::init()
 	
 	ActSelectDraw();		// キャラ表示
 	SwipeRotation();		// スワイプに合わせて回転
+	ObjHit();
 	Arrange();
+	//Arrange(POS, items, UPSIDECNT, DRAWCNT, DEFAULT_SCALE, DIFF_SCALE, DEFAULT_OPACITY, DIFF_SCALE, OFFSET);
 
 	// touchイベント
 	auto touchEventGet = EventListenerTouchOneByOne::create();
@@ -79,13 +94,32 @@ bool TitleScene::init()
 	// 登録
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(touchEventGet, this);
 
+	RectDraw(0, 0, 550, 490,winSize.width / 2 - 10, winSize.height / 2 - 30);
+
 	return true;
 }
 
 // 押した瞬間
 bool TitleScene::TouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)
 {
+	_touchPos = touch->getLocation();
+
 	TouchArrange(touch);
+
+	if (Top)
+	{
+		log("\top内だよ");
+		//指定Rect内をクリックしたら説明文表示
+		if (_swipeRect.containsPoint(_touchPos))
+		{
+			
+			_clickCnt += 1;
+			if (_clickCnt > 1)
+			{
+				log("押ok");
+			}
+		}
+	}
 	return true;
 }
 
@@ -218,10 +252,10 @@ void TitleScene::ObjHit()
 	//画像サイズ取得
 	Size winSize = Director::getInstance()->getWinSize();
 
-	Rect _swipeRect = Rect(0, 0, 550, 490);
-	Sprite *square = Sprite::create();
-	square->setTextureRect(_swipeRect);
-	square->setPosition(winSize.width / 2 - 10, winSize.height / 2 - 30);
+	_swipeRect = Rect(0, 0, 550, 490);
+	_swipe	   = Sprite::create();
+	_swipe->setTextureRect(_swipeRect);
+	_swipe->setPosition(winSize.width / 2 - 10, winSize.height / 2 - 30);
 
 	_swipeRect = Rect(_swipe->getPosition().x - _swipe->getContentSize().width / 2,
 					  _swipe->getPosition().y - _swipe->getContentSize().height/2,
@@ -277,6 +311,40 @@ void TitleScene::RectDraw(const unsigned int x, const unsigned int y, const unsi
 	square->setTextureRect(rect);
 	square->setPosition(posX, posY);
 	this->addChild(square, 5);
+}
+
+void TitleScene::Arrange(const Vec2 _pos, std::vector<Node*>& _sprite, const int _upSideCnt, const int _drawCnt, const float _defaultScale, const float _diffScale, const GLubyte _defaultOpacity, const GLubyte _diffOpacity, const Vec2 _offset)
+{
+	float tmp, tmp2;
+	// 実数値を整数部分と小数部分に分ける
+	auto tmpAngle = modf(angle, &tmp);
+	tmpAngle = modf(tmpAngle, &tmp2);
+	tmpAngle = -tmpAngle;
+	// 小数を切り捨て型キャスト
+	auto j = static_cast<int>(tmp) % _sprite.size();
+	// 
+	for (int i= -_upSideCnt; i < _drawCnt - _upSideCnt; ++i) 
+	{
+		// 総枚数　% 総枚数= 現在の番号わかる
+		auto index = ((i + j) + _sprite.size()) % _sprite.size();
+		// 
+		_sprite[index]->setPosition(POS + Vec2(OFFSET.x * abs(i) , OFFSET.y * (i)));
+		// 
+		//_sprite[index]->setScale(_defaultScale - (abs(i) * _diffScale));
+		_sprite[index]->setScale(i == 0 ? _defaultScale : _defaultScale - _diffScale);
+		// 
+		_sprite[index]->setOpacity(_defaultOpacity - (abs(i) * _diffOpacity));
+		// 
+		_sprite[index]->setZOrder(_drawCnt - abs(i));
+	}
+	//そーとするよ(´・ω・`)
+	auto tmpVector = _sprite;
+	std::sort(tmpVector.begin(), tmpVector.end(), [](const Node* a, const Node* b)
+	// 先に大きいのtrue /　begin > end ←初めに大きいもの来る＝大きい順になる  
+	{return a->getScale() > b->getScale(); });
+	// TOPに一番多きものが入る
+	Top = tmpVector.front();
+	
 }
 	
 // タッチしたところエフェクト
