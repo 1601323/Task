@@ -19,29 +19,31 @@ public:
 	void pushStart(Ref *pSender);
 
 private:
-	Node* Top;				// 最前にあるものの情報
-							// 行動パターン情報
-	Sprite *_Attack;		// 攻撃
-	Sprite *_Defence;		// 防御
-	Sprite *_Item;			// アイテム
-	Sprite *_Skill;			// スキル
-							// 当たり判定用
-	Vec2 _touchPos;			// 現在座標
-	Rect _swipeRect;		// スワイプ用の判定範囲
-	Sprite *_swipe;
-	// スキル選択
-	Sprite *_ChoiceSkill;	// 選択スキル
-	void ActSelectDraw();	// 表示
-	void Arrange();			// 角度調整
-	void SwipeRotation();	// 回転
-	void ObjHit();			// 当たり判定用
-	// 四角描画用(X,Y,幅,高さ,配置座標)
-	void RectDraw(const unsigned int x, const unsigned int y, const unsigned int _width, const unsigned int _height, const int posX, const int posY);
-	// (配置座標,スプライト,上に表示する数,総表示数,通常拡大率,拡大率,通常透過,透過,X軸への広がり)
-	void Arrange(const Vec2 _pos, std::vector<Node*>& _sprite, const int _upSideCnt, const int _drawCnt, const float _defaultScale, const float _diffScale, const GLubyte _defaultOpacity, const GLubyte _diffOpacity, const Vec2 _offset);			// 角度調整
+	int nowSelect;					// 現在選ばれている番号
+	unsigned int _clickCnt = 0;		// クリック回数を保存
+	Node* Top;						// 最前にあるものの情報
+	// 行動パターン情報
+	Sprite *_Attack;				// 攻撃
+	Sprite *_Defence;				// 防御
+	Sprite *_Item;					// アイテム
+	Sprite *_Skill;					// スキル
 
-	void TouchArrange(Touch* _touch);		// タッチしたところエフェクト
-	unsigned int _clickCnt = 0;	// クリック回数を保存
+	// 当たり判定用
+	Vec2 _touchPos;					// 現在座標
+	Rect _swipeRect;				// スワイプ用の判定範囲
+	Rect _clickButtunRect;			// ボタンのクリック判定
+	Sprite *_swipe;					// スワイプ用スプライト
+	Sprite *_clickButton;			// クリック用スプライト
+	Sprite *_ChoiceSkill;			// 選択スキル
+
+	void ActSelectDraw();						// 表示
+	void Arrange(const Vec2 _pos);				// 角度調整
+	void Arrange(const Vec2 _pos, std::vector<Node*>& _sprite, const int _upSideCnt, const int _drawCnt, const float _defaultScale, const float _diffScale, const GLubyte _defaultOpacity, const GLubyte _diffOpacity, const Vec2 _offset);										// (配置座標,スプライト,上に表示する数,総表示数,通常拡大率,拡大率,通常透過,透過,X軸への広がり)
+	void SwipeRotation();						// 回転
+	void SwipeRotation(const float roleYDist);	// 回転
+	void RectDraw(const unsigned int x, const unsigned int y, const unsigned int _width, const unsigned int _height, const int posX, const int posY);		// 四角描画用(X,Y,幅,高さ,配置座標)
+	void ObjHit();								// 当たり判定用
+	void TouchArrange(Touch* _touch);			// タッチしたところエフェクト
 
 	// touchイベント
 	bool TouchBegan(cocos2d::Touch* touch, cocos2d::Event* event);	// 押した瞬間
