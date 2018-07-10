@@ -14,39 +14,42 @@ const int DIV_ANGLE		 = DIV_CIRCLE / DIV_NUM;
 const int DIV_ANGLE_HALF = DIV_ANGLE / 2;
 
 // 角度調整
-const unsigned int RADIUS		   = 150;					// 円の広がり
+const unsigned int RADIUS		   = 150;				// 円の広がり
 const float PI					   = 3.14159265359f;
-const float FLATTEN_RATE		   = 0.1f;					// 奥行
-const unsigned int PL_POS_OFFSET_Y = 400;					// プレイヤー表示のオフセット
-const unsigned int PL_POS_OFFSET_X = 600;					// プレイヤー表示のオフセット
+const float FLATTEN_RATE		   = 0.1f;				// 奥行
+const unsigned int PL_POS_OFFSET_Y = 400;				// プレイヤー表示のオフセット
+const unsigned int PL_POS_OFFSET_X = 600;				// プレイヤー表示のオフセット
 
 // 拡大幅
-const float LIMIT_TIME			   = 0.9f;					// 秒指定[戻る際]
-const float DOUBLE_SCALE		   = 0.5f;					// 何倍か[拡大率指定]
-const float WAIT_TIME			   = 0.6f;					// 待機時間
-const float BOX_SCALE			   = 0.9;					// チーム編成用のBOXの拡大率
+const float LIMIT_TIME			   = 0.9f;				// 秒指定[戻る際]
+const float DOUBLE_SCALE		   = 0.5f;				// 何倍か[拡大率指定]
+const float WAIT_TIME			   = 0.6f;				// 待機時間
+const float BOX_SCALE			   = 0.9;				// チーム編成用のBOXの拡大率
 
-const unsigned int BUTTON_POS_X	   = 50;					// ボタンの配置座標X
-const unsigned int BUTTON_POS_Y    = 1200;					// ボタンの配置座標Y
+const unsigned int BUTTON_POS_X	   = 50;				// ボタンの配置座標X
+const unsigned int BUTTON_POS_Y    = 1200;				// ボタンの配置座標Y
 
 // タッチ語のイベント用
 const float DELETE				   = 1.5f;
 const unsigned int TOUCH_RADIUS    = 25;
 
 // アレンジ用
-const int UPSIDECNT				= 3;						// 上に表示する個数
-const int DRAWCNT				= 6;						// 表示する個数(総数)
-const float DEFAULT_SCALE		= 1.f;						// 通常拡大率
-const float DIFF_SCALE			= 0.15f;					// 拡大率
-const float ROLE_Y_DIST			= 0.05f;					// 回転する際の移動量(数字を大きくすると余計に動く)
-const GLubyte DEFAULT_OPACITY	= 255;						// 通常不透明度			
-const GLubyte DIFF_OPACITY		= 0;						// 不透明度
-const Vec2 POS					= Vec2(600, 650);			// 配置座標410、650
-const Vec2 OFFSET				= Vec2(0, -100);			// オフセット(横へのひろがりかえれるよ)
+const int UPSIDECNT				= 3;					// 上に表示する個数
+const int DRAWCNT				= 6;					// 表示する個数(総数)
+const float DEFAULT_SCALE		= 1.f;					// 通常拡大率
+const float DIFF_SCALE			= 0.15f;				// 拡大率
+const float ROLE_Y_DIST			= 0.05f;				// 回転する際の移動量(数字を大きくすると余計に動く)
+const GLubyte DEFAULT_OPACITY	= 255;					// 通常不透明度			
+const GLubyte DIFF_OPACITY		= 0;					// 不透明度
+const Vec2 POS					= Vec2(600, 650);		// 配置座標410、650
+const Vec2 OFFSET				= Vec2(0, -100);		// オフセット(横へのひろがりかえれるよ)
 
 // 中心
 const Vec2 POS2 = Vec2(410, 650);		// 配置座標410、650
 const Vec2 POS3 = Vec2(5, 650);			// 配置座標410、650
+
+// 実態生成
+std::vector<SelectName> TitleScene::SelectData;
 
 Scene *TitleScene::createScene()
 {
@@ -86,7 +89,6 @@ bool TitleScene::init()
 	ActSelectDraw();		// キャラ表示
 	SwipeRotation();		// スワイプに合わせて回転
 	//SwipeRotation(ROLE_Y_DIST);
-	//SwipeRotation(POS2);
 	ObjHit();
 	
 	Arrange(POS2);
@@ -114,6 +116,27 @@ bool TitleScene::TouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)
 	_touchPos = touch->getLocation();
 	TouchArrange(touch);
 
+	_pushCnt++;
+	if (_clickButtunRect.containsPoint(_touchPos))
+	{
+		// ボタンをクリックされたら選択肢によって変わる
+		if (_pushCnt>1)
+		{
+			int i = 0;
+			for (i = 0; i<items.size(); i++)
+			{
+				if (items[i] == Top)
+				{
+					break;
+				}
+				// 追加
+				SelectData.push_back(static_cast<SelectName> (i));
+				log("選択されましたよ主君%d", i, Top);
+			}
+			_pushCnt = 0;
+		}
+	}
+
 	return true;
 }
 
@@ -133,10 +156,11 @@ void TitleScene::TouchEnd(cocos2d::Touch* touch, cocos2d::Event* event)
 	{
 		if (_clickButtunRect.containsPoint(_touchPos))
 		{
-			log("何かが選択されたぜ!");
+			//log("ボタンを押されましたか？主君");
 			// Arrange1の座標をPOS3の座標に変更
 			// Arrange2の表示
 			// Arrange1のスワイプを切る
+		
 		}
 
 	}
@@ -167,29 +191,29 @@ void TitleScene::ActSelectDraw()
 		this->addChild(item,0);
 	}
 	this->angle = 0.0f;
-	//RectDraw(0 ,0, 550, 490,winSize.width/2  - 10,winSize.height/2 - 30);		// 0,0,550,490,win/2-10,win/2-30 回す判定範囲
 }
 
 // アレンジ1(配置座標)
 void TitleScene::Arrange(const Vec2 _pos)
 {	// 縦に回るようなの
 	float theta = 360.0f / items.size() + (items.size() / 2);
-	float baseAngle = this->angle;							// 加算すると円の奥行増えるよ
+	float baseAngle = this->angle;									// 加算すると円の奥行増えるよ
+
 	for (int i = 0; i < items.size(); i++)
 	{
 		// 270 度の位置が正面にくるように  
-		float angle = theta   * i + baseAngle;
-		float radians = angle   * PI / 180.0;
-		float x = RADIUS  * cos(radians);
-		float y = RADIUS  * sin(radians) * FLATTEN_RATE;	// 円の角度斜めにするよ
-		float radiusY = RADIUS  * FLATTEN_RATE;
+		float angle		= theta   * i + baseAngle;
+		float radians	= angle   * PI / 180.0;
+		float x			= RADIUS  * cos(radians);
+		float y			= RADIUS  * sin(radians) * FLATTEN_RATE;	// 円の角度斜めにするよ
+		float radiusY	= RADIUS  * FLATTEN_RATE;
 		float diameterY = radiusY * 2;
-		float scale = (diameterY - y) / diameterY;				// y座標に応じて変化するよ
+		float scale		= (diameterY - y) / diameterY;				// y座標に応じて変化するよ
 		GLubyte opacity = 255 - (y + radiusY);
 
-		this->items.at(i)->setPosition(Vec2(_pos.x, _pos.y + x));		// 配置座標
-		this->items.at(i)->setScale(scale);													// 拡大率
-		this->items.at(i)->setOpacity(opacity);												// 不透明度
+		this->items.at(i)->setPosition(Vec2(_pos.x, _pos.y + x));	// 配置座標
+		this->items.at(i)->setScale(scale);							// 拡大率
+		this->items.at(i)->setOpacity(opacity);						// 不透明度
 		this->items.at(i)->setZOrder(diameterY - y);
 	}
 	//そーとするよ(´・ω・`)
@@ -249,7 +273,7 @@ void TitleScene::SwipeRotation()
 	{
 		if (_swipeRect.containsPoint(_touchPos))
 		{
-			float delta = touch->getLocation().y - touch->getPreviousLocation().y;
+			float delta  = touch->getLocation().y - touch->getPreviousLocation().y;
 			this->angle += delta;
 			Arrange(POS2);
 		}
@@ -283,7 +307,7 @@ void TitleScene::SwipeRotation(const float roleYDist)
 	// 移動量[スワイプ]
 	listener->onTouchMoved = [&, roleYDist](Touch *touch, Event *event)
 	{
-		float delta = touch->getLocation().y - touch->getPreviousLocation().y;
+		float delta  = touch->getLocation().y - touch->getPreviousLocation().y;
 		this->angle += delta / roleYDist;
 		Arrange(POS, items, UPSIDECNT, DRAWCNT, DEFAULT_SCALE, DIFF_SCALE, DEFAULT_OPACITY, DIFF_SCALE, OFFSET);
 	};
@@ -294,8 +318,8 @@ void TitleScene::SwipeRotation(const float roleYDist)
 		this->angle = roundf(this->angle);
 		Arrange(POS, items, UPSIDECNT, DRAWCNT, DEFAULT_SCALE, DIFF_SCALE, DEFAULT_OPACITY, DIFF_SCALE, OFFSET);
 	};
-	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
 
+	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
 }
 
 // 当たり判定用範囲
@@ -325,6 +349,9 @@ void TitleScene::ObjHit()
 							_clickButton->getPosition().y - _clickButton->getContentSize().height / 2,
 							_clickButton->getContentSize().width,
 							_clickButton->getContentSize().height);
+
+	// スキルのボタン用
+
 }
 
 // 背景
@@ -349,6 +376,11 @@ void TitleScene::TitleBackGroudn()
 	// 表示座標指定
 	bgsprite->setPosition(winSize.width/2, winSize.height/2);
 	this->addChild(bgsprite,0);
+}
+
+const std::vector<SelectName>& TitleScene::GetSelectData()
+{
+	return SelectData;
 }
 
 // 画面遷移

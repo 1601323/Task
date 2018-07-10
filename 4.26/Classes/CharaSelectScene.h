@@ -2,6 +2,7 @@
 #define __Screen__CharaSelectScene__
 #include "cocos2d.h"
 #include <Vector>
+#include <vector>
 
 USING_NS_CC;
 
@@ -45,13 +46,11 @@ private:
 	Sprite *_teamBox;				// チーム編成用
 	Sprite *_okButton;
 
-
 	void Update(float delta);		// アップデート
 	void CharaDraw();				// キャラ表示
 	void CharaText();				// きゃら説明文
-	void Draw();					// 表示	
+	void TeamBoxDraw();				// 表示	
 	void CharaSelectBackGroudn();	// 背景
-	void TestChara();				// 編成表示
 	void ObjHit();					// 当たり判定用
 	void Arrange();					// アレンジ	
 	void SwipeRotation();			// スワイプに合わせて回転
@@ -68,14 +67,10 @@ private:
 
 	// きれいに並べなおしておいてね
 	CCSprite *_Box;
-	CCSprite *_Box1;
 	unsigned int _clickCnt = 0;	// クリック回数を保存
 
 	Sprite *_Pl_BOX;
-	Sprite *_effect;
-	Sprite *_ok;
-
-
+	SpriteBatchNode *_batchNode;
 };
 
 #endif // Title
