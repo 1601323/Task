@@ -85,8 +85,7 @@ bool CharaSelectScene::init()
 	// 登録
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(touchEventGet, this);
 
-	
-	Draw();					// 表示(キャラ以外)
+	TeamBoxDraw();			// 表示(キャラ以外)
 	CharaDraw();			// キャラ表示
 	SwipeRotation();		// スワイプに合わせて回転
 	ObjHit();				// 当たり判定
@@ -116,13 +115,6 @@ bool CharaSelectScene::init()
 bool CharaSelectScene::TouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)
 {
 	//_touchPos = touch->getLocation();
-
-	//// 決定ボタンのところ
-	//if (_ok_rect.containsPoint(_touchPos))
-	//{
-	//	// 画像切り替え押した後のほう
-	//	_ok->setSpriteFrame(Sprite::create("UI/Status/UI_Button_Wait02.png")->getSpriteFrame());
-	//}
 
 	//if (Top)
 	//{
@@ -193,64 +185,35 @@ void CharaSelectScene::TouchEnd(cocos2d::Touch* touch, cocos2d::Event* event)
 {
 	_touchPos = touch->getLocation();
 
-	// 決定ボタンのところ
-	if (_ok_rect.containsPoint(_touchPos))
+	//指定Rect内をクリックしたら説明文表示
+	if (_pl_rect.containsPoint(_touchPos))
 	{
-		// 画像切り替え押した後のほう
-		_ok->setSpriteFrame(Sprite::create("UI/Status/UI_Button_Wait02.png")->getSpriteFrame());
-	}
+		_clickCnt += 1;
 
-	if (Top)
-	{
-		//指定Rect内をクリックしたら説明文表示
-		if (_pl_rect.containsPoint(_touchPos))
+		if (_clickCnt>1)
 		{
-			_clickCnt += 1;
-			if (_clickCnt > 1)
-			{
-				log("説明文たぜ大将！！");
-				CharaText();
-			}
-		
-			if (_clickCnt > 2)
-			{
-				log("チームが編成されたぜ");
-				TestChara();
-				_clickCnt = 1;
-				int i = 0;
-				for (i = 0; i<items.size(); i++)
-				{
-					if (items[i] == Top)
-					{
-						break;
-					}
-					// 追加
-					CharaData.push_back(static_cast<CharaName> (i));
-					log("追加しましたよ%d", i, Top);
-
-				}
-			}
+			CharaText();	// プレイヤーの説明文の表示
+		}
+		else if (_clickCnt > 2)
+		{
+			// No.3 キャラクターのデータを保存
+			// 保存したデータをもとにチーム編成のところに表示
+			_clickCnt = 0;
 		}
 	}
-	// チーム編成の箱をクリックしたとき
+
+	// チーム編成の箱をクリックしたとき[第一範囲]
 	if (_box_rect.containsPoint(_touchPos))
 	{
 		// チーム編成キャンセル
-		if (_clickCnt > 2)
+		//if (_clickCnt > 2)
 		{
 			log("メンバー編成し直したぜ大将!!");
-			_Pl_BOX->removeFromParentAndCleanup(true);
+
+			// No.4 clickされたキャラをCharaDataから消す
+			// 横に(←)詰める
 		}
 	}
-	// その他
-	else {}
-	// 元のボタン画像に戻す
-	if (_ok_rect.containsPoint(_touchPos))
-	{
-		// 画像切り替え
-		_ok->setSpriteFrame(Sprite::create("UI/Status/UI_Button_Wait01.png")->getSpriteFrame());
-	}
-	else {}
 }
 
 // 更新
@@ -301,28 +264,6 @@ void CharaSelectScene::CharaDraw()
 	this->angle = 0.0f;
 	this->Arrange();
 }
-
-//// 文字描画
-//void CharaSelectScene::FontsDraw()
-//{
-//	//画像サイズ取得
-//	Size winSize = Director::getInstance()->getWinSize();
-//	// マルチれぞーしょん対応か
-//	Point origin = Director::getInstance()->getVisibleOrigin();
-//
-//	// スワイプの動いているとこ
-//	// 配置文字
-//	auto swipeLabel = Label::createWithSystemFont("スワイプで動くよ", "fonts/HGRSGU.TTC", 30);
-//	// 配置場所
-//	swipeLabel->setPosition(100, 300);
-//	swipeLabel->setColor(Color3B(200, 150, 0));
-//
-//	// Select追加
-//	this->addChild(swipeLabel, 1);
-//	auto act1 = ScaleTo::create(LIMIT_TIME, DOUBLE_SCALE);   // 0.9秒で0.5倍に拡大
-//	auto act2 = ScaleTo::create(LIMIT_TIME, 1.0f);			 // 0.9秒で元のサイズに戻す
-//	swipeLabel->runAction(RepeatForever::create(Sequence::create(act1, act2, NULL)));  //  延々繰り返し
-//}
 
 // プレイヤー説明文
 void CharaSelectScene::CharaText()
@@ -416,23 +357,26 @@ void CharaSelectScene::CharaText()
 }
 
 // 表示 チーム編成の箱
-void CharaSelectScene::Draw()
+void CharaSelectScene::TeamBoxDraw()
 {
-	_Box			= CCSprite::create("PL_CharFlame01.png");
-	_Box1			= CCSprite::create("PL_CharFlame01.png");
-	CCSprite *_Box2 = CCSprite::create("PL_CharFlame01.png");
+	_batchNode = SpriteBatchNode::create("PL_CharFlame01.png");
+	_batchNode->setPosition(TEAM_BOX_OFFSET_X, 0);
 
-	_Box ->setScale(BOX_SCALE);
-	_Box1->setScale(BOX_SCALE);
-	_Box2->setScale(BOX_SCALE);
+	for (int n = 0; n<3; n++) 
+	{
+		//batchNodeからテクスチャを取得
+		_Box = Sprite::createWithTexture(_batchNode->getTexture());
+		_Box->setScale(BOX_SCALE);
+		
+		//位置に設定
+		_Box->setPosition((TEAM_BOX_X+16)*n, (TEAM_BOX_Y));
 
-	_Box ->setPosition(TEAM_BOX_X+44, TEAM_BOX_Y);
-	_Box1->setPosition(TEAM_BOX_X + TEAM_BOX_OFFSET_X, TEAM_BOX_Y);
-	_Box2->setPosition(TEAM_BOX_X + TEAM_BOX_OFFSET_X * 2 - 44, TEAM_BOX_Y);
+		//SpriteBatchNodeに貼り付ける
+		_batchNode->addChild(_Box);
+	}
 
-	addChild(_Box, 2);
-	addChild(_Box1, 2);
-	addChild(_Box2, 2);
+	//一括貼り付け
+	this->addChild(_batchNode);
 }
 
 // 背景
@@ -457,15 +401,6 @@ void CharaSelectScene::CharaSelectBackGroudn()
 	this->addChild(_backImage,0);
 }
 
-// test表示
-void CharaSelectScene::TestChara()
-{
-	_Pl_BOX = Sprite::create("Player/PL_Attacker_face01.png");
-	_Pl_BOX->setScale(BOX_SCALE);
-	_Pl_BOX->setPosition(165+ 44, 140);
-	addChild(_Pl_BOX, 3);
-}
-
 // 当たり判定用
 void CharaSelectScene::ObjHit()
 {
@@ -479,17 +414,28 @@ void CharaSelectScene::ObjHit()
 	_pl_square->setPosition(430, winSize.height / 2);			// 座標配置
 	//this->addChild(pl_square);								// 追加
 
-	// プレイヤーのRect取得
+	// プレイヤークリック判定範囲
 	_pl_rect = Rect(_pl_square->getPosition().x - _pl_square->getContentSize().width /  2,
 				    _pl_square->getPosition().y - _pl_square->getContentSize().height / 2,
 				    _pl_square->getContentSize().width,
 				    _pl_square->getContentSize().height);
 
 	// チーム編成用枠判定
-	_box_rect = Rect(_Box->getPosition().x - _Box->getContentSize().width / 2,
-					 _Box->getPosition().y - _Box->getContentSize().height / 2,
-					 _Box->getContentSize().width,
-					 _Box->getContentSize().height);
+	//_box_rect = Rect(_Box->getPosition().x - _Box->getContentSize().width / 2,
+	//				 _Box->getPosition().y - _Box->getContentSize().height / 2,
+	//			     _Box->getContentSize().width * BOX_SCALE ,
+	//				 _Box->getContentSize().height * BOX_SCALE );
+
+
+	// No.1当たり判定をきちんとチーム編成の分きちんと対応させる
+	_box_rect = Rect(0, 0, _Box->getContentSize().width * BOX_SCALE, _Box->getContentSize().height * BOX_SCALE);	// 範囲
+	for (int i = 0; i< 3;i++)
+	{
+		_Box = Sprite::create();								// 生成
+		_Box->setTextureRect(_box_rect);						// テクスチャ指定
+		_Box->setPosition((TEAM_BOX_X + 16)*i + TEAM_BOX_OFFSET_X, (TEAM_BOX_Y));			// 座標配置
+		//this->addChild(_Box);
+	}
 }
 
 // アレンジ　回転とか
@@ -541,6 +487,8 @@ void CharaSelectScene::SwipeRotation()
 	// 離した
 	listener->onTouchEnded = [&](Touch *touch, Event *event)
 	{
+		// No.2 SwipeRotation内の離した,押した処理を押した,離した特化の関数内に入れるのか
+
 		// 補正つけますよ
 		// 正の値
 		if (angle>0.f)
@@ -562,40 +510,6 @@ const std::vector<CharaName>& CharaSelectScene::GetCharaData()
 {
 	return CharaData;
 }
-
-/*
-// Clickしたらデータ入れるよ
-//void CharaSelectScene::CharaClick()
-//{
-//	// どれが一番前にいるのかを分かるように調べよう→暗くする処理楽だよ
-//	// 0123にそろえましょうか　//static_cast<CharaData>(1234のやつ-1);
-//
-//	if(Top)
-//	{
-//	// ここら辺の範囲2かいタップしたら
-//		int i = 0;
-//		for (i = 0; i < items.size(); i++)
-//		{
-//			// 
-//			if (items[i] == Top)
-//			{
-//				break;
-//			}
-//			// 追加
-//			CharaData.push_back(static_cast<CharaName> (i));
-//		}
-//			// 選択外の者は暗くする
-//			if (!Top)
-//			{
-//
-//				タップした奴　拡大率で今前のやつを判断
-//
-//				その番号をpushback
-//					//push_back
-//					CharaData.push_back;
-//				}
-//	};
-//}*/
 
 // 次画面遷移
 void CharaSelectScene::pushStart(Ref * pSender)
@@ -628,6 +542,39 @@ void CharaSelectScene::backStart(Ref * pSender)
 	Director::getInstance()->replaceScene(transition);
 }
 
+/*
+// Clickしたらデータ入れるよ
+//void CharaSelectScene::CharaClick()
+//{
+//	// どれが一番前にいるのかを分かるように調べよう→暗くする処理楽だよ
+//	// 0123にそろえましょうか　//static_cast<CharaData>(1234のやつ-1);
+//
+//	if(Top)
+//	{
+//	// ここら辺の範囲2かいタップしたら
+//		int i = 0;
+//		for (i = 0; i < items.size(); i++)
+//		{
+//			//
+//			if (items[i] == Top)
+//			{
+//				break;
+//			}
+//			// 追加
+//			CharaData.push_back(static_cast<CharaName> (i));
+//		}
+//			// 選択外の者は暗くする
+//			if (!Top)
+//			{
+//
+//				タップした奴　拡大率で今前のやつを判断
+//
+//				その番号をpushback
+//					//push_back
+//					CharaData.push_back;
+//				}
+//	};
+//}*/
 
 /*　URL
 http://takachan.hatenablog.com/entry/2017/08/08/002844
@@ -654,10 +601,29 @@ http://vivi.dyndns.org/blog/archives/605
 https://freegame-mugen.jp/roleplaying/game_6860.html
 https://qiita.com/s0hno/items/739b8da8d0ee1375c2cd
 
-
-*/
-
 // コインエフェクト表現
-/*
 http://takachan.hatenablog.com/entry/2017/08/28/213842
+
+// 文字描画
+void CharaSelectScene::FontsDraw()
+{
+	//画像サイズ取得
+	Size winSize = Director::getInstance()->getWinSize();
+	// マルチれぞーしょん対応か
+	Point origin = Director::getInstance()->getVisibleOrigin();
+
+	// スワイプの動いているとこ
+	// 配置文字
+	auto swipeLabel = Label::createWithSystemFont("スワイプで動くよ", "fonts/HGRSGU.TTC", 30);
+	// 配置場所
+	swipeLabel->setPosition(100, 300);
+	swipeLabel->setColor(Color3B(200, 150, 0));
+
+	// Select追加
+	this->addChild(swipeLabel, 1);
+	auto act1 = ScaleTo::create(LIMIT_TIME, DOUBLE_SCALE);   // 0.9秒で0.5倍に拡大
+	auto act2 = ScaleTo::create(LIMIT_TIME, 1.0f);			 // 0.9秒で元のサイズに戻す
+	swipeLabel->runAction(RepeatForever::create(Sequence::create(act1, act2, NULL)));  //  延々繰り返し
+}
+
 */

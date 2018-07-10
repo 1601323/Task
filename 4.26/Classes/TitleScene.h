@@ -5,6 +5,14 @@
 
 USING_NS_CC;
 
+enum class SelectName
+{
+	SELECT_ATTACK,		// 攻撃
+	SELECT_SHIELD,		// 防御
+	SELECT_ITEM,		// アイテム
+	SELECT_SKILL,		// スキル
+};
+
 class TitleScene :public cocos2d::Layer
 {
 public:
@@ -14,6 +22,8 @@ public:
 	CREATE_FUNC(TitleScene);
 	std::vector<cocos2d::Node *> items;
 	void TitleBackGroudn();
+	// 選択された選択情報格納
+	static const std::vector<SelectName>& GetSelectData();
 
 	// スタートボタン押下時の処理宣言 戻る Object →　Ref に変更
 	void pushStart(Ref *pSender);
@@ -21,6 +31,7 @@ public:
 private:
 	int nowSelect;					// 現在選ばれている番号
 	unsigned int _clickCnt = 0;		// クリック回数を保存
+	unsigned int _pushCnt  = 0;		// 押した瞬間用カウント
 	Node* Top;						// 最前にあるものの情報
 	// 行動パターン情報
 	Sprite *_Attack;				// 攻撃
@@ -50,6 +61,8 @@ private:
 	void TouchMove(cocos2d::Touch* touch, cocos2d::Event* event);	// スワイプ中
 	void TouchEnd(cocos2d::Touch* touch, cocos2d::Event* event);	// 離した瞬間
 	EventListenerTouchOneByOne *_listener = EventListenerTouchOneByOne::create();
+
+	static std::vector<SelectName> SelectData;	// 保存する用のデータ
 };
 
 #endif // Title
