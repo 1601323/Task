@@ -2,17 +2,9 @@
 #define __Screen__CharaSelectScene__
 #include "cocos2d.h"
 #include <Vector>
-#include <vector>
+#include "Global.h"
 
 USING_NS_CC;
-
-enum class CharaName
-{
-	CHARA_ATTACKER,		// 小男
-	CHARA_SHIELD,		// 大男
-	CHARA_MAGIC,		// ツイン
-	CHARA_GEALER,		// ケモミミ
-};
 
 class CharaSelectScene :public cocos2d::Layer
 {
@@ -60,7 +52,7 @@ private:
 	void TouchMove(cocos2d::Touch* touch, cocos2d::Event* event);	// スワイプ中
 	void TouchEnd(cocos2d::Touch* touch, cocos2d::Event* event);	// 離した瞬間
 
-	// 保存する用のデータ
+	//// 保存する用のデータ
 	static std::vector<CharaName> CharaData;
 	// click判定
 	EventListenerTouchOneByOne *_listener = EventListenerTouchOneByOne::create();
@@ -71,6 +63,8 @@ private:
 
 	Sprite *_Pl_BOX;
 	SpriteBatchNode *_batchNode;
+
+	void CharaSeveData();
 };
 
 #endif // Title

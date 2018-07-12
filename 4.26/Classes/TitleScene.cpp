@@ -87,12 +87,12 @@ bool TitleScene::init()
 	this->addChild(menu,1);
 	
 	ActSelectDraw();		// キャラ表示
-	SwipeRotation();		// スワイプに合わせて回転
-	//SwipeRotation(ROLE_Y_DIST);
+	//SwipeRotation();		// スワイプに合わせて回転
+	SwipeRotation(ROLE_Y_DIST);
 	ObjHit();
 	
-	Arrange(POS2);
-	//Arrange(POS, items, UPSIDECNT, DRAWCNT, DEFAULT_SCALE, DIFF_SCALE, DEFAULT_OPACITY, DIFF_SCALE, OFFSET);
+	//Arrange(POS2);
+	Arrange(POS, items, UPSIDECNT, DRAWCNT, DEFAULT_SCALE, DIFF_SCALE, DEFAULT_OPACITY, DIFF_SCALE, OFFSET);
 
 	// touchイベント
 	auto touchEventGet = EventListenerTouchOneByOne::create();
@@ -143,7 +143,6 @@ bool TitleScene::TouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)
 // スワイプ中
 void TitleScene::TouchMove(cocos2d::Touch* touch, cocos2d::Event* event)
 {
-
 }
 
 // 離した瞬間
@@ -160,9 +159,7 @@ void TitleScene::TouchEnd(cocos2d::Touch* touch, cocos2d::Event* event)
 			// Arrange1の座標をPOS3の座標に変更
 			// Arrange2の表示
 			// Arrange1のスワイプを切る
-		
 		}
-
 	}
 }
 
@@ -253,7 +250,7 @@ void TitleScene::Arrange(const Vec2 _pos, std::vector<Node*>& _sprite, const int
 	//そーとするよ(´・ω・`)
 	auto tmpVector = _sprite;
 	std::sort(tmpVector.begin(), tmpVector.end(), [](const Node* a, const Node* b)
-		// 先に大きいのtrue /　begin > end ←初めに大きいもの来る＝大きい順になる  
+	// 先に大きいのtrue /　begin > end ←初めに大きいもの来る＝大きい順になる  
 	{return a->getScale() > b->getScale(); });
 	// TOPに一番多きものが入る
 	Top = tmpVector.front();
@@ -395,8 +392,6 @@ void TitleScene::pushStart(Ref *pSender)
 	// 模様左からだんだん...
 	Director::getInstance()->replaceScene(TransitionFadeTR::create(0.7f, CharaSelectScene::createScene()));
 	CCDirector::sharedDirector()->replaceScene(CCTransitionFadeTR::create(2.0f, CharaSelectScene::createScene()));
-
-
 }
 
 // 四角描画
@@ -440,7 +435,3 @@ void TitleScene::TouchArrange(Touch* _touch)
 	// 追加
 	this->addChild(_effect, 10);
 }
-
-/* 要望メモ
-clickしたらあのやつ表示してってやる
-*/
