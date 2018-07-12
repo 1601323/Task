@@ -2,6 +2,7 @@
 #include "FightScene.h"
 #include "GameOver.h"
 #include "TitleScene.h"
+#include "Global.h"
 #include "Imput.h"
 #include <algorithm>
 #include "cocos2d.h"
@@ -91,6 +92,8 @@ bool CharaSelectScene::init()
 	ObjHit();				// 当たり判定
 
 	this->scheduleUpdate();	// 更新	
+
+	CharaData.reserve(3);		// 事前に領域確保
 
 	// ダメージ表示のやつ
 	/*srand((unsigned int)time(nullptr));
@@ -189,31 +192,57 @@ void CharaSelectScene::TouchEnd(cocos2d::Touch* touch, cocos2d::Event* event)
 	if (_pl_rect.containsPoint(_touchPos))
 	{
 		_clickCnt += 1;
-
-		if (_clickCnt>1)
+		if (_clickCnt > 1)
 		{
-			CharaText();	// プレイヤーの説明文の表示
+			log("説明文たぜ大将！！");
+			CharaText();
 		}
-		else if (_clickCnt > 2)
+		if (_clickCnt > 2)
 		{
-			// No.3 キャラクターのデータを保存
-			// 保存したデータをもとにチーム編成のところに表示
-			_clickCnt = 0;
+			log("チームが編成されたぜ");
+			_clickCnt = 1;
+			int i = 0;
+			for (i = 0; i < items.size(); i++)
+			{
+				if (items[i] != Top)
+				{
+					continue;
+				}
+
+				// 例外処理[要素以上の場合]
+				/*auto result = std::find(CharaData.begin(),CharaData.end(),3);
+				if (result == CharaData.end())
+				{
+					log("追加しましたよ%d", i);
+				}*/
+				// 範囲内の場合
+				// 追加
+
+				CharaData.push_back(static_cast<CharaName> (i));
+				//log("追加しましたよ%d", i);
+	
+			}
 		}
 	}
 
-	// チーム編成の箱をクリックしたとき[第一範囲]
-	if (_box_rect.containsPoint(_touchPos))
-	{
-		// チーム編成キャンセル
-		//if (_clickCnt > 2)
-		{
-			log("メンバー編成し直したぜ大将!!");
+	//// チーム編成の箱をクリックしたとき[第一範囲]
+	//if (_box_rect.containsPoint(_touchPos))
+	//{
+	//	// チーム編成キャンセル
+	//	//if (_clickCnt > 2)
+	//	{
+	//		log("メンバー編成し直したぜ大将!!");
+	//		// No.4 clickされたキャラをCharaDataから消す
+	//		// 横に(←)詰める
+	//	}
+	//}
+}
 
-			// No.4 clickされたキャラをCharaDataから消す
-			// 横に(←)詰める
-		}
-	}
+// チーム編成表示
+void CharaSelectScene::CharaSeveData()
+{
+	// CahraDataの読み取る
+	
 }
 
 // 更新
@@ -362,6 +391,7 @@ void CharaSelectScene::TeamBoxDraw()
 	_batchNode = SpriteBatchNode::create("PL_CharFlame01.png");
 	_batchNode->setPosition(TEAM_BOX_OFFSET_X, 0);
 
+	// チーム編成のBox分表示
 	for (int n = 0; n<3; n++) 
 	{
 		//batchNodeからテクスチャを取得
@@ -374,7 +404,6 @@ void CharaSelectScene::TeamBoxDraw()
 		//SpriteBatchNodeに貼り付ける
 		_batchNode->addChild(_Box);
 	}
-
 	//一括貼り付け
 	this->addChild(_batchNode);
 }
@@ -428,12 +457,13 @@ void CharaSelectScene::ObjHit()
 
 
 	// No.1当たり判定をきちんとチーム編成の分きちんと対応させる
+	// なんかうまくいってないからよろしく丸
 	_box_rect = Rect(0, 0, _Box->getContentSize().width * BOX_SCALE, _Box->getContentSize().height * BOX_SCALE);	// 範囲
 	for (int i = 0; i< 3;i++)
 	{
-		_Box = Sprite::create();								// 生成
-		_Box->setTextureRect(_box_rect);						// テクスチャ指定
-		_Box->setPosition((TEAM_BOX_X + 16)*i + TEAM_BOX_OFFSET_X, (TEAM_BOX_Y));			// 座標配置
+		_Box = Sprite::create();													// 生成
+		_Box->setTextureRect(_box_rect);											// テクスチャ指定
+		_Box->setPosition((TEAM_BOX_X + 16)*i + TEAM_BOX_OFFSET_X, (TEAM_BOX_Y));	// 座標配置
 		//this->addChild(_Box);
 	}
 }
