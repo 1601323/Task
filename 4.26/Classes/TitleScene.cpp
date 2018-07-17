@@ -47,6 +47,7 @@ const Vec2 OFFSET				= Vec2(0, -100);		// オフセット(横へのひろがりかえれるよ)
 // 中心
 const Vec2 POS2 = Vec2(410, 650);		// 配置座標410、650
 const Vec2 POS3 = Vec2(5, 650);			// 配置座標410、650
+const Vec2 POS4 = Vec2(100, 650);
 
 // 実態生成
 std::vector<SelectName> TitleScene::SelectData;
@@ -85,15 +86,12 @@ bool TitleScene::init()
 	menu->setPosition(Point::ZERO);
 	// 追加
 	this->addChild(menu,1);
-	
-	ActSelectDraw();		// キャラ表示
-	//SwipeRotation();		// スワイプに合わせて回転
-	SwipeRotation(ROLE_Y_DIST);
-	ObjHit();
-	
-	//Arrange(POS2);
-	Arrange(POS, items, UPSIDECNT, DRAWCNT, DEFAULT_SCALE, DIFF_SCALE, DEFAULT_OPACITY, DIFF_SCALE, OFFSET);
 
+	ActSelectDraw();		// キャラ表示
+	SwipeRotation();		// スワイプに合わせて回転
+	ObjHit();
+	Arrange(POS2);
+	flag = false;
 	// touchイベント
 	auto touchEventGet = EventListenerTouchOneByOne::create();
 	touchEventGet->onTouchBegan = CC_CALLBACK_2(TitleScene::TouchBegan, this);
@@ -117,26 +115,25 @@ bool TitleScene::TouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)
 	TouchArrange(touch);
 
 	_pushCnt++;
-	if (_clickButtunRect.containsPoint(_touchPos))
+
+	//if (_clickButtunRect.containsPoint(_touchPos))
 	{
 		// ボタンをクリックされたら選択肢によって変わる
 		if (_pushCnt>1)
 		{
 			int i = 0;
-			for (i = 0; i<items.size(); i++)
+			for (i = 0; i<selects.size(); i++)
 			{
-				if (items[i] == Top)
+				if (selects[i] != Top)
 				{
 					break;
 				}
 				// 追加
 				SelectData.push_back(static_cast<SelectName> (i));
-				log("選択されましたよ主君%d", i, Top);
 			}
 			_pushCnt = 0;
 		}
 	}
-
 	return true;
 }
 
@@ -151,15 +148,18 @@ void TitleScene::TouchEnd(cocos2d::Touch* touch, cocos2d::Event* event)
 	_touchPos = touch->getLocation();
 
 	_clickCnt++;
-	if (_clickCnt>1)
+
+	if (_clickCnt>2)
 	{
 		if (_clickButtunRect.containsPoint(_touchPos))
 		{
-			//log("ボタンを押されましたか？主君");
+			SelectMove();		// 何選択したか
+
 			// Arrange1の座標をPOS3の座標に変更
 			// Arrange2の表示
 			// Arrange1のスワイプを切る
 		}
+		_clickCnt = 0;
 	}
 }
 
@@ -189,6 +189,77 @@ void TitleScene::ActSelectDraw()
 	}
 	this->angle = 0.0f;
 }
+
+// スキル表示
+void TitleScene::SkillDraw()
+{
+	//画像サイズ取得
+	Size winSize = Director::getInstance()->getWinSize();
+	// マルチれぞーしょん対応か
+	Point origin = Director::getInstance()->getVisibleOrigin();
+
+	_Top	= Sprite::create("UI/Status/UI_Button_Choice01.png");
+	_Belpw	= Sprite::create("UI/Status/UI_Button_Wait01.png");
+	_Belpw1 = Sprite::create("UI/Status/UI_Button_Wait01.png");
+	_Belpw2 = Sprite::create("UI/Status/UI_Button_Wait01.png");
+
+	this->selects.clear();
+	this->selects.push_back(_Top);
+	this->selects.push_back(_Belpw);
+	this->selects.push_back(_Belpw1);
+	this->selects.push_back(_Belpw2);
+
+	// 配置
+	for (auto& item : selects)
+	{
+		this->addChild(item, 0);
+	}
+	this->angle = 0.0f;
+}
+
+// 選択画面
+void TitleScene::SelectMove()
+{
+	//画像サイズ取得
+	Size winSize = Director::getInstance()->getWinSize();
+
+	// 攻撃
+	if (Top == _Attack)
+	{
+		log("攻撃");
+		flag = false;
+	}
+	// 防御
+	else if (Top == _Defence)
+	{
+		log("防御");
+		flag = false;
+	}
+	// アイテム
+	else if (Top == _Item)
+	{
+		log("アイテム");
+		flag = false;
+	}
+	// 
+	else if (Top == _Skill)
+	{
+		flag = true;
+		SkillDraw();
+		log("スキル");
+		flag = true;
+		SwipeRotation(ROLE_Y_DIST);
+		Arrange(POS, selects, UPSIDECNT, DRAWCNT, DEFAULT_SCALE, DIFF_SCALE, DEFAULT_OPACITY, DIFF_SCALE, OFFSET);
+		
+	}
+	// 何もなし
+	else
+	{
+		log("ｴﾗｰですよ");
+	}
+}
+
+
 
 // アレンジ1(配置座標)
 void TitleScene::Arrange(const Vec2 _pos)
@@ -268,19 +339,27 @@ void TitleScene::SwipeRotation()
 	// 移動量[スワイプ]
 	listener->onTouchMoved = [&](Touch *touch, Event *event)
 	{
-		if (_swipeRect.containsPoint(_touchPos))
+		if (flag == false)
 		{
-			float delta  = touch->getLocation().y - touch->getPreviousLocation().y;
-			this->angle += delta;
-			Arrange(POS2);
+			if (_swipeRect.containsPoint(_touchPos))
+			{
+				float delta = touch->getLocation().y - touch->getPreviousLocation().y;
+				this->angle += delta;
+				Arrange(POS2);
+			}
 		}
+		else
+		{
+			//Arrange(POS4);
+		}
+
 	};
 	// 離した
 	listener->onTouchEnded = [&](Touch *touch, Event *event)
 	{
 		// 補正つけますよ
 		// 正の値
-		if (angle>0.f)
+		if (angle > 0.f)
 		{
 			this->angle = (((((static_cast<int>(this->angle)) + DIV_ANGLE_HALF) % 360) / DIV_ANGLE) * DIV_ANGLE);
 		}
@@ -289,7 +368,14 @@ void TitleScene::SwipeRotation()
 		{
 			this->angle = ((((static_cast<int>(this->angle - 360) % 360 - DIV_ANGLE_HALF) % 360) / DIV_ANGLE) * DIV_ANGLE);
 		}
-		Arrange(POS2);
+		if (flag == false)
+		{
+			Arrange(POS2);
+		}
+		else
+		{
+			Arrange(POS4);
+		}
 	};
 	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
 }
@@ -306,14 +392,21 @@ void TitleScene::SwipeRotation(const float roleYDist)
 	{
 		float delta  = touch->getLocation().y - touch->getPreviousLocation().y;
 		this->angle += delta / roleYDist;
-		Arrange(POS, items, UPSIDECNT, DRAWCNT, DEFAULT_SCALE, DIFF_SCALE, DEFAULT_OPACITY, DIFF_SCALE, OFFSET);
+		if (flag == true)
+		{
+			Arrange(POS, selects, UPSIDECNT, DRAWCNT, DEFAULT_SCALE, DIFF_SCALE, DEFAULT_OPACITY, DIFF_SCALE, OFFSET);
+		}
+		
 	};
 
 	// 離した
 	listener->onTouchEnded = [&, roleYDist](Touch *touch, Event *event)
 	{
 		this->angle = roundf(this->angle);
-		Arrange(POS, items, UPSIDECNT, DRAWCNT, DEFAULT_SCALE, DIFF_SCALE, DEFAULT_OPACITY, DIFF_SCALE, OFFSET);
+		if (flag == true)
+		{
+			Arrange(POS, selects, UPSIDECNT, DRAWCNT, DEFAULT_SCALE, DIFF_SCALE, DEFAULT_OPACITY, DIFF_SCALE, OFFSET);
+		}
 	};
 
 	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);

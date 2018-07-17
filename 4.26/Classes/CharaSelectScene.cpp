@@ -93,7 +93,7 @@ bool CharaSelectScene::init()
 
 	this->scheduleUpdate();	// 更新	
 
-	CharaData.reserve(3);		// 事前に領域確保
+	CharaData.reserve(3);	// 事前に領域確保[チーム編成用]
 
 	// ダメージ表示のやつ
 	/*srand((unsigned int)time(nullptr));
@@ -117,62 +117,7 @@ bool CharaSelectScene::init()
 // 押した瞬間
 bool CharaSelectScene::TouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)
 {
-	//_touchPos = touch->getLocation();
-
-	//if (Top)
-	//{
-	//	//指定Rect内をクリックしたら説明文表示
-	//	if (_pl_rect.containsPoint(_touchPos))
-	//	{
-	//		_clickCnt += 1;
-	//		log("説明文たぜ大将！！");
-	//		CharaText();
-	//		if (_clickCnt > 2)
-	//		{
-	//			log("チームが編成されたぜ");
-	//			TestChara();
-	//			_clickCnt = 1;		
-	//			int i = 0;
-	//			for (i = 0; i<items.size(); i++)
-	//			{
-	//				if (items[i] == Top)
-	//				{
-	//					break;
-	//				}
-	//				// 追加
-	//				CharaData.push_back(static_cast<CharaName> (i));
-	//				log("追加しましたよ%d", i,Top);
-
-	//			}
-	//		}
-	//	}
-	//}
-
-	//////指定Rect内をクリックしたら説明文表示
-	////if (pl_rect.containsPoint(touchPos))
-	////{
-	////	clickCnt += 1;
-	////	log("説明文たぜ大将！！");
-	////	charaText();
-	////	if (clickCnt > 2)
-	////	{
-	////		log("チームが編成されたぜ");
-	////		testChara();
-	////		clickCnt = 1;
-	////	}
-	////}
-	//// チーム編成の箱をクリックしたとき
-	//if (_box_rect.containsPoint(_touchPos))
-	//{
-	//	// チーム編成キャンセル
-	//	if (_clickCnt > 2 )
-	//	{
-	//		log("メンバー編成し直したぜ大将!!");
-	//		_Pl_BOX->removeFromParentAndCleanup(true);
-	//	}
-	//}
-	//// その他
-	//else {}
+	_touchPos = touch->getLocation();
 
 	return true;
 }
@@ -194,8 +139,7 @@ void CharaSelectScene::TouchEnd(cocos2d::Touch* touch, cocos2d::Event* event)
 		_clickCnt += 1;
 		if (_clickCnt > 1)
 		{
-			log("説明文たぜ大将！！");
-			CharaText();
+			CharaText();	// キャラ説明文
 		}
 		if (_clickCnt > 2)
 		{
@@ -210,16 +154,15 @@ void CharaSelectScene::TouchEnd(cocos2d::Touch* touch, cocos2d::Event* event)
 				}
 
 				// 例外処理[要素以上の場合]
-				/*auto result = std::find(CharaData.begin(),CharaData.end(),3);
-				if (result == CharaData.end())
-				{
-					log("追加しましたよ%d", i);
-				}*/
 				// 範囲内の場合
 				// 追加
-
+				//if (CharaData.size== 3)
+				{
+					//break;
+					log("メンツおｋ",CharaData);
+				}
 				CharaData.push_back(static_cast<CharaName> (i));
-				//log("追加しましたよ%d", i);
+				log("追加しましたよ%d", i);
 	
 			}
 		}
@@ -297,6 +240,9 @@ void CharaSelectScene::CharaDraw()
 // プレイヤー説明文
 void CharaSelectScene::CharaText()
 {
+	// 追加でプレイヤーの役割も追加してほしいな
+	// Labelは2個で　1つはキャラの説明文,1つはキャラ名表示用
+
 	//画像サイズ取得
 	Size winSize = Director::getInstance()->getWinSize();
 	// マルチれぞーしょん対応か
