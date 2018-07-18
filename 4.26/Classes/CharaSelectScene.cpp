@@ -90,7 +90,7 @@ bool CharaSelectScene::init()
 	CharaDraw();			// キャラ表示
 	SwipeRotation();		// スワイプに合わせて回転
 	ObjHit();				// 当たり判定
-
+	_changeFlag = false;
 	this->scheduleUpdate();	// 更新	
 
 	CharaData.reserve(3);	// 事前に領域確保[チーム編成用]
@@ -132,6 +132,7 @@ void CharaSelectScene::TouchMove(cocos2d::Touch* touch, cocos2d::Event* event)
 void CharaSelectScene::TouchEnd(cocos2d::Touch* touch, cocos2d::Event* event)
 {
 	_touchPos = touch->getLocation();
+	Top->pause();
 
 	//指定Rect内をクリックしたら説明文表示
 	if (_pl_rect.containsPoint(_touchPos))
@@ -139,6 +140,7 @@ void CharaSelectScene::TouchEnd(cocos2d::Touch* touch, cocos2d::Event* event)
 		_clickCnt += 1;
 		if (_clickCnt > 1)
 		{
+			_changeFlag = true;
 			CharaText();	// キャラ説明文
 		}
 		if (_clickCnt > 2)
@@ -191,6 +193,7 @@ void CharaSelectScene::CharaSeveData()
 // 更新
 void CharaSelectScene::Update(float delta)
 {
+	
 }
 
 // キャラ表示
@@ -260,6 +263,9 @@ void CharaSelectScene::CharaText()
 		"魔法攻撃で敵を攻撃するもよし\n見方を強化してサポートしてもよし\n二つの顔を持つマジシャン");
 	auto label4 = Label::createWithTTF(ttfConfig,
 		"回復のスペシャリストと思いきや\n敵の弱体化もお任せ\nデバフ系ヒーラー");
+
+	auto act1 = ScaleTo::create(LIMIT_TIME, 1.2);   // 0.9秒で0.5倍に拡大
+	auto act2 = ScaleTo::create(LIMIT_TIME, 1.0f);			 // 0.9秒で元のサイズに戻す
 	
 	// アタッカー
 	if (Top == _PL_Attacker)
@@ -274,6 +280,8 @@ void CharaSelectScene::CharaText()
 		if (int tag = label1->getTag() != 1)
 		{
 			this->addChild(label1, 6);
+			
+			_PL_Attacker->runAction(RepeatForever::create(Sequence::create(act1, act2, NULL)));  //  延々繰り返し*/
 		}
 	}
 	// シールド
@@ -290,6 +298,7 @@ void CharaSelectScene::CharaText()
 		if (int tag = label2->getTag() != 1)
 		{
 			this->addChild(label2, 6);
+			_PL_Shield->runAction(RepeatForever::create(Sequence::create(act1, act2, NULL)));  //  延々繰り返し*/
 		}
 	}
 	// 魔法
@@ -306,6 +315,7 @@ void CharaSelectScene::CharaText()
 		if (int tag = label3->getTag() != 1)
 		{
 			this->addChild(label3, 6);
+			_PL_Magic->runAction(RepeatForever::create(Sequence::create(act1, act2, NULL)));  //  延々繰り返し*/
 		}
 
 	}
@@ -323,6 +333,7 @@ void CharaSelectScene::CharaText()
 		if (int tag = label4->getTag() != 1)
 		{
 			this->addChild(label4, 6);
+			_PL_Healer->runAction(RepeatForever::create(Sequence::create(act1, act2, NULL)));  //  延々繰り返し*/
 		}
 	}
 	else
@@ -361,12 +372,15 @@ void CharaSelectScene::CharaSelectBackGroudn()
 	Size winSize = Director::getInstance()->getWinSize();
 	// マルチれぞーしょん対応か
 	Point origin = Director::getInstance()->getVisibleOrigin();
-
-	// 説明文の板配置
-	Sprite *_fontBoard = Sprite::create("UI/Status/UI_Status_Inters.png");
+	
+	 //説明文の板配置
+	_fontBoard = Sprite::create("UI/Status/UI_Status_Inters.png");
 	// 配置
 	_fontBoard->setPosition(winSize.width / 2, 1130);
-	this->addChild(_fontBoard, 1);
+	//if (_changeFlag == true)
+	{
+		this->addChild(_fontBoard, 1);
+	}
 
 	// 背景画像追加
 	Sprite* _backImage = Sprite::create("BackImage/ST_CharSerect2.png");
@@ -443,7 +457,7 @@ void CharaSelectScene::Arrange()
 	// 先に大きいのtrue /　begin > end ←初めに大きいもの来る＝大きい順になる  
 	{return a->getScale() > b->getScale(); });
 	// TOPに一番多きものが入る
-	Top = tmpVector.front();
+	Top = tmpVector.front();	
 }
 
 // スワイプに合わせて回転

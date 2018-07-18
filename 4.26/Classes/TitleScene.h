@@ -69,6 +69,11 @@ private:
 	void TouchArrange(Touch* _touch);			// タッチしたところエフェクト
 	void SelectMove();							// 選択画面
 
+	/*//////////
+	///仮表示///
+	//////////*/
+	void TestPLDraw();							// 仮ボス
+
 	// touchイベント
 	bool TouchBegan(cocos2d::Touch* touch, cocos2d::Event* event);	// 押した瞬間
 	void TouchMove(cocos2d::Touch* touch, cocos2d::Event* event);	// スワイプ中

@@ -60,8 +60,10 @@ private:
 	// ‚«‚ê‚¢‚É•À‚×‚È‚¨‚µ‚Ä‚¨‚¢‚Ä‚Ë
 	CCSprite *_Box;
 	unsigned int _clickCnt = 0;	// ƒNƒŠƒbƒN‰ñ”‚ğ•Û‘¶
+	bool _changeFlag;
 
 	Sprite *_Pl_BOX;
+	Sprite *_fontBoard;
 	SpriteBatchNode *_batchNode;
 
 	void CharaSeveData();
@@ -175,3 +177,11 @@ this->minY = min;
 this->maxY = max;
 }
 */
+
+
+
+/* Select’Ç‰Á
+this->addChild(swipeLabel, 1);
+auto act1 = ScaleTo::create(LIMIT_TIME, DOUBLE_SCALE);   // 0.9•b‚Å0.5”{‚ÉŠg‘å
+auto act2 = ScaleTo::create(LIMIT_TIME, 1.0f);			 // 0.9•b‚ÅŒ³‚ÌƒTƒCƒY‚É–ß‚·
+swipeLabel->runAction(RepeatForever::create(Sequence::create(act1, act2, NULL)));  //  ‰„XŒJ‚è•Ô‚µ*/

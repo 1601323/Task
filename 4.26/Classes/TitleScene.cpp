@@ -34,10 +34,11 @@ const float DELETE				   = 1.5f;
 const unsigned int TOUCH_RADIUS    = 25;
 
 // アレンジ用
+const int SCALE					= 5;					// 引数(座標)用のスケール
 const int UPSIDECNT				= 3;					// 上に表示する個数
 const int DRAWCNT				= 6;					// 表示する個数(総数)
 const float DEFAULT_SCALE		= 1.f;					// 通常拡大率
-const float DIFF_SCALE			= 0.15f;				// 拡大率
+const float DIFF_SCALE			= 0.15;					// 拡大率0.15
 const float ROLE_Y_DIST			= 0.05f;				// 回転する際の移動量(数字を大きくすると余計に動く)
 const GLubyte DEFAULT_OPACITY	= 255;					// 通常不透明度			
 const GLubyte DIFF_OPACITY		= 0;					// 不透明度
@@ -45,9 +46,11 @@ const Vec2 POS					= Vec2(600, 650);		// 配置座標410、650
 const Vec2 OFFSET				= Vec2(0, -100);		// オフセット(横へのひろがりかえれるよ)
 
 // 中心
-const Vec2 POS2 = Vec2(410, 650);		// 配置座標410、650
-const Vec2 POS3 = Vec2(5, 650);			// 配置座標410、650
-const Vec2 POS4 = Vec2(100, 650);
+const Vec2 POS2		= Vec2(410, 650);		// 配置座標410、650
+const Vec2 POS3		= Vec2(  5, 650);		// 配置座標410、650
+const Vec2 POS4		= Vec2(40, 650);		// 変更後の座標
+const Vec2 POSKILL	= Vec2(490, 550);		// 配置座標410、650		スキル用のやつ
+
 
 // 実態生成
 std::vector<SelectName> TitleScene::SelectData;
@@ -87,6 +90,7 @@ bool TitleScene::init()
 	// 追加
 	this->addChild(menu,1);
 
+	TestPLDraw();			// 仮ボス表示(後で消しておいてよ)
 	ActSelectDraw();		// キャラ表示
 	SwipeRotation();		// スワイプに合わせて回転
 	ObjHit();
@@ -106,6 +110,18 @@ bool TitleScene::init()
 	//RectDraw(0,0,490,180, winSize.width / 2 - 10, winSize.height / 2 - 30);
 	//RectDraw(0, 0, 490, 180, 5, winSize.height / 2 - 30);
 	return true;
+}
+
+// 仮ボス表示
+void TitleScene::TestPLDraw()
+{
+	//画像サイズ取得
+	Size winSize = Director::getInstance()->getWinSize();
+	
+	Sprite *Boss = Sprite::create("Enemy/EM_Valkyrie.png");
+	Boss->setPosition(winSize.width/2,winSize.height/2+100
+	);
+	addChild(Boss,2);
 }
 
 // 押した瞬間
@@ -249,7 +265,7 @@ void TitleScene::SelectMove()
 		log("スキル");
 		flag = true;
 		SwipeRotation(ROLE_Y_DIST);
-		Arrange(POS, selects, UPSIDECNT, DRAWCNT, DEFAULT_SCALE, DIFF_SCALE, DEFAULT_OPACITY, DIFF_SCALE, OFFSET);
+		Arrange(POSKILL, selects, UPSIDECNT, DRAWCNT, DEFAULT_SCALE, DIFF_SCALE, DEFAULT_OPACITY, DIFF_SCALE, OFFSET);
 		
 	}
 	// 何もなし
@@ -258,8 +274,6 @@ void TitleScene::SelectMove()
 		log("ｴﾗｰですよ");
 	}
 }
-
-
 
 // アレンジ1(配置座標)
 void TitleScene::Arrange(const Vec2 _pos)
@@ -276,7 +290,7 @@ void TitleScene::Arrange(const Vec2 _pos)
 		float y			= RADIUS  * sin(radians) * FLATTEN_RATE;	// 円の角度斜めにするよ
 		float radiusY	= RADIUS  * FLATTEN_RATE;
 		float diameterY = radiusY * 2;
-		float scale		= (diameterY - y) / diameterY;				// y座標に応じて変化するよ
+		float scale		= (diameterY - y - SCALE) / diameterY ;		// y座標に応じて変化するよ
 		GLubyte opacity = 255 - (y + radiusY);
 
 		this->items.at(i)->setPosition(Vec2(_pos.x, _pos.y + x));	// 配置座標
@@ -309,10 +323,10 @@ void TitleScene::Arrange(const Vec2 _pos, std::vector<Node*>& _sprite, const int
 		// 総枚数　% 総枚数= 現在の番号わかる
 		auto index = ((i + j) + _sprite.size()) % _sprite.size();
 		// 
-		_sprite[index]->setPosition(POS + Vec2(OFFSET.x * abs(i), OFFSET.y * (i)));
+		_sprite[index]->setPosition(POSKILL + Vec2(OFFSET.x * abs(i), OFFSET.y * (i)));
 		// 
 		//_sprite[index]->setScale(_defaultScale - (abs(i) * _diffScale));
-		_sprite[index]->setScale(i == 0 ? _defaultScale : _defaultScale - _diffScale);
+		_sprite[index]->setScale(i == 0 ? _defaultScale : _defaultScale - _diffScale) ;
 		// 
 		_sprite[index]->setOpacity(_defaultOpacity - (abs(i) * _diffOpacity));
 		// 
