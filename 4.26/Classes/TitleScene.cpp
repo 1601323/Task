@@ -90,12 +90,14 @@ bool TitleScene::init()
 	// 追加
 	this->addChild(menu,1);
 
+	flag = false;
+
 	TestPLDraw();			// 仮ボス表示(後で消しておいてよ)
 	ActSelectDraw();		// キャラ表示
 	SwipeRotation();		// スワイプに合わせて回転
-	ObjHit();
+	ObjHit();				// 当たり判定用
 	Arrange(POS2);
-	flag = false;
+
 	// touchイベント
 	auto touchEventGet = EventListenerTouchOneByOne::create();
 	touchEventGet->onTouchBegan = CC_CALLBACK_2(TitleScene::TouchBegan, this);
@@ -104,11 +106,7 @@ bool TitleScene::init()
 
 	// 登録
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(touchEventGet, this);
-	// スワイプ範囲
-	//RectDraw(0, 0, 550, 490,winSize.width / 2 - 10, winSize.height / 2 - 30);
-	// clickボタン範囲
-	//RectDraw(0,0,490,180, winSize.width / 2 - 10, winSize.height / 2 - 30);
-	//RectDraw(0, 0, 490, 180, 5, winSize.height / 2 - 30);
+
 	return true;
 }
 
@@ -261,12 +259,10 @@ void TitleScene::SelectMove()
 	else if (Top == _Skill)
 	{
 		flag = true;
-		SkillDraw();
-		log("スキル");
-		flag = true;
+		SkillDraw();		// スキル一覧表示
 		SwipeRotation(ROLE_Y_DIST);
 		Arrange(POSKILL, selects, UPSIDECNT, DRAWCNT, DEFAULT_SCALE, DIFF_SCALE, DEFAULT_OPACITY, DIFF_SCALE, OFFSET);
-		
+		log("スキル");
 	}
 	// 何もなし
 	else
@@ -523,7 +519,7 @@ void TitleScene::TouchArrange(Touch* _touch)
 	// 配置座標
 	_circle->setPosition(_touchPos);
 
-	Sprite *_effect = Sprite::create("effect_cure01_0001.png");
+	Sprite *_effect = Sprite::create("Touch/effect_cure01_0001.png");
 	_effect->setPosition(_touchPos);
 
 	// アニメーション追加

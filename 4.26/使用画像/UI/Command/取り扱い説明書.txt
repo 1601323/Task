@@ -1,0 +1,30 @@
+
+名前（取説が一番下にくる）順番で書いていきます
+
+
+UI_Button_Attack01：ボスバトルで使用するボタンです。押してない状態です。
+UI_Button_Attack02：ボスバトルで使用するボタンです。UI_Button_Attack01の押した状態です。
+
+UI_Button_Back　　：キャラセレで使用するボタンです。一つ前に戻ります。
+
+UI_Button_Choice01：ボスバトルで使用するボタンです。UI_Button_Skill01・UI_Button_Item01を押した後に出てくる、
+						　　各種スキル・アイテムの今選択しているコマンドを指すボタンです。
+
+UI_Button_Defence01:ボスバトルで使用するボタンです。押してない状態です。
+UI_Button_Defence02：ボスバトルで使用するボタンです。UI_Button_Defence01の押した状態です。
+
+UI_Button_Go	  ：フィールドバトルで使用するボタンです。押すとボスバトルに移動します。
+UI_Button_GoBoss  ：フィールドバトルで使用するボタンです。押すとボスバトルに移動するかどうか選択します。
+UI_Button_GoN	  ：フィールドバトルで使用するボタンです。押すとボスバトルに移動するのをやめます。
+
+UI_Button_Item01　：ボスバトルで使用するボタンです。押してない状態です。
+UI_Button_Item02　：ボスバトルで使用するボタンです。UI_Button_Item01の押した状態です。
+
+UI_Button_Next01　：キャラセレで使用するボタンです。次に進みます。(名前変更済
+UI_Button_Next02  ：キャラセレで使用するボタンです。UI_Butoon_Next01の押した状態です。(新規
+
+UI_Button_Skill01 ：ボスバトルで使用するボタンです。押してない状態です。
+UI_Button_Skill02 ：ボスバトルで使用するボタンです。UI_Button_Skill01の押した状態です
+
+UI_Button_Wait01　：ボスバトルで使用するボタンです。UI_Button_Skill01・UI_Button_Item01を押した後に出てくる、
+						　　各種スキル・アイテムの今選択していないコマンドを指すボタンです。
