@@ -23,7 +23,11 @@ public:
 
 
 private:
+	unsigned int _clickCnt = 0;		// クリック回数を保存
+	bool _changeFlag;				// キャラクター切り替え用Flag
 	Node* Top;
+	Sprite *_fontBoard;				// 説明文の背景板
+	SpriteBatchNode *_batchNode;
 	// キャラ情報
 	Sprite *_PL_Attacker;			// ｱﾀｯｶｰ(小男)
 	Sprite *_PL_Shield;				// 守備(大男)
@@ -37,15 +41,18 @@ private:
 	Sprite *_pl_square;				// プレイヤーのスプライト
 	Sprite *_teamBox;				// チーム編成用
 	Sprite *_okButton;
+	CCSprite *_Box;					// チーム用のSprite
 
 	void Update(float delta);		// アップデート
 	void CharaDraw();				// キャラ表示
-	void CharaText();				// きゃら説明文
+	void CharaText();				// キャラ説明文
 	void TeamBoxDraw();				// 表示	
 	void CharaSelectBackGroudn();	// 背景
 	void ObjHit();					// 当たり判定用
 	void Arrange();					// アレンジ	
 	void SwipeRotation();			// スワイプに合わせて回転
+	void AddTeam();					// チーム編成用
+	void CharaSeveData();
 					
 	// touchイベント
 	bool TouchBegan(cocos2d::Touch* touch, cocos2d::Event* event);	// 押した瞬間
@@ -58,130 +65,7 @@ private:
 	EventListenerTouchOneByOne *_listener = EventListenerTouchOneByOne::create();
 
 	// きれいに並べなおしておいてね
-	CCSprite *_Box;
-	unsigned int _clickCnt = 0;	// クリック回数を保存
-	bool _changeFlag;
-
-	Sprite *_Pl_BOX;
-	Sprite *_fontBoard;
-	SpriteBatchNode *_batchNode;
-
-	void CharaSeveData();
+	// テスト用
 };
 
 #endif // Title
-
-/*
-_listener->onTouchBegan = [&](Touch * touch, Event *event)
-{
-}
-listener->onTouchMoved = [&](Touch *touch, Event *event)
-{
-	this->removeChildByTag(PL_TAG);
-};
-// 離した
-_listener->onTouchEnded = [&](Touch *touch, Event *event)
-{
-};
-this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(_listener, this);
-
-*/
-
-/*
-	// 生成個数
-	const unsigned int minCnt = 8;		// 最小生成量
-	const unsigned int maxCnt = 20;		// 最大生成量
-										// 実行時間	
-	float minTime = 0.2f;
-	float maxTime = 0.35;
-	// 飛び跳ねる高さ
-	float minHeight = 12.0f;
-	float maxHeight = 22.0f;
-	// 広がる幅
-	float minX = -18.0f;
-	float maxX = 18.0;
-	// 広がる高さ
-	float minY = -14.0f;
-	float maxY = 0;
-	//Sprite *effect;
-
-// 指定した速度で開始
-	void runEffect(Sprite *effect);
-	// アニメーション実行
-	void setStart(const float min,const float max);
-	// 飛び跳ねる高さ
-	void setJumpHeight(const float min,const float max);
-	// 広がる範囲X
-	void setWidth(const float min,const float max);
-	// 広がる範囲Y
-	void setHeight(const float min,const float max);
-	// 最後に自分削除
-	void updateSelf();
-
-void CharaSelectScene::runEffect(Sprite *effect)
-{
-int max = random(this->minTime,this->maxTime);
-for (int i = 0; i < maxTime; i++)
-{
-effect = Sprite::create("effect_cure01_0000.png"); //"effect_cure01_0000.png"
-float baseTime = random(minTime, maxTime);
-float baseHeight = random(minHeight, maxHeight);
-float baseVecX = random(minX, maxX);
-float baseVecY = random(minY, maxY);
-
-// だんだんバウンド小さく
-// 時間、幅(X,Y)、高さ、要素数
-auto jump1 = JumpBy::create(baseTime,Vec2(baseVecX, baseVecY), baseHeight,1);
-auto jump2 = JumpBy::create(baseTime*0.8, Vec2(baseVecX/2, baseVecY/2), baseHeight/2, 1);
-auto jump3 = JumpBy::create(baseTime*0.6, Vec2(baseVecX/4, baseVecY/4), baseHeight/4, 1);
-
-auto dele = DelayTime::create(1.0f);
-auto lastFunc = CallFuncN::create([this](Node* node)
-{
-node->removeFromParentAndCleanup(true);
-this->updateSelf();
-});
-
-effect->runAction(Sequence::create(jump1, jump2, jump3, dele,nullptr));
-
-this->updateSelf();
-}
-}
-//
-void CharaSelectScene::updateSelf()
-{
-this->removeFromParentAndCleanup(true);
-}
-// アニメーション実行
-void CharaSelectScene::setStart(float min, const float max)
-{
-this->minTime = min;
-this->maxTime = max;
-}
-// 飛び跳ねる高さ
-void CharaSelectScene::setJumpHeight(float min, const float max)
-{
-this->minHeight = min;
-this->maxHeight = max;
-}
-// 広がり方X
-void CharaSelectScene::setWidth(float min, const float max)
-{
-this->minX = min;
-this->maxX = max;
-}
-// 広がり方Y
-void CharaSelectScene::setHeight(float min, const float max)
-{
-this->minY = min;
-this->maxY = max;
-}
-*/
-
-
-
-/* Select追加
-this->addChild(swipeLabel, 1);
-auto act1 = ScaleTo::create(LIMIT_TIME, DOUBLE_SCALE);   // 0.9秒で0.5倍に拡大
-auto act2 = ScaleTo::create(LIMIT_TIME, 1.0f);			 // 0.9秒で元のサイズに戻す
-swipeLabel->runAction(RepeatForever::create(Sequence::create(act1, act2, NULL)));  //  延々繰り返し*/

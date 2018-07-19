@@ -141,46 +141,14 @@ void CharaSelectScene::TouchEnd(cocos2d::Touch* touch, cocos2d::Event* event)
 		if (_clickCnt > 1)
 		{
 			_changeFlag = true;
-			CharaText();	// キャラ説明文
+			CharaText();			// キャラ説明文
 		}
 		if (_clickCnt > 2)
 		{
-			log("チームが編成されたぜ");
+			AddTeam();				// チーム追加用
 			_clickCnt = 1;
-			int i = 0;
-			for (i = 0; i < items.size(); i++)
-			{
-				if (items[i] != Top)
-				{
-					continue;
-				}
-
-				// 例外処理[要素以上の場合]
-				// 範囲内の場合
-				// 追加
-				//if (CharaData.size== 3)
-				{
-					//break;
-					log("メンツおｋ",CharaData);
-				}
-				CharaData.push_back(static_cast<CharaName> (i));
-				log("追加しましたよ%d", i);
-	
-			}
 		}
 	}
-
-	//// チーム編成の箱をクリックしたとき[第一範囲]
-	//if (_box_rect.containsPoint(_touchPos))
-	//{
-	//	// チーム編成キャンセル
-	//	//if (_clickCnt > 2)
-	//	{
-	//		log("メンバー編成し直したぜ大将!!");
-	//		// No.4 clickされたキャラをCharaDataから消す
-	//		// 横に(←)詰める
-	//	}
-	//}
 }
 
 // チーム編成表示
@@ -193,7 +161,6 @@ void CharaSelectScene::CharaSeveData()
 // 更新
 void CharaSelectScene::Update(float delta)
 {
-	
 }
 
 // キャラ表示
@@ -345,7 +312,7 @@ void CharaSelectScene::CharaText()
 // 表示 チーム編成の箱
 void CharaSelectScene::TeamBoxDraw()
 {
-	_batchNode = SpriteBatchNode::create("PL_CharFlame01.png");
+	_batchNode = SpriteBatchNode::create("UI/PL_CharFlame01.png");
 	_batchNode->setPosition(TEAM_BOX_OFFSET_X, 0);
 
 	// チーム編成のBox分表示
@@ -501,6 +468,38 @@ const std::vector<CharaName>& CharaSelectScene::GetCharaData()
 	return CharaData;
 }
 
+// チーム追加用
+void CharaSelectScene::AddTeam()
+{
+	int i = 0;
+	for (i = 0; i < items.size(); i++)
+	{
+		if (items[i] != Top)
+		{
+			continue;
+		}
+		// 例外処理入れてね　おんなじキャラ選べないとか
+		if (CharaData.size() == 3)
+		{
+			log("メンバーが揃いました", CharaData);
+			break;
+		}
+		CharaData.push_back(static_cast<CharaName> (i));
+		log("追加されました。%d", i);
+	}
+	//// チーム編成の箱をクリックしたとき[第一範囲]
+	//if (_box_rect.containsPoint(_touchPos))
+	//{
+	//	// チーム編成キャンセル
+	//	//if (_clickCnt > 2)
+	//	{
+	//		log("メンバー編成し直したぜ大将!!");
+	//		// No.4 clickされたキャラをCharaDataから消す
+	//		// 横に(←)詰める
+	//	}
+	//}
+}
+
 // 次画面遷移
 void CharaSelectScene::pushStart(Ref * pSender)
 {
@@ -531,40 +530,6 @@ void CharaSelectScene::backStart(Ref * pSender)
 	// 遷移実行 アニメーション
 	Director::getInstance()->replaceScene(transition);
 }
-
-/*
-// Clickしたらデータ入れるよ
-//void CharaSelectScene::CharaClick()
-//{
-//	// どれが一番前にいるのかを分かるように調べよう→暗くする処理楽だよ
-//	// 0123にそろえましょうか　//static_cast<CharaData>(1234のやつ-1);
-//
-//	if(Top)
-//	{
-//	// ここら辺の範囲2かいタップしたら
-//		int i = 0;
-//		for (i = 0; i < items.size(); i++)
-//		{
-//			//
-//			if (items[i] == Top)
-//			{
-//				break;
-//			}
-//			// 追加
-//			CharaData.push_back(static_cast<CharaName> (i));
-//		}
-//			// 選択外の者は暗くする
-//			if (!Top)
-//			{
-//
-//				タップした奴　拡大率で今前のやつを判断
-//
-//				その番号をpushback
-//					//push_back
-//					CharaData.push_back;
-//				}
-//	};
-//}*/
 
 /*　URL
 http://takachan.hatenablog.com/entry/2017/08/08/002844

@@ -33,7 +33,7 @@ private:
 	int nowSelect;					// 現在選ばれている番号
 	unsigned int _clickCnt = 0;		// クリック回数を保存
 	unsigned int _pushCnt  = 0;		// 押した瞬間用カウント
-	bool flag;
+	bool flag;						// 切り替え用のFlag
 	Node* Top;						// 最前にあるものの情報
 	// 行動パターン情報
 	Sprite *_Attack;				// 攻撃
@@ -44,7 +44,6 @@ private:
 	Sprite *_Belpw;					// 他
 	Sprite *_Belpw1;				// 他
 	Sprite *_Belpw2;				// 他
-
 	// 当たり判定用
 	Vec2 _touchPos;					// 現在座標
 	Rect _swipeRect;				// スワイプ用の判定範囲
@@ -52,14 +51,10 @@ private:
 	Sprite *_swipe;					// スワイプ用スプライト
 	Sprite *_clickButton;			// クリック用スプライト
 	Sprite *_ChoiceSkill;			// 選択スキル
-
-	Vec2 _pos;
-
-	static std::vector<SelectName> SelectData;	// 保存する用のデータ
+	Vec2 _pos;						// 座標
 
 	void ActSelectDraw();						// 表示
 	void SkillDraw();							// スキル表示
-	
 	void Arrange(const Vec2 _pos);				// 角度調整
 	void Arrange(const Vec2 _pos, std::vector<Node*>& _sprite, const int _upSideCnt, const int _drawCnt, const float _defaultScale, const float _diffScale, const GLubyte _defaultOpacity, const GLubyte _diffOpacity, const Vec2 _offset);										// (配置座標,スプライト,上に表示する数,総表示数,通常拡大率,拡大率,通常透過,透過,X軸への広がり)
 	void SwipeRotation();						// 回転
@@ -69,16 +64,19 @@ private:
 	void TouchArrange(Touch* _touch);			// タッチしたところエフェクト
 	void SelectMove();							// 選択画面
 
-	/*//////////
-	///仮表示///
-	//////////*/
-	void TestPLDraw();							// 仮ボス
+	static std::vector<SelectName> SelectData;	// 保存する用のデータ
 
 	// touchイベント
 	bool TouchBegan(cocos2d::Touch* touch, cocos2d::Event* event);	// 押した瞬間
 	void TouchMove(cocos2d::Touch* touch, cocos2d::Event* event);	// スワイプ中
 	void TouchEnd(cocos2d::Touch* touch, cocos2d::Event* event);	// 離した瞬間
 	EventListenerTouchOneByOne *_listener = EventListenerTouchOneByOne::create();
+
+
+	/*//////////
+	///仮表示///
+	//////////*/
+	void TestPLDraw();							// 仮ボス
 };
 
 #endif // Title
