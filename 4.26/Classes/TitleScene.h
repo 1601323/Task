@@ -3,6 +3,7 @@
 
 #include "cocos2d.h"
 
+
 USING_NS_CC;
 
 enum class SelectName
@@ -36,21 +37,21 @@ private:
 	bool flag;						// 切り替え用のFlag
 	Node* Top;						// 最前にあるものの情報
 	// 行動パターン情報
-	Sprite *_Attack;				// 攻撃
-	Sprite *_Defence;				// 防御
-	Sprite *_Item;					// アイテム
-	Sprite *_Skill;					// スキル
-	Sprite *_Top;					// 先頭
-	Sprite *_Belpw;					// 他
-	Sprite *_Belpw1;				// 他
-	Sprite *_Belpw2;				// 他
+	Sprite *_s_Attack;				// 攻撃
+	Sprite *_s_Defence;				// 防御
+	Sprite *_s_Item;				// アイテム
+	Sprite *_s_Skill;				// スキル
+	Sprite *_s_Top;					// 先頭
+	Sprite *_s_Belpw;				// 他
+	Sprite *_s_Belpw1;				// 他
+	Sprite *_s_Belpw2;				// 他
 	// 当たり判定用
 	Vec2 _touchPos;					// 現在座標
-	Rect _swipeRect;				// スワイプ用の判定範囲
-	Rect _clickButtunRect;			// ボタンのクリック判定
-	Sprite *_swipe;					// スワイプ用スプライト
-	Sprite *_clickButton;			// クリック用スプライト
-	Sprite *_ChoiceSkill;			// 選択スキル
+	Rect _r_swipeRect;				// スワイプ用の判定範囲
+	Rect _r_clickButtunRect;		// ボタンのクリック判定
+	Sprite *_s_swipe;				// スワイプ用スプライト
+	Sprite *_s_clickButton;			// クリック用スプライト
+	Sprite *_s_ChoiceSkill;			// 選択スキル
 	Vec2 _pos;						// 座標
 
 	void ActSelectDraw();						// 表示

@@ -47,7 +47,7 @@ const Vec2 OFFSET				= Vec2(0, -100);		// オフセット(横へのひろがりかえれるよ)
 
 // 中心
 const Vec2 POS2		= Vec2(410, 650);		// 配置座標410、650
-const Vec2 POS3		= Vec2(  5, 650);		// 配置座標410、650
+const Vec2 POS3		= Vec2(  5, 650);		// click後初めの方_配置座標410、650　
 const Vec2 POS4		= Vec2(40, 650);		// 変更後の座標
 const Vec2 POSKILL	= Vec2(490, 550);		// 配置座標410、650		スキル用のやつ
 
@@ -78,8 +78,6 @@ bool TitleScene::init()
 	Size winSize = Director::getInstance()->getWinSize();
 
 	// ボタン配置
-	// 通常時,押した時
-	// 押した時のｱｸｼｮﾝ
 	auto startButton = MenuItemImage::create("CloseNormal.png","CloseSelected.png", CC_CALLBACK_1(TitleScene::pushStart,this));
 
 	// ボタンの配置
@@ -165,7 +163,7 @@ void TitleScene::TouchEnd(cocos2d::Touch* touch, cocos2d::Event* event)
 
 	if (_clickCnt>2)
 	{
-		if (_clickButtunRect.containsPoint(_touchPos))
+		if (_r_clickButtunRect.containsPoint(_touchPos))
 		{
 			SelectMove();		// 何選択したか
 
@@ -185,16 +183,16 @@ void TitleScene::ActSelectDraw()
 	// マルチれぞーしょん対応か
 	Point origin = Director::getInstance()->getVisibleOrigin();
 
-	_Attack  = Sprite::create("UI/Command/UI_Button_Attack01.png");
-	_Defence = Sprite::create("UI/Command/UI_Button_Defence01.png");
-	_Item	 = Sprite::create("UI/Command/UI_Button_Item01.png");
-	_Skill	 = Sprite::create("UI/Command/UI_Button_Skill01.png");
+	_s_Attack  = Sprite::create("UI/Command/UI_Button_Attack01.png");
+	_s_Defence = Sprite::create("UI/Command/UI_Button_Defence01.png");
+	_s_Item	   = Sprite::create("UI/Command/UI_Button_Item01.png");
+	_s_Skill   = Sprite::create("UI/Command/UI_Button_Skill01.png");
 
 	this->items.clear();
-	this->items.push_back(_Attack);
-	this->items.push_back(_Defence);
-	this->items.push_back(_Item);
-	this->items.push_back(_Skill);
+	this->items.push_back(_s_Attack);
+	this->items.push_back(_s_Defence);
+	this->items.push_back(_s_Item);
+	this->items.push_back(_s_Skill);
 
 	// 配置
 	for (auto& item :items)
@@ -212,16 +210,16 @@ void TitleScene::SkillDraw()
 	// マルチれぞーしょん対応か
 	Point origin = Director::getInstance()->getVisibleOrigin();
 
-	_Top	= Sprite::create("UI/Status/UI_Button_Choice01.png");
-	_Belpw	= Sprite::create("UI/Status/UI_Button_Wait01.png");
-	_Belpw1 = Sprite::create("UI/Status/UI_Button_Wait01.png");
-	_Belpw2 = Sprite::create("UI/Status/UI_Button_Wait01.png");
+	_s_Top	  = Sprite::create("UI/Status/UI_Button_Choice01.png");
+	_s_Belpw  = Sprite::create("UI/Status/UI_Button_Wait01.png");
+	_s_Belpw1 = Sprite::create("UI/Status/UI_Button_Wait01.png");
+	_s_Belpw2 = Sprite::create("UI/Status/UI_Button_Wait01.png");
 
 	this->selects.clear();
-	this->selects.push_back(_Top);
-	this->selects.push_back(_Belpw);
-	this->selects.push_back(_Belpw1);
-	this->selects.push_back(_Belpw2);
+	this->selects.push_back(_s_Top);
+	this->selects.push_back(_s_Belpw);
+	this->selects.push_back(_s_Belpw1);
+	this->selects.push_back(_s_Belpw2);
 
 	// 配置
 	for (auto& item : selects)
@@ -238,36 +236,36 @@ void TitleScene::SelectMove()
 	Size winSize = Director::getInstance()->getWinSize();
 
 	// 攻撃
-	if (Top == _Attack)
+	if (Top == _s_Attack)
 	{
 		log("攻撃");
 		flag = false;
 	}
 	// 防御
-	else if (Top == _Defence)
+	else if (Top == _s_Defence)
 	{
 		log("防御");
 		flag = false;
 	}
 	// アイテム
-	else if (Top == _Item)
+	else if (Top == _s_Item)
 	{
 		log("アイテム");
 		flag = false;
 	}
 	// 
-	else if (Top == _Skill)
+	else if (Top == _s_Skill)
 	{
 		flag = true;
 		SkillDraw();		// スキル一覧表示
 		SwipeRotation(ROLE_Y_DIST);
 		Arrange(POSKILL, selects, UPSIDECNT, DRAWCNT, DEFAULT_SCALE, DIFF_SCALE, DEFAULT_OPACITY, DIFF_SCALE, OFFSET);
-		log("スキル");
+		log("スキル一覧表示します");
 	}
 	// 何もなし
 	else
 	{
-		log("ｴﾗｰですよ");
+		log("ｴﾗｰ起きていますよ");
 	}
 }
 
@@ -308,9 +306,9 @@ void TitleScene::Arrange(const Vec2 _pos, std::vector<Node*>& _sprite, const int
 {
 	float tmp, tmp2;
 	// 実数値を整数部分と小数部分に分ける
-	auto tmpAngle = modf(angle, &tmp);
-	tmpAngle = modf(tmpAngle, &tmp2);
-	tmpAngle = -tmpAngle;
+	auto tmpAngle	= modf(angle, &tmp);
+	tmpAngle		= modf(tmpAngle, &tmp2);
+	tmpAngle		= -tmpAngle;
 	// 小数を切り捨て型キャスト
 	auto j = static_cast<int>(tmp) % _sprite.size();
 	// 
@@ -318,14 +316,14 @@ void TitleScene::Arrange(const Vec2 _pos, std::vector<Node*>& _sprite, const int
 	{
 		// 総枚数　% 総枚数= 現在の番号わかる
 		auto index = ((i + j) + _sprite.size()) % _sprite.size();
-		// 
-		_sprite[index]->setPosition(POSKILL + Vec2(OFFSET.x * abs(i), OFFSET.y * (i)));
-		// 
+		// _pos[表示したい位置] + オフセット　*　絶対値(-2~2) ←こうすることで2,1,0,1,2という風に並ぶ,y座標は-2-1,1,2という風になる
+		_sprite[index]->setPosition(_pos + Vec2(OFFSET.x * abs(i), OFFSET.y * (i)));
+		// 正面に来た場合のみ指定した拡大ｻｲｽﾞになり,その他は小さくなる
 		//_sprite[index]->setScale(_defaultScale - (abs(i) * _diffScale));
 		_sprite[index]->setScale(i == 0 ? _defaultScale : _defaultScale - _diffScale) ;
-		// 
+		// 不透明度
 		_sprite[index]->setOpacity(_defaultOpacity - (abs(i) * _diffOpacity));
-		// 
+		// 奥行　表示したい個数 - ｒ
 		_sprite[index]->setZOrder(_drawCnt - abs(i));
 	}
 	//そーとするよ(´・ω・`)
@@ -349,15 +347,17 @@ void TitleScene::SwipeRotation()
 	// 移動量[スワイプ]
 	listener->onTouchMoved = [&](Touch *touch, Event *event)
 	{
+		// スキルが選択されていない場合
 		if (flag == false)
 		{
-			if (_swipeRect.containsPoint(_touchPos))
+			if (_r_swipeRect.containsPoint(_touchPos))
 			{
 				float delta = touch->getLocation().y - touch->getPreviousLocation().y;
 				this->angle += delta;
 				Arrange(POS2);
 			}
 		}
+		// スキルが選択されている場合
 		else
 		{
 			//Arrange(POS4);
@@ -367,7 +367,6 @@ void TitleScene::SwipeRotation()
 	// 離した
 	listener->onTouchEnded = [&](Touch *touch, Event *event)
 	{
-		// 補正つけますよ
 		// 正の値
 		if (angle > 0.f)
 		{
@@ -429,26 +428,26 @@ void TitleScene::ObjHit()
 	Size winSize = Director::getInstance()->getWinSize();
 	
 	// スワイプの範囲
-	_swipeRect = Rect(0, 0, 550, 490);
-	_swipe	   = Sprite::create();
-	_swipe->setTextureRect(_swipeRect);
-	_swipe->setPosition(winSize.width / 2 - 10, winSize.height / 2 - 30);
+	_r_swipeRect = Rect(0, 0, 550, 490);
+	_s_swipe	   = Sprite::create();
+	_s_swipe->setTextureRect(_r_swipeRect);
+	_s_swipe->setPosition(winSize.width / 2 - 10, winSize.height / 2 - 30);
 
-	_swipeRect = Rect(_swipe->getPosition().x - _swipe->getContentSize().width / 2,
-					  _swipe->getPosition().y - _swipe->getContentSize().height/2,
-					  _swipe->getContentSize().width,
-					  _swipe->getContentSize().height);
+	_r_swipeRect = Rect(_s_swipe->getPosition().x - _s_swipe->getContentSize().width / 2,
+					    _s_swipe->getPosition().y - _s_swipe->getContentSize().height/2,
+					    _s_swipe->getContentSize().width,
+					    _s_swipe->getContentSize().height);
 
 	// ボタンのclick用
-	_clickButtunRect = Rect(0, 0, 490, 180);
-	_clickButton	 = Sprite::create();
-	_clickButton->setTextureRect(_clickButtunRect);
-	_clickButton->setPosition(winSize.width / 2 - 10, winSize.height / 2 - 30);
+	_r_clickButtunRect = Rect(0, 0, 490, 180);
+	_s_clickButton	 = Sprite::create();
+	_s_clickButton->setTextureRect(_r_clickButtunRect);
+	_s_clickButton->setPosition(winSize.width / 2 - 10, winSize.height / 2 - 30);
 
-	_clickButtunRect = Rect(_clickButton->getPosition().x - _clickButton->getContentSize().width / 2,
-							_clickButton->getPosition().y - _clickButton->getContentSize().height / 2,
-							_clickButton->getContentSize().width,
-							_clickButton->getContentSize().height);
+	_r_clickButtunRect = Rect(_s_clickButton->getPosition().x - _s_clickButton->getContentSize().width / 2,
+							  _s_clickButton->getPosition().y - _s_clickButton->getContentSize().height / 2,
+							  _s_clickButton->getContentSize().width,
+							  _s_clickButton->getContentSize().height);
 
 	// スキルのボタン用
 
@@ -459,13 +458,11 @@ void TitleScene::TitleBackGroudn()
 {
 	// 画面サイズ取得
 	Size winSize = Director::getInstance()->getWinSize();
-	// マルチレゾリューション対応がどうとか
 	Point origin = Director::getInstance()->getVisibleOrigin();
 
 	// タイトル配置
 	// 配置文字
 	auto lbl_Title = Label::createWithSystemFont("Title","HiraKakuProN-W6",100);
-	// 配置場所
 	lbl_Title->setPosition(Point(origin.x+winSize.width/2,
 								 origin.y+winSize.height - lbl_Title->getContentSize().height));
 	// Title追加
@@ -473,7 +470,6 @@ void TitleScene::TitleBackGroudn()
 
 	// 背景画像追加
 	Sprite* bgsprite = Sprite::create("BackImage/ST_Boss.png");
-	// 表示座標指定
 	bgsprite->setPosition(winSize.width/2, winSize.height/2);
 	this->addChild(bgsprite,0);
 }
@@ -533,8 +529,6 @@ void TitleScene::TouchArrange(Touch* _touch)
 	auto _time = DelayTime::create(3);
 	// 終わったら消す処理
 	Sequence* seq = Sequence::create(_spawn, _time, nullptr);
-	// 実行
 	_effect->runAction(seq);
-	// 追加
 	this->addChild(_effect, 10);
 }

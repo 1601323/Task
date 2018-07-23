@@ -26,22 +26,22 @@ private:
 	unsigned int _clickCnt = 0;		// クリック回数を保存
 	bool _changeFlag;				// キャラクター切り替え用Flag
 	Node* Top;
-	Sprite *_fontBoard;				// 説明文の背景板
+	Sprite *_s_fontBoard;			// 説明文の背景板
 	SpriteBatchNode *_batchNode;
 	// キャラ情報
-	Sprite *_PL_Attacker;			// ｱﾀｯｶｰ(小男)
-	Sprite *_PL_Shield;				// 守備(大男)
-	Sprite *_PL_Magic;				// 魔法使い(ツイン)
-	Sprite *_PL_Healer;				// 回復(ｹﾓﾐﾐ)
+	Sprite *_s_Attacker;			// ｱﾀｯｶｰ(小男)
+	Sprite *_s_Shield;				// 守備(大男)
+	Sprite *_s_Magic;				// 魔法使い(ツイン)
+	Sprite *_s_Healer;				// 回復(ｹﾓﾐﾐ)
 	// 当たり判定用
 	Vec2 _touchPos;					// 現在の座標
-	Rect _pl_rect;					// プレイヤーのRect
-	Rect _box_rect;					// チーム編成用
-	Rect _ok_rect;					// 
-	Sprite *_pl_square;				// プレイヤーのスプライト
-	Sprite *_teamBox;				// チーム編成用
-	Sprite *_okButton;
-	CCSprite *_Box;					// チーム用のSprite
+	Rect _r_pl_rect;				// プレイヤーのRect
+	Rect _r_box_rect;				// チーム編成用
+	Rect _r_ok_rect;				// 
+	Sprite *_s_pl_square;			// プレイヤーのスプライト
+	Sprite *_s_teamBox;				// チーム編成用
+	Sprite *_s_okButton;
+	CCSprite *_ccp_Box;				// チーム用のSprite
 
 	void Update(float delta);		// アップデート
 	void CharaDraw();				// キャラ表示
@@ -66,6 +66,8 @@ private:
 
 	// きれいに並べなおしておいてね
 	// テスト用
+	void Test();
+	Sprite *_test;
 };
 
 #endif // Title
