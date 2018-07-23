@@ -6,6 +6,8 @@
 #include "Imput.h"
 #include <algorithm>
 #include "cocos2d.h"
+#include "SimpleAudioEngine.h"
+using namespace CocosDenshion;
 
 #pragma execution_character_set("utf-8")
 
@@ -13,30 +15,34 @@ const int DIV_NUM		  = 4;
 const int DIV_ANGLE		  = 360 / DIV_NUM;
 const int DIV_ANGLE_HALF  = DIV_ANGLE / 2;
 
-const unsigned int PL_TAG		  = 101;		// タグ用
-const unsigned int TEXT_OFFSET    = 510;		// text表示のオフセット値
+const unsigned int PL_TAG				= 101;		// プレイヤー切り替え用タグ
+const unsigned int TEXT_OFFSET			= 510;		// text表示のオフセット値
+const unsigned int FAST_CLICK			= 1;		// 初めのclick
+const unsigned int SECOND_CLICK			= 2;		// 2回目click
+const unsigned int TEAM_MEMBER			= 3;		// チームの人数
 
-const unsigned int NEXT_BUTTON_X  = 660;		// 次の画面遷移へのボタンの配置座標X
-const unsigned int NEXT_BUTTON_Y  = 65;			// 次の画面遷移へのボタンの配置座標Y
+const unsigned int NEXT_BUTTON_X		= 660;		// 次の画面遷移へのボタンの配置座標X
+const unsigned int NEXT_BUTTON_Y		= 65;		// 次の画面遷移へのボタンの配置座標Y
 
-const unsigned int FONT_SIZE	  = 38;			// プレイヤー説明文用の文字ｻｲｽﾞ
-const unsigned int PL_TEXT_RECT_X = 250;		// プレイヤー用の板の配置位置X
-const unsigned int PL_TEXT_RECT_Y = 750;		// プレイヤー用の板の配置位置Y
-const unsigned int TEAM_BOX_X	  = 165;		// チーム編成用のboxの配置位開X
-const unsigned int TEAM_BOX_Y	  = 180;		// チーム編成用のboxの配置位置Y
-const unsigned int TEAM_BOX_OFFSET_X = 225;		// チーム編成用のboxのオフセット
+const unsigned int FONT_SIZE			= 38;		// プレイヤー説明文用の文字ｻｲｽﾞ
+const unsigned int PL_TEXT_RECT_X		= 250;		// プレイヤー用の板の配置位置X
+const unsigned int PL_TEXT_RECT_Y		= 750;		// プレイヤー用の板の配置位置Y
+const unsigned int TEAM_BOX_X			= 165;		// チーム編成用のboxの配置位開X
+const unsigned int TEAM_BOX_Y			= 180;		// チーム編成用のboxの配置位置Y
+const unsigned int TEAM_BOX_OFFSET_X	= 225;		// チーム編成用のboxのオフセット
+const unsigned int PLAYER_NAME_WIDTH	= 210;
 
 // 角度関係で使うよ
-const int RADIUS		  = 200;
-const float PI			  = 3.14159265359f;
-const float FLATTEN_RATE  = 0.4f;
-const unsigned int PL_POS_OFFSET_X = 420;		// プレイヤー表示のオフセット
-const unsigned int PL_POS_OFFSET_Y = 820;		// プレイヤー表示のオフセット
+const int RADIUS						= 200;
+const float PI							= 3.14159265359f;
+const float FLATTEN_RATE				= 0.4f;
+const unsigned int PL_POS_OFFSET_X		= 420;				// プレイヤー表示のオフセット
+const unsigned int PL_POS_OFFSET_Y		= 820;				// プレイヤー表示のオフセット
 // 拡縮用
-const float LIMIT_TIME	  = 0.9f;				// 秒指定[戻る際]
-const float DOUBLE_SCALE  = 0.5f;				// 何倍か[拡大率指定]
-const float WAIT_TIME	  = 0.6f;				// 待機時間
-const float BOX_SCALE	  = 1.2;				// チーム編成用のBOXの拡大率
+const float LIMIT_TIME					= 0.9f;				// 秒指定[戻る際]
+const float DOUBLE_SCALE				= 0.5f;				// 何倍か[拡大率指定]
+const float WAIT_TIME					= 0.6f;				// 待機時間
+const float BOX_SCALE					= 1.2;				// チーム編成用のBOXの拡大率
 
 USING_NS_CC;
 
@@ -86,6 +92,15 @@ bool CharaSelectScene::init()
 	// 登録
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(touchEventGet, this);
 
+	// あとでSoundManagerやら作ってやり直してね
+	// 音楽ファイルの読み込み
+	auto _sound = SimpleAudioEngine::sharedEngine();
+	_sound->setBackgroundMusicVolume(0.5f);
+	_sound->preloadBackgroundMusic("BGM/BGM_PartyCreate_Main.mp3");
+
+	_sound->playBackgroundMusic("BGM/BGM_PartyCreate_Main.mp3", true);
+
+
 	TeamBoxDraw();			// 表示(キャラ以外)
 	CharaDraw();			// キャラ表示
 	SwipeRotation();		// スワイプに合わせて回転
@@ -93,24 +108,7 @@ bool CharaSelectScene::init()
 	_changeFlag = false;
 	this->scheduleUpdate();	// 更新	
 
-	CharaData.reserve(3);	// 事前に領域確保[チーム編成用]
-
-	// ダメージ表示のやつ
-	/*srand((unsigned int)time(nullptr));
-
-	auto listner = EventListenerTouchOneByOne::create();
-
-	listener->onTouchBegan = [this](Touch* touch, Event* event)
-	{
-		DmEffect* effect = DmEffect::create();
-		effect->setPosition(Vec2(touch->getLocation().x + 30 ,touch->getLocation().y));
-		effect->showEffect(rand() % 9999);
-		this->addChild(effect);
-
-		return true;
-	};
-	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listner, this);*/
-
+	CharaData.reserve(TEAM_MEMBER);	// 事前に領域確保[チームの人数分]
 	return true;
 }
 
@@ -125,8 +123,7 @@ bool CharaSelectScene::TouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)
 void CharaSelectScene::TouchMove(cocos2d::Touch* touch, cocos2d::Event* event)
 {
 	this->removeChildByTag(PL_TAG);
-	// 動いているときはカウントしない
-	_clickCnt = 0;
+	_clickCnt = 0;			// 動いているときはカウントしない
 }
 // 離した瞬間
 void CharaSelectScene::TouchEnd(cocos2d::Touch* touch, cocos2d::Event* event)
@@ -135,18 +132,18 @@ void CharaSelectScene::TouchEnd(cocos2d::Touch* touch, cocos2d::Event* event)
 	Top->pause();
 
 	//指定Rect内をクリックしたら説明文表示
-	if (_pl_rect.containsPoint(_touchPos))
+	if (_r_pl_rect.containsPoint(_touchPos))
 	{
 		_clickCnt += 1;
-		if (_clickCnt > 1)
+		if (_clickCnt > FAST_CLICK)
 		{
 			_changeFlag = true;
 			CharaText();			// キャラ説明文
 		}
-		if (_clickCnt > 2)
+		if (_clickCnt > SECOND_CLICK)
 		{
 			AddTeam();				// チーム追加用
-			_clickCnt = 1;
+			_clickCnt = FAST_CLICK;
 		}
 	}
 }
@@ -171,16 +168,16 @@ void CharaSelectScene::CharaDraw()
 	// マルチれぞーしょん対応か
 	Point origin = Director::getInstance()->getVisibleOrigin();
 
-	_PL_Attacker = Sprite::create("Player/PL_Attacker.png");
-	_PL_Shield   = Sprite::create("Player/PL_Shield.png");
-	_PL_Magic    = Sprite::create("Player/PL_Magic.png");
-	_PL_Healer   = Sprite::create("Player/PL_Healer.png");
+	_s_Attacker = Sprite::create("Player/PL_Attacker.png");
+	_s_Shield   = Sprite::create("Player/PL_Shield.png");
+	_s_Magic    = Sprite::create("Player/PL_Magic.png");
+	_s_Healer   = Sprite::create("Player/PL_Healer.png");
 
 	this->items.clear();
-	this->items.push_back(_PL_Attacker);
-	this->items.push_back(_PL_Shield);
-	this->items.push_back(_PL_Magic);
-	this->items.push_back(_PL_Healer);
+	this->items.push_back(_s_Attacker);
+	this->items.push_back(_s_Shield);
+	this->items.push_back(_s_Magic);
+	this->items.push_back(_s_Healer);
 	//this->items.clear();
 	//this->items.push_back(Sprite::create("PL_Attacker.png"));
 	//this->items.push_back(Sprite::create("PL_Shield.png"));
@@ -231,76 +228,89 @@ void CharaSelectScene::CharaText()
 	auto label4 = Label::createWithTTF(ttfConfig,
 		"回復のスペシャリストと思いきや\n敵の弱体化もお任せ\nデバフ系ヒーラー");
 
-	auto act1 = ScaleTo::create(LIMIT_TIME, 1.2);   // 0.9秒で0.5倍に拡大
-	auto act2 = ScaleTo::create(LIMIT_TIME, 1.0f);			 // 0.9秒で元のサイズに戻す
-	
+	auto plName1 = Label::createWithTTF(ttfConfig, "剣士");
+	auto plName2 = Label::createWithTTF(ttfConfig, "騎士");
+	auto plName3 = Label::createWithTTF(ttfConfig, "魔術師");
+	auto plName4 = Label::createWithTTF(ttfConfig, "聖職者");
+
 	// アタッカー
-	if (Top == _PL_Attacker)
+	if (Top == _s_Attacker)
 	{
 		this->removeChildByTag(PL_TAG);
 		// タグ設定
 		label1->setTag(PL_TAG);
 		label1->setColor(textColor);
-		// 座標設定
 		label1->setPosition(winSize.width / 2, winSize.height / 2 + TEXT_OFFSET);
+		// タグ設定
+		plName1->setTag(PL_TAG);
+		plName1->setColor(textColor);
+		plName1->setScale(0.9);
+		plName1->setPosition(winSize.width / 2- PLAYER_NAME_WIDTH, winSize.height / 2 + TEXT_OFFSET-100);
 		// タグチェック
 		if (int tag = label1->getTag() != 1)
 		{
-			this->addChild(label1, 6);
-			
-			_PL_Attacker->runAction(RepeatForever::create(Sequence::create(act1, act2, NULL)));  //  延々繰り返し*/
+			this->addChild(label1 ,6);
+			this->addChild(plName1,6);
 		}
 	}
 	// シールド
-	else if (Top == _PL_Shield)
+	else if (Top == _s_Shield)
 	{
 		this->removeChildByTag(PL_TAG);
 		// タグ設定
 		label2->setTag(PL_TAG);
-		// 色設定
 		label2->setColor(textColor);
-		// 座標設定
 		label2->setPosition(winSize.width / 2, winSize.height / 2 + TEXT_OFFSET);
-		// タグチェック
+		// タグ設定
+		plName2->setTag(PL_TAG);
+		plName2->setColor(textColor);
+		plName2->setScale(0.9);
+		plName2->setPosition(winSize.width / 2 - PLAYER_NAME_WIDTH, winSize.height / 2 + TEXT_OFFSET - 100);
 		if (int tag = label2->getTag() != 1)
 		{
-			this->addChild(label2, 6);
-			_PL_Shield->runAction(RepeatForever::create(Sequence::create(act1, act2, NULL)));  //  延々繰り返し*/
+			this->addChild(label2 , 6);
+			this->addChild(plName2, 6);
 		}
 	}
 	// 魔法
-	else if (Top == _PL_Magic)
+	else if (Top == _s_Magic)
 	{
 		this->removeChildByTag(PL_TAG);
 		// タグ設定
 		label3->setTag(PL_TAG);
-		// 色設定
 		label3->setColor(textColor);
-		// 座標設定
 		label3->setPosition(winSize.width / 2, winSize.height / 2 + TEXT_OFFSET);
+		// タグ設定
+		plName3->setTag(PL_TAG);
+		plName3->setColor(textColor);
+		plName3->setScale(0.9);
+		plName3->setPosition(winSize.width / 2 - PLAYER_NAME_WIDTH, winSize.height / 2 + TEXT_OFFSET - 100);
 		// タグチェック
 		if (int tag = label3->getTag() != 1)
 		{
-			this->addChild(label3, 6);
-			_PL_Magic->runAction(RepeatForever::create(Sequence::create(act1, act2, NULL)));  //  延々繰り返し*/
+			this->addChild(label3 , 6);
+			this->addChild(plName3, 6);
 		}
 
 	}
 	// 回復
-	else if (Top == _PL_Healer)
+	else if (Top == _s_Healer)
 	{
 		this->removeChildByTag(PL_TAG);
 		// タグ設定
 		label4->setTag(PL_TAG);
-		// 色設定
 		label4->setColor(textColor);
-		// 座標設定
 		label4->setPosition(winSize.width / 2, winSize.height / 2 + TEXT_OFFSET);
+		// タグ設定
+		plName4->setTag(PL_TAG);
+		plName4->setColor(textColor);
+		plName4->setScale(0.9);
+		plName4->setPosition(winSize.width / 2 - PLAYER_NAME_WIDTH, winSize.height / 2 + TEXT_OFFSET - 100);
 		// タグチェック
 		if (int tag = label4->getTag() != 1)
 		{
-			this->addChild(label4, 6);
-			_PL_Healer->runAction(RepeatForever::create(Sequence::create(act1, act2, NULL)));  //  延々繰り返し*/
+			this->addChild(label4 , 6);
+			this->addChild(plName4, 6);
 		}
 	}
 	else
@@ -316,19 +326,17 @@ void CharaSelectScene::TeamBoxDraw()
 	_batchNode->setPosition(TEAM_BOX_OFFSET_X, 0);
 
 	// チーム編成のBox分表示
-	for (int n = 0; n<3; n++) 
+	for (int n = 0; n<TEAM_MEMBER; n++)
 	{
 		//batchNodeからテクスチャを取得
-		_Box = Sprite::createWithTexture(_batchNode->getTexture());
-		_Box->setScale(BOX_SCALE);
+		_ccp_Box = Sprite::createWithTexture(_batchNode->getTexture());
+		_ccp_Box->setScale(BOX_SCALE);
 		
-		//位置に設定
-		_Box->setPosition((TEAM_BOX_X+16)*n, (TEAM_BOX_Y));
+		_ccp_Box->setPosition((TEAM_BOX_X+16)*n, (TEAM_BOX_Y));
 
-		//SpriteBatchNodeに貼り付ける
-		_batchNode->addChild(_Box);
+		//SpriteBatchNodeに貼り付け
+		_batchNode->addChild(_ccp_Box);
 	}
-	//一括貼り付け
 	this->addChild(_batchNode);
 }
 
@@ -337,23 +345,19 @@ void CharaSelectScene::CharaSelectBackGroudn()
 {
 	//画像サイズ取得
 	Size winSize = Director::getInstance()->getWinSize();
-	// マルチれぞーしょん対応か
 	Point origin = Director::getInstance()->getVisibleOrigin();
 	
 	 //説明文の板配置
-	_fontBoard = Sprite::create("UI/Status/UI_Status_Inters.png");
-	// 配置
-	_fontBoard->setPosition(winSize.width / 2, 1130);
+	_s_fontBoard = Sprite::create("UI/Status/UI_Status_Inters.png");
+	_s_fontBoard->setPosition(winSize.width / 2, 1130);
 	//if (_changeFlag == true)
 	{
-		this->addChild(_fontBoard, 1);
+		this->addChild(_s_fontBoard, 1);
 	}
 
 	// 背景画像追加
 	Sprite* _backImage = Sprite::create("BackImage/ST_CharSerect2.png");
-	// 配置座標
 	_backImage->setPosition(winSize.width / 2, winSize.height / 2);
-	// 追加
 	this->addChild(_backImage,0);
 }
 
@@ -364,33 +368,26 @@ void CharaSelectScene::ObjHit()
 	Size winSize = Director::getInstance()->getWinSize();
 
 	// プレイヤー用のクリック判定用板
-	_pl_rect   = Rect(0, 0, PL_TEXT_RECT_X, PL_TEXT_RECT_Y);	// 範囲
-	_pl_square = Sprite::create();								// 生成
-	_pl_square->setTextureRect(_pl_rect);						// テクスチャ指定
-	_pl_square->setPosition(430, winSize.height / 2);			// 座標配置
+	_r_pl_rect   = Rect(0, 0, PL_TEXT_RECT_X, PL_TEXT_RECT_Y);	// 範囲
+	_s_pl_square = Sprite::create();								// 生成
+	_s_pl_square->setTextureRect(_r_pl_rect);						// テクスチャ指定
+	_s_pl_square->setPosition(430, winSize.height / 2);			// 座標配置
 	//this->addChild(pl_square);								// 追加
 
 	// プレイヤークリック判定範囲
-	_pl_rect = Rect(_pl_square->getPosition().x - _pl_square->getContentSize().width /  2,
-				    _pl_square->getPosition().y - _pl_square->getContentSize().height / 2,
-				    _pl_square->getContentSize().width,
-				    _pl_square->getContentSize().height);
-
-	// チーム編成用枠判定
-	//_box_rect = Rect(_Box->getPosition().x - _Box->getContentSize().width / 2,
-	//				 _Box->getPosition().y - _Box->getContentSize().height / 2,
-	//			     _Box->getContentSize().width * BOX_SCALE ,
-	//				 _Box->getContentSize().height * BOX_SCALE );
-
+	_r_pl_rect = Rect(_s_pl_square->getPosition().x - _s_pl_square->getContentSize().width /  2,
+				    _s_pl_square->getPosition().y - _s_pl_square->getContentSize().height / 2,
+				    _s_pl_square->getContentSize().width,
+				    _s_pl_square->getContentSize().height);
 
 	// No.1当たり判定をきちんとチーム編成の分きちんと対応させる
 	// なんかうまくいってないからよろしく丸
-	_box_rect = Rect(0, 0, _Box->getContentSize().width * BOX_SCALE, _Box->getContentSize().height * BOX_SCALE);	// 範囲
+	_r_box_rect = Rect(0, 0, _ccp_Box->getContentSize().width * BOX_SCALE, _ccp_Box->getContentSize().height * BOX_SCALE);	// 範囲
 	for (int i = 0; i< 3;i++)
 	{
-		_Box = Sprite::create();													// 生成
-		_Box->setTextureRect(_box_rect);											// テクスチャ指定
-		_Box->setPosition((TEAM_BOX_X + 16)*i + TEAM_BOX_OFFSET_X, (TEAM_BOX_Y));	// 座標配置
+		_ccp_Box = Sprite::create();													// 生成
+		_ccp_Box->setTextureRect(_r_box_rect);											// テクスチャ指定
+		_ccp_Box->setPosition((TEAM_BOX_X + 16)*i + TEAM_BOX_OFFSET_X, (TEAM_BOX_Y));	// 座標配置
 		//this->addChild(_Box);
 	}
 }
@@ -446,7 +443,6 @@ void CharaSelectScene::SwipeRotation()
 	{
 		// No.2 SwipeRotation内の離した,押した処理を押した,離した特化の関数内に入れるのか
 
-		// 補正つけますよ
 		// 正の値
 		if (angle>0.f)
 		{
@@ -478,14 +474,14 @@ void CharaSelectScene::AddTeam()
 		{
 			continue;
 		}
+		CharaData.push_back(static_cast<CharaName> (i));
+		log("追加されました。%d", i);
 		// 例外処理入れてね　おんなじキャラ選べないとか
-		if (CharaData.size() == 3)
+		if (CharaData.size() == TEAM_MEMBER)
 		{
 			log("メンバーが揃いました", CharaData);
 			break;
 		}
-		CharaData.push_back(static_cast<CharaName> (i));
-		log("追加されました。%d", i);
 	}
 	//// チーム編成の箱をクリックしたとき[第一範囲]
 	//if (_box_rect.containsPoint(_touchPos))
@@ -500,6 +496,7 @@ void CharaSelectScene::AddTeam()
 	//}
 }
 
+
 // 次画面遷移
 void CharaSelectScene::pushStart(Ref * pSender)
 {
@@ -508,8 +505,7 @@ void CharaSelectScene::pushStart(Ref * pSender)
 	// 遷移策の画面をｲﾝｽﾀﾝｽ
 	Scene *pScene = FightScene::createScene();
 
-	// 0.6秒かけて次画面に遷移
-	// (時間,遷移先,色(オプション))
+	// 0.6秒かけて次画面に遷移(時間,遷移先,色(オプション))
 	TransitionFade *transition = TransitionFade::create(WAIT_TIME, pScene);
 
 	// 遷移実行 アニメーション
@@ -523,8 +519,7 @@ void CharaSelectScene::backStart(Ref * pSender)
 	// 遷移策の画面をｲﾝｽﾀﾝｽ
 	Scene *pScene = TitleScene::createScene();
 
-	// 0.6秒かけて次画面に遷移
-	// (時間,遷移先,色(オプション))
+	// 0.6秒かけて次画面に遷移 (時間,遷移先,色(オプション))
 	TransitionFade *transition = TransitionFade::create(WAIT_TIME, pScene);
 
 	// 遷移実行 アニメーション

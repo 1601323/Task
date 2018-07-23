@@ -1,0 +1,14 @@
+
+BGM_Oden_Main：オーディンの戦闘で使用するBGMです
+
+BGM_PartyCreate_Main：パーティ編成の時に使うBGMです
+
+BGM_Sleipnir_Main：スレイプニルの戦闘で使用するBGMです
+
+BGM_Tors_Main：Thorの戦闘で使用するBGMです
+
+BGM_Valkyrie_Main：ヴァルキリーの戦闘で使用するBGMです
+
+
+
+拡張子ってどれがええんやろ（しっかりしろクソ
