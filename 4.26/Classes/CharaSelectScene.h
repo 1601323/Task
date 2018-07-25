@@ -42,6 +42,7 @@ private:
 	Sprite *_s_teamBox;				// チーム編成用
 	Sprite *_s_okButton;
 	CCSprite *_ccp_Box;				// チーム用のSprite
+	Sprite *hozon;
 
 	void Update(float delta);		// アップデート
 	void CharaDraw();				// キャラ表示
@@ -53,6 +54,8 @@ private:
 	void SwipeRotation();			// スワイプに合わせて回転
 	void AddTeam();					// チーム編成用
 	void CharaSeveData();
+	void Sound();					// 音楽用
+	void TeamDraw();				// チームメンバー表示
 					
 	// touchイベント
 	bool TouchBegan(cocos2d::Touch* touch, cocos2d::Event* event);	// 押した瞬間
@@ -68,6 +71,7 @@ private:
 	// テスト用
 	void Test();
 	Sprite *_test;
+	CharaName *Data[3];
 };
 
 #endif // Title
