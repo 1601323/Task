@@ -44,6 +44,8 @@ const float DOUBLE_SCALE				= 0.5f;				// 何倍か[拡大率指定]
 const float WAIT_TIME					= 0.6f;				// 待機時間
 const float BOX_SCALE					= 1.2;				// チーム編成用のBOXの拡大率
 
+const float SOUND_VOLUME				= 0.5f;				// BGM音量調整
+
 USING_NS_CC;
 
 // 実態作るよ
@@ -91,21 +93,12 @@ bool CharaSelectScene::init()
 	touchEventGet->onTouchEnded = CC_CALLBACK_2(CharaSelectScene::TouchEnd, this);
 	// 登録
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(touchEventGet, this);
-
-	// あとでSoundManagerやら作ってやり直してね
-	// 音楽ファイルの読み込み
-	auto _sound = SimpleAudioEngine::sharedEngine();
-	_sound->setBackgroundMusicVolume(0.5f);
-	_sound->preloadBackgroundMusic("BGM/BGM_PartyCreate_Main.mp3");
-
-	_sound->playBackgroundMusic("BGM/BGM_PartyCreate_Main.mp3", true);
-
-
+	
+	//Sound();
 	TeamBoxDraw();			// 表示(キャラ以外)
 	CharaDraw();			// キャラ表示
 	SwipeRotation();		// スワイプに合わせて回転
 	ObjHit();				// 当たり判定
-	_changeFlag = false;
 	this->scheduleUpdate();	// 更新	
 
 	CharaData.reserve(TEAM_MEMBER);	// 事前に領域確保[チームの人数分]
@@ -123,7 +116,12 @@ bool CharaSelectScene::TouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)
 void CharaSelectScene::TouchMove(cocos2d::Touch* touch, cocos2d::Event* event)
 {
 	this->removeChildByTag(PL_TAG);
-	_clickCnt = 0;			// 動いているときはカウントしない
+	_clickCnt = 0;						// 動いているときはカウントしない
+	// スワイプ中には板は表示しない
+	if (_s_fontBoard->isVisible())
+	{
+		_s_fontBoard->setVisible(false);
+	}	
 }
 // 離した瞬間
 void CharaSelectScene::TouchEnd(cocos2d::Touch* touch, cocos2d::Event* event)
@@ -135,16 +133,21 @@ void CharaSelectScene::TouchEnd(cocos2d::Touch* touch, cocos2d::Event* event)
 	if (_r_pl_rect.containsPoint(_touchPos))
 	{
 		_clickCnt += 1;
+		
 		if (_clickCnt > FAST_CLICK)
 		{
-			_changeFlag = true;
-			CharaText();			// キャラ説明文
+			_s_fontBoard->setVisible(true);	// 説明文の板表示
+			CharaText();					// キャラ説明文
 		}
 		if (_clickCnt > SECOND_CLICK)
 		{
-			AddTeam();				// チーム追加用
+			AddTeam();						// チーム追加用
 			_clickCnt = FAST_CLICK;
 		}
+	}
+	else
+	{
+		_s_fontBoard->setVisible(false);	// 説明文の板非表示
 	}
 }
 
@@ -340,6 +343,22 @@ void CharaSelectScene::TeamBoxDraw()
 	this->addChild(_batchNode);
 }
 
+// チームメンバー表示
+void CharaSelectScene::TeamDraw()
+{
+	// CharaDataのデータを参照して画像を表示
+	auto data0 = CharaData.at(0);
+	auto data1 = CharaData.at(1);
+	auto data2 = CharaData.at(2);
+
+	// enumと関連つけたいよね～
+	Sprite *_s_teamAttacker = Sprite::create("Player/PL_Attacker_face.png");
+	Sprite *_s_teamSHIELD	= Sprite::create("Player/PL_Shield_face.png");
+	Sprite *_s_teamMAGIC	= Sprite::create("Player/PL_Magic_face.png");
+	Sprite *_s_teamHEALER	= Sprite::create("Player/PL_Healer_face.png");
+
+}
+
 // 背景
 void CharaSelectScene::CharaSelectBackGroudn()
 {
@@ -347,18 +366,15 @@ void CharaSelectScene::CharaSelectBackGroudn()
 	Size winSize = Director::getInstance()->getWinSize();
 	Point origin = Director::getInstance()->getVisibleOrigin();
 	
-	 //説明文の板配置
-	_s_fontBoard = Sprite::create("UI/Status/UI_Status_Inters.png");
-	_s_fontBoard->setPosition(winSize.width / 2, 1130);
-	//if (_changeFlag == true)
-	{
-		this->addChild(_s_fontBoard, 1);
-	}
-
 	// 背景画像追加
 	Sprite* _backImage = Sprite::create("BackImage/ST_CharSerect2.png");
 	_backImage->setPosition(winSize.width / 2, winSize.height / 2);
 	this->addChild(_backImage,0);
+
+	//説明文の板配置
+	_s_fontBoard = Sprite::create("UI/Status/UI_Status_Inters.png");
+	_s_fontBoard->setPosition(winSize.width / 2, 1130);
+	addChild(_s_fontBoard, 1);
 }
 
 // 当たり判定用
@@ -480,6 +496,7 @@ void CharaSelectScene::AddTeam()
 		if (CharaData.size() == TEAM_MEMBER)
 		{
 			log("メンバーが揃いました", CharaData);
+			TeamDraw();		
 			break;
 		}
 	}
@@ -496,6 +513,17 @@ void CharaSelectScene::AddTeam()
 	//}
 }
 
+// BGM
+void CharaSelectScene::Sound()
+{
+	// あとでSoundManagerやら作ってやり直してね
+	// 音楽ファイルの読み込み
+	auto _sound = SimpleAudioEngine::getInstance();
+	_sound->setBackgroundMusicVolume(SOUND_VOLUME);
+	_sound->preloadBackgroundMusic("BGM/BGM_PartyCreate_Main.mp3");
+
+	_sound->playBackgroundMusic("BGM/BGM_PartyCreate_Main.mp3", true);
+}
 
 // 次画面遷移
 void CharaSelectScene::pushStart(Ref * pSender)
