@@ -99,9 +99,10 @@ bool CharaSelectScene::init()
 	CharaDraw();			// キャラ表示
 	SwipeRotation();		// スワイプに合わせて回転
 	ObjHit();				// 当たり判定
-	this->scheduleUpdate();	// 更新	
+	this->scheduleUpdate();	// 更新
+	_s_fontBoard->setVisible(false);	// 板を非表示
 
-	CharaData.reserve(TEAM_MEMBER);	// 事前に領域確保[チームの人数分]
+	CharaData.reserve(TEAM_MEMBER);		// 事前に領域確保[チームの人数分]
 	return true;
 }
 
@@ -352,11 +353,35 @@ void CharaSelectScene::TeamDraw()
 	auto data2 = CharaData.at(2);
 
 	// enumと関連つけたいよね～
-	Sprite *_s_teamAttacker = Sprite::create("Player/PL_Attacker_face.png");
-	Sprite *_s_teamSHIELD	= Sprite::create("Player/PL_Shield_face.png");
-	Sprite *_s_teamMAGIC	= Sprite::create("Player/PL_Magic_face.png");
-	Sprite *_s_teamHEALER	= Sprite::create("Player/PL_Healer_face.png");
+	_s_teamAttacker = Sprite::create("Player/PL_Attacker_face01.png");
+	_s_teamShied	= Sprite::create("Player/PL_Shield_face01.png");
+	_s_teamMagic	= Sprite::create("Player/PL_Magic_face01.png");
+	_s_teamHealer	= Sprite::create("Player/PL_Healer_face01.png");
 
+	_s_teamAttacker	->setScale(BOX_SCALE);
+	_s_teamShied	->setScale(BOX_SCALE);
+	_s_teamMagic	->setScale(BOX_SCALE);
+	_s_teamHealer	->setScale(BOX_SCALE);
+	
+	//charaData[CharaName::CHARA_ATTACKER]	= Sprite::create("Player/PL_Attacker_face01.png");
+	//charaData[CharaName::CHARA_SHIELD]		= Sprite::create("Player/PL_Shield_face01.png");
+	//charaData[CharaName::CHARA_MAGIC]		= Sprite::create("Player/PL_Magic_face01.png");
+	//charaData[CharaName::CHARA_HEALER]		= Sprite::create("Player/PL_Healer_face01.png");
+
+	// 仮表示チーム　
+	_s_teamAttacker->setPosition( TEAM_BOX_OFFSET_X, (TEAM_BOX_Y));//(TEAM_BOX_X+16) + TEAM_BOX_OFFSET_X←X(真ん中)
+	addChild(_s_teamAttacker, 8);
+
+	_s_teamShied->setPosition((TEAM_BOX_X + 16) + TEAM_BOX_OFFSET_X, (TEAM_BOX_Y));//(TEAM_BOX_X+16) + TEAM_BOX_OFFSET_X←X(真ん中)
+	addChild(_s_teamShied, 9);
+
+	_s_teamMagic->setPosition((TEAM_BOX_X + 16)*2 + TEAM_BOX_OFFSET_X, (TEAM_BOX_Y));//(TEAM_BOX_X+16) + TEAM_BOX_OFFSET_X←X(真ん中)
+	addChild(_s_teamMagic, 9);
+
+
+
+	//charaData[CharaName::CHARA_HEALER]->setPosition((TEAM_BOX_X + 16) * 2 + TEAM_BOX_OFFSET_X, (TEAM_BOX_Y));
+	//addChild(charaData[CharaName::CHARA_HEALER]);
 }
 
 // 背景
@@ -479,6 +504,7 @@ const std::vector<CharaName>& CharaSelectScene::GetCharaData()
 {
 	return CharaData;
 }
+
 
 // チーム追加用
 void CharaSelectScene::AddTeam()
