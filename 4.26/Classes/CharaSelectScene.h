@@ -69,7 +69,7 @@ private:
 
 	//// 保存する用のデータ
 	static std::vector<CharaName> CharaData;
-	static std::map<CharaName,Sprite *> charaData;
+	static std::map<CharaName,Sprite *> teamData;
 	// click判定
 	EventListenerTouchOneByOne *_listener = EventListenerTouchOneByOne::create();
 

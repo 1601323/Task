@@ -27,9 +27,10 @@ const unsigned int NEXT_BUTTON_Y		= 65;		// 次の画面遷移へのボタンの配置座標Y
 const unsigned int FONT_SIZE			= 38;		// プレイヤー説明文用の文字ｻｲｽﾞ
 const unsigned int PL_TEXT_RECT_X		= 250;		// プレイヤー用の板の配置位置X
 const unsigned int PL_TEXT_RECT_Y		= 750;		// プレイヤー用の板の配置位置Y
-const unsigned int TEAM_BOX_X			= 165;		// チーム編成用のboxの配置位開X
+const unsigned int TEAM_BOX_X			= 171;		// チーム編成用のboxの配置位開X 165
 const unsigned int TEAM_BOX_Y			= 180;		// チーム編成用のboxの配置位置Y
 const unsigned int TEAM_BOX_OFFSET_X	= 225;		// チーム編成用のboxのオフセット
+
 const unsigned int PLAYER_NAME_WIDTH	= 210;
 
 // 角度関係で使うよ
@@ -50,6 +51,7 @@ USING_NS_CC;
 
 // 実態作るよ
 std::vector<CharaName> CharaSelectScene::CharaData;
+std::map<CharaName, Sprite *> CharaSelectScene::teamData;
 
 Scene *CharaSelectScene::createScene()
 {
@@ -93,13 +95,25 @@ bool CharaSelectScene::init()
 	touchEventGet->onTouchEnded = CC_CALLBACK_2(CharaSelectScene::TouchEnd, this);
 	// 登録
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(touchEventGet, this);
+
+	//キャラデータの初期化
+	teamData[CharaName::CHARA_ATTACKER]	= Sprite::create("Player/PL_Attacker_face01.png");
+	teamData[CharaName::CHARA_SHIELD]		= Sprite::create("Player/PL_Shield_face01.png");
+	teamData[CharaName::CHARA_MAGIC]		= Sprite::create("Player/PL_Magic_face01.png");
+	teamData[CharaName::CHARA_GEALER]		= Sprite::create("Player/PL_Healer_face01.png");
+
+	//大きさ
+	teamData[CharaName::CHARA_ATTACKER]->setScale(BOX_SCALE);
+	teamData[CharaName::CHARA_SHIELD]->setScale(BOX_SCALE);
+	teamData[CharaName::CHARA_MAGIC]->setScale(BOX_SCALE);
+	teamData[CharaName::CHARA_GEALER]->setScale(BOX_SCALE);
 	
 	//Sound();
 	TeamBoxDraw();			// 表示(キャラ以外)
 	CharaDraw();			// キャラ表示
 	SwipeRotation();		// スワイプに合わせて回転
 	ObjHit();				// 当たり判定
-	this->scheduleUpdate();	// 更新
+//	this->scheduleUpdate();	// 更新
 	_s_fontBoard->setVisible(false);	// 板を非表示
 
 	CharaData.reserve(TEAM_MEMBER);		// 事前に領域確保[チームの人数分]
@@ -345,44 +359,36 @@ void CharaSelectScene::TeamBoxDraw()
 }
 
 // チームメンバー表示
-void CharaSelectScene::TeamDraw()
-{
-	// CharaDataのデータを参照して画像を表示
-	auto data0 = CharaData.at(0);
-	auto data1 = CharaData.at(1);
-	auto data2 = CharaData.at(2);
-
-	// enumと関連つけたいよね～
-	_s_teamAttacker = Sprite::create("Player/PL_Attacker_face01.png");
-	_s_teamShied	= Sprite::create("Player/PL_Shield_face01.png");
-	_s_teamMagic	= Sprite::create("Player/PL_Magic_face01.png");
-	_s_teamHealer	= Sprite::create("Player/PL_Healer_face01.png");
-
-	_s_teamAttacker	->setScale(BOX_SCALE);
-	_s_teamShied	->setScale(BOX_SCALE);
-	_s_teamMagic	->setScale(BOX_SCALE);
-	_s_teamHealer	->setScale(BOX_SCALE);
-	
-	//charaData[CharaName::CHARA_ATTACKER]	= Sprite::create("Player/PL_Attacker_face01.png");
-	//charaData[CharaName::CHARA_SHIELD]		= Sprite::create("Player/PL_Shield_face01.png");
-	//charaData[CharaName::CHARA_MAGIC]		= Sprite::create("Player/PL_Magic_face01.png");
-	//charaData[CharaName::CHARA_HEALER]		= Sprite::create("Player/PL_Healer_face01.png");
-
-	// 仮表示チーム　
-	_s_teamAttacker->setPosition( TEAM_BOX_OFFSET_X, (TEAM_BOX_Y));//(TEAM_BOX_X+16) + TEAM_BOX_OFFSET_X←X(真ん中)
-	addChild(_s_teamAttacker, 8);
-
-	_s_teamShied->setPosition((TEAM_BOX_X + 16) + TEAM_BOX_OFFSET_X, (TEAM_BOX_Y));//(TEAM_BOX_X+16) + TEAM_BOX_OFFSET_X←X(真ん中)
-	addChild(_s_teamShied, 9);
-
-	_s_teamMagic->setPosition((TEAM_BOX_X + 16)*2 + TEAM_BOX_OFFSET_X, (TEAM_BOX_Y));//(TEAM_BOX_X+16) + TEAM_BOX_OFFSET_X←X(真ん中)
-	addChild(_s_teamMagic, 9);
-
-
-
-	//charaData[CharaName::CHARA_HEALER]->setPosition((TEAM_BOX_X + 16) * 2 + TEAM_BOX_OFFSET_X, (TEAM_BOX_Y));
-	//addChild(charaData[CharaName::CHARA_HEALER]);
-}
+//void CharaSelectScene::TeamDraw()
+//{
+//	// CharaDataのデータを参照して画像を表示
+//	auto data0 = CharaData.at(0);
+//	auto data1 = CharaData.at(1);
+//	auto data2 = CharaData.at(2);
+//
+//	// enumと関連つけたいよね～
+//	//_s_teamAttacker = Sprite::create("Player/PL_Attacker_face01.png");
+//	//_s_teamShied	= Sprite::create("Player/PL_Shield_face01.png");
+//	//_s_teamMagic	= Sprite::create("Player/PL_Magic_face01.png");
+//	//_s_teamHealer	= Sprite::create("Player/PL_Healer_face01.png");
+//
+//
+//	
+//
+//
+//	//// 仮表示チーム　
+//	//_s_teamAttacker->setPosition( TEAM_BOX_OFFSET_X,)*	(TEAM_BOX_X + 16)		*i)							(TEAM_BOX_Y));//(TEAM_BOX_X+16) + TEAM_BOX_OFFSET_X←X(真ん中)
+//
+//	//_s_teamShied->setPosition((TEAM_BOX_X + 16) + TEAM_BOX_OFFSET_X,						(TEAM_BOX_Y));//(TEAM_BOX_X+16) + TEAM_BOX_OFFSET_X←X(真ん中)
+//
+//	//_s_teamMagic->setPosition((TEAM_BOX_X + 16)*2 + TEAM_BOX_OFFSET_X,					(TEAM_BOX_Y));//(TEAM_BOX_X+16) + TEAM_BOX_OFFSET_X←X(hasi
+//
+//
+//
+//
+//	//charaData[CharaName::CHARA_HEALER]->setPosition((TEAM_BOX_X + 16) * 2 + TEAM_BOX_OFFSET_X, (TEAM_BOX_Y));
+//	//addChild(charaData[CharaName::CHARA_HEALER]);
+//}
 
 // 背景
 void CharaSelectScene::CharaSelectBackGroudn()
@@ -519,12 +525,17 @@ void CharaSelectScene::AddTeam()
 		CharaData.push_back(static_cast<CharaName> (i));
 		log("追加されました。%d", i);
 		// 例外処理入れてね　おんなじキャラ選べないとか
+		//サイズ超えていないか
 		if (CharaData.size() == TEAM_MEMBER)
 		{
 			log("メンバーが揃いました", CharaData);
-			TeamDraw();		
+			//TeamDraw();		
 			break;
 		}
+		//addChildする
+		teamData[static_cast<CharaName>(i)]->setPosition(TEAM_BOX_OFFSET_X + (TEAM_BOX_X * i), (TEAM_BOX_Y));
+
+		this->addChild(teamData[static_cast<CharaName>(i)]);
 	}
 	//// チーム編成の箱をクリックしたとき[第一範囲]
 	//if (_box_rect.containsPoint(_touchPos))
