@@ -60,7 +60,6 @@ private:
 	void AddTeam();					// チーム編成用
 	void CharaSeveData();
 	void Sound();					// 音楽用
-	void TeamDraw();				// チームメンバー表示
 					
 	// touchイベント
 	bool TouchBegan(cocos2d::Touch* touch, cocos2d::Event* event);	// 押した瞬間
@@ -70,13 +69,9 @@ private:
 	//// 保存する用のデータ
 	static std::vector<CharaName> CharaData;
 	static std::map<CharaName,Sprite *> teamData;
+	//Sprite *teamData;
 	// click判定
 	EventListenerTouchOneByOne *_listener = EventListenerTouchOneByOne::create();
-
-	// きれいに並べなおしておいてね
-	// テスト用
-	void Test();
-	Sprite *_test;
 };
 
 #endif // Title

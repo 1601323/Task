@@ -1,4 +1,5 @@
 #include "CharaSelectScene.h"
+#include "Geometry.h"
 #include "FightScene.h"
 #include "GameOver.h"
 #include "TitleScene.h"
@@ -72,7 +73,7 @@ bool CharaSelectScene::init()
 	// バックグランド
 	CharaSelectBackGroudn();
 	// ボタン配置 (通常時,押した時,押した時のｱｸｼｮﾝ)
-	auto _buttunNext = MenuItemImage::create("UI/Command/UI_Button_Next.png", "UI/Command/UI_Button_Next.png", CC_CALLBACK_1(CharaSelectScene::pushStart, this));
+	auto _buttunNext = MenuItemImage::create(UI_BUTTON_NEXT, UI_BUTTON_NEXT_PUSH, CC_CALLBACK_1(CharaSelectScene::pushStart, this));
 	_buttunNext->setPosition(NEXT_BUTTON_X+30, NEXT_BUTTON_Y);		// 座標指定
 	_buttunNext->setScale(0.5);										// 大きさ調整
 
@@ -80,7 +81,7 @@ bool CharaSelectScene::init()
 	menu1->setPosition(Point::ZERO);								// 座標配置
 	this->addChild(menu1, 8);										// 追加
 
-	auto _buttunBack = MenuItemImage::create("UI/Command/UI_Button_Back.png", "UI/Command/UI_Button_Back.png", CC_CALLBACK_1(CharaSelectScene::backStart, this));
+	auto _buttunBack = MenuItemImage::create(UI_BUTTON_BUCK, UI_BUTTON_BUCK, CC_CALLBACK_1(CharaSelectScene::backStart, this));
 	_buttunBack->setPosition(NEXT_BUTTON_X - 550, NEXT_BUTTON_Y);	// 座標指定
 	_buttunBack->setScale(0.5);										// 大きさ調整	
 
@@ -97,26 +98,30 @@ bool CharaSelectScene::init()
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(touchEventGet, this);
 
 	//キャラデータの初期化
-	teamData[CharaName::CHARA_ATTACKER]	= Sprite::create("Player/PL_Attacker_face01.png");
-	teamData[CharaName::CHARA_SHIELD]		= Sprite::create("Player/PL_Shield_face01.png");
-	teamData[CharaName::CHARA_MAGIC]		= Sprite::create("Player/PL_Magic_face01.png");
-	teamData[CharaName::CHARA_GEALER]		= Sprite::create("Player/PL_Healer_face01.png");
+	teamData[CharaName::CHARA_ATTACKER]		= Sprite::create(PL_ATTACKER_FACE);
+	teamData[CharaName::CHARA_SHIELD]		= Sprite::create(PL_SHIELD_FACE);
+	teamData[CharaName::CHARA_MAGIC]		= Sprite::create(PL_MAGIC_FACE);
+	teamData[CharaName::CHARA_HEALER]		= Sprite::create(PL_HEALER_FACE);
 
 	//大きさ
-	teamData[CharaName::CHARA_ATTACKER]->setScale(BOX_SCALE);
-	teamData[CharaName::CHARA_SHIELD]->setScale(BOX_SCALE);
-	teamData[CharaName::CHARA_MAGIC]->setScale(BOX_SCALE);
-	teamData[CharaName::CHARA_GEALER]->setScale(BOX_SCALE);
-	
-	//Sound();
-	TeamBoxDraw();			// 表示(キャラ以外)
-	CharaDraw();			// キャラ表示
-	SwipeRotation();		// スワイプに合わせて回転
-	ObjHit();				// 当たり判定
-//	this->scheduleUpdate();	// 更新
-	_s_fontBoard->setVisible(false);	// 板を非表示
+	//teamData[CharaName::CHARA_ATTACKER]->setScale(BOX_SCALE);
+	//teamData[CharaName::CHARA_SHIELD]->setScale(BOX_SCALE);
+	//teamData[CharaName::CHARA_MAGIC]->setScale(BOX_SCALE);
+	//teamData[CharaName::CHARA_HEALER]->setScale(BOX_SCALE);
 
+	//_s_teamAttacker = Sprite::create(PL_ATTACKER_FACE);
+	//teamData = _s_teamAttacker;
+	
+//	Sound();
+	TeamBoxDraw();						// 表示(キャラ以外)
+	CharaDraw();						// キャラ表示
+	SwipeRotation();					// スワイプに合わせて回転
+	ObjHit();							// 当たり判定
+	this->scheduleUpdate();				// 更新
+	_s_fontBoard->setVisible(false);	// 板を非表示
 	CharaData.reserve(TEAM_MEMBER);		// 事前に領域確保[チームの人数分]
+	
+
 	return true;
 }
 
@@ -149,15 +154,19 @@ void CharaSelectScene::TouchEnd(cocos2d::Touch* touch, cocos2d::Event* event)
 	{
 		_clickCnt += 1;
 		
-		if (_clickCnt > FAST_CLICK)
+		if (_clickCnt == FAST_CLICK)
 		{
 			_s_fontBoard->setVisible(true);	// 説明文の板表示
 			CharaText();					// キャラ説明文
 		}
-		if (_clickCnt > SECOND_CLICK)
+		else if (_clickCnt == SECOND_CLICK)
 		{
 			AddTeam();						// チーム追加用
 			_clickCnt = FAST_CLICK;
+		}
+		else if (_clickCnt < FAST_CLICK)
+		{
+			// 何もなし
 		}
 	}
 	else
@@ -186,21 +195,16 @@ void CharaSelectScene::CharaDraw()
 	// マルチれぞーしょん対応か
 	Point origin = Director::getInstance()->getVisibleOrigin();
 
-	_s_Attacker = Sprite::create("Player/PL_Attacker.png");
-	_s_Shield   = Sprite::create("Player/PL_Shield.png");
-	_s_Magic    = Sprite::create("Player/PL_Magic.png");
-	_s_Healer   = Sprite::create("Player/PL_Healer.png");
+	_s_Attacker = Sprite::create(PL_ATTACKER);
+	_s_Shield   = Sprite::create(PL_SHIELD);
+	_s_Magic    = Sprite::create(PL_MAGIC);
+	_s_Healer   = Sprite::create(PL_HEALER);
 
 	this->items.clear();
 	this->items.push_back(_s_Attacker);
 	this->items.push_back(_s_Shield);
 	this->items.push_back(_s_Magic);
 	this->items.push_back(_s_Healer);
-	//this->items.clear();
-	//this->items.push_back(Sprite::create("PL_Attacker.png"));
-	//this->items.push_back(Sprite::create("PL_Shield.png"));
-	//this->items.push_back(Sprite::create("PL_Magic.png"));
-	//this->items.push_back(Sprite::create("PL_Healer.png"));
 
 	// 選択されてないもの半透明に
 	if (!Top)
@@ -233,7 +237,7 @@ void CharaSelectScene::CharaText()
 	// マルチれぞーしょん対応か
 	Point origin = Director::getInstance()->getVisibleOrigin();
 	// フォント指定
-	TTFConfig ttfConfig("fonts/HGRSGU.TTC", FONT_SIZE);
+	TTFConfig ttfConfig(FONT_PL_TEXT, FONT_SIZE);
 	// 色指定
 	auto textColor = Color3B(0,0,50);
 	// テキスト
@@ -340,7 +344,7 @@ void CharaSelectScene::CharaText()
 // 表示 チーム編成の箱
 void CharaSelectScene::TeamBoxDraw()
 {
-	_batchNode = SpriteBatchNode::create("UI/PL_CharFlame01.png");
+	_batchNode = SpriteBatchNode::create(UI_PL_CHRA_FLAME);
 	_batchNode->setPosition(TEAM_BOX_OFFSET_X, 0);
 
 	// チーム編成のBox分表示
@@ -358,38 +362,6 @@ void CharaSelectScene::TeamBoxDraw()
 	this->addChild(_batchNode);
 }
 
-// チームメンバー表示
-//void CharaSelectScene::TeamDraw()
-//{
-//	// CharaDataのデータを参照して画像を表示
-//	auto data0 = CharaData.at(0);
-//	auto data1 = CharaData.at(1);
-//	auto data2 = CharaData.at(2);
-//
-//	// enumと関連つけたいよね～
-//	//_s_teamAttacker = Sprite::create("Player/PL_Attacker_face01.png");
-//	//_s_teamShied	= Sprite::create("Player/PL_Shield_face01.png");
-//	//_s_teamMagic	= Sprite::create("Player/PL_Magic_face01.png");
-//	//_s_teamHealer	= Sprite::create("Player/PL_Healer_face01.png");
-//
-//
-//	
-//
-//
-//	//// 仮表示チーム　
-//	//_s_teamAttacker->setPosition( TEAM_BOX_OFFSET_X,)*	(TEAM_BOX_X + 16)		*i)							(TEAM_BOX_Y));//(TEAM_BOX_X+16) + TEAM_BOX_OFFSET_X←X(真ん中)
-//
-//	//_s_teamShied->setPosition((TEAM_BOX_X + 16) + TEAM_BOX_OFFSET_X,						(TEAM_BOX_Y));//(TEAM_BOX_X+16) + TEAM_BOX_OFFSET_X←X(真ん中)
-//
-//	//_s_teamMagic->setPosition((TEAM_BOX_X + 16)*2 + TEAM_BOX_OFFSET_X,					(TEAM_BOX_Y));//(TEAM_BOX_X+16) + TEAM_BOX_OFFSET_X←X(hasi
-//
-//
-//
-//
-//	//charaData[CharaName::CHARA_HEALER]->setPosition((TEAM_BOX_X + 16) * 2 + TEAM_BOX_OFFSET_X, (TEAM_BOX_Y));
-//	//addChild(charaData[CharaName::CHARA_HEALER]);
-//}
-
 // 背景
 void CharaSelectScene::CharaSelectBackGroudn()
 {
@@ -398,14 +370,14 @@ void CharaSelectScene::CharaSelectBackGroudn()
 	Point origin = Director::getInstance()->getVisibleOrigin();
 	
 	// 背景画像追加
-	Sprite* _backImage = Sprite::create("BackImage/ST_CharSerect2.png");
+	Sprite* _backImage = Sprite::create(BACK_GRAND_SPRITE_CHRASELECT);
 	_backImage->setPosition(winSize.width / 2, winSize.height / 2);
 	this->addChild(_backImage,0);
 
 	//説明文の板配置
-	_s_fontBoard = Sprite::create("UI/Status/UI_Status_Inters.png");
+	_s_fontBoard = Sprite::create(UI_FONT_BOARD);
 	_s_fontBoard->setPosition(winSize.width / 2, 1130);
-	addChild(_s_fontBoard, 1);
+	this->addChild(_s_fontBoard, 1);
 }
 
 // 当たり判定用
@@ -462,7 +434,7 @@ void CharaSelectScene::Arrange()
 		this->items.at(i)->setOpacity(opacity);
 		this->items.at(i)->setZOrder(diameterY - y);
 	}
-	//そーとするよ(´・ω・`)
+	// ソート
 	auto tmpVector = items;
 	std::sort(tmpVector.begin(), tmpVector.end(), [](const Node* a, const Node* b)
 	// 先に大きいのtrue /　begin > end ←初めに大きいもの来る＝大きい順になる  
@@ -488,8 +460,6 @@ void CharaSelectScene::SwipeRotation()
 	// 離した
 	listener->onTouchEnded = [&](Touch *touch, Event *event)
 	{
-		// No.2 SwipeRotation内の離した,押した処理を押した,離した特化の関数内に入れるのか
-
 		// 正の値
 		if (angle>0.f)
 		{
@@ -511,7 +481,6 @@ const std::vector<CharaName>& CharaSelectScene::GetCharaData()
 	return CharaData;
 }
 
-
 // チーム追加用
 void CharaSelectScene::AddTeam()
 {
@@ -522,7 +491,7 @@ void CharaSelectScene::AddTeam()
 		{
 			continue;
 		}
-		CharaData.push_back(static_cast<CharaName> (i));
+	
 		log("追加されました。%d", i);
 		// 例外処理入れてね　おんなじキャラ選べないとか
 		//サイズ超えていないか
@@ -532,22 +501,11 @@ void CharaSelectScene::AddTeam()
 			//TeamDraw();		
 			break;
 		}
+		CharaData.push_back(static_cast<CharaName> (i));
 		//addChildする
 		teamData[static_cast<CharaName>(i)]->setPosition(TEAM_BOX_OFFSET_X + (TEAM_BOX_X * i), (TEAM_BOX_Y));
-
 		this->addChild(teamData[static_cast<CharaName>(i)]);
 	}
-	//// チーム編成の箱をクリックしたとき[第一範囲]
-	//if (_box_rect.containsPoint(_touchPos))
-	//{
-	//	// チーム編成キャンセル
-	//	//if (_clickCnt > 2)
-	//	{
-	//		log("メンバー編成し直したぜ大将!!");
-	//		// No.4 clickされたキャラをCharaDataから消す
-	//		// 横に(←)詰める
-	//	}
-	//}
 }
 
 // BGM
@@ -590,55 +548,3 @@ void CharaSelectScene::backStart(Ref * pSender)
 	// 遷移実行 アニメーション
 	Director::getInstance()->replaceScene(transition);
 }
-
-/*　URL
-http://takachan.hatenablog.com/entry/2017/08/08/002844
-https://iscene.jimdo.com/2015/02/04/cocos2d-x-ver-3-x-c-iphone-android-%E3%81%AE%E9%96%8B%E7%99%BA%E5%9F%BA%E7%A4%8E%E8%AC%9B%E5%BA%A7-%E7%9B%AE-%E6%AC%A1/
-http://hayateasdf.hatenablog.com/entry/2017/12/21/190434#10-%E6%95%B5%E3%81%AE%E4%BD%9C%E6%88%90
-https://qiita.com/isaoeka/items/dee8159e2a0c2a37a662
-http://brbranch.jp/blog/201607/cocos2d-x/shader/
-http://buildman.xyz/blog/cocos2dx-beginner-10/
-https://teratail.com/questions/72658
-http://www.fujimi-labo.com/2016/11/29/cocos2d-x8_1/
-http://rinov.jp/cocos-doujo-dx/index.html
-https://qiita.com/HamachiTaro/items/f7df7fc101e7e1222afc
-http://brbranch.jp/blog/201312/cocos2d-x/convert_to_node_space/
-
-// 文字表示
-//http://developer.wonderpla.net/entry/blog/engineer/Cocos2dx_Carousel
-//http://hayateasdf.hatenablog.com/entry/2017/12/21/190434#10-%E6%95%B5%E3%81%AE%E4%BD%9C%E6%88%90
-//https://iscene.jimdo.com/2015/02/23/cocos2d-x-ver-3-x-top%E3%83%9A%E3%83%BC%E3%82%B8-tableview-%E7%94%BB%E5%83%8F%E8%A1%A8%E7%A4%BA%E7%B7%A8/
-// cocos いろんなのが載ってるサイト
-// https://iscene.jimdo.com/2015/02/04/cocos2d-x-ver-3-x-c-iphone-android-%E3%81%AE%E9%96%8B%E7%99%BA%E5%9F%BA%E7%A4%8E%E8%AC%9B%E5%BA%A7-%E7%9B%AE-%E6%AC%A1/
-
-
-http://vivi.dyndns.org/blog/archives/605
-https://freegame-mugen.jp/roleplaying/game_6860.html
-https://qiita.com/s0hno/items/739b8da8d0ee1375c2cd
-
-// コインエフェクト表現
-http://takachan.hatenablog.com/entry/2017/08/28/213842
-
-// 文字描画
-void CharaSelectScene::FontsDraw()
-{
-	//画像サイズ取得
-	Size winSize = Director::getInstance()->getWinSize();
-	// マルチれぞーしょん対応か
-	Point origin = Director::getInstance()->getVisibleOrigin();
-
-	// スワイプの動いているとこ
-	// 配置文字
-	auto swipeLabel = Label::createWithSystemFont("スワイプで動くよ", "fonts/HGRSGU.TTC", 30);
-	// 配置場所
-	swipeLabel->setPosition(100, 300);
-	swipeLabel->setColor(Color3B(200, 150, 0));
-
-	// Select追加
-	this->addChild(swipeLabel, 1);
-	auto act1 = ScaleTo::create(LIMIT_TIME, DOUBLE_SCALE);   // 0.9秒で0.5倍に拡大
-	auto act2 = ScaleTo::create(LIMIT_TIME, 1.0f);			 // 0.9秒で元のサイズに戻す
-	swipeLabel->runAction(RepeatForever::create(Sequence::create(act1, act2, NULL)));  //  延々繰り返し
-}
-
-*/

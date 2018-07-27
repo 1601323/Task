@@ -10,5 +10,3 @@ bool Global::init()
 		return false;
 	}
 }
-
-
