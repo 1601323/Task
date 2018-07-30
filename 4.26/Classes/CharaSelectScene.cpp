@@ -51,8 +51,8 @@ const float SOUND_VOLUME				= 0.5f;				// BGM音量調整
 USING_NS_CC;
 
 // 実態作るよ
-std::vector<CharaName> CharaSelectScene::CharaData;
-std::map<CharaName, Sprite *> CharaSelectScene::teamData;
+//std::vector<CharaName> CharaSelectScene::CharaData;
+//std::map<CharaName, Sprite *> CharaSelectScene::teamData;
 
 Scene *CharaSelectScene::createScene()
 {
@@ -121,7 +121,6 @@ bool CharaSelectScene::init()
 	_s_fontBoard->setVisible(false);	// 板を非表示
 	CharaData.reserve(TEAM_MEMBER);		// 事前に領域確保[チームの人数分]
 	
-
 	return true;
 }
 
@@ -157,21 +156,20 @@ void CharaSelectScene::TouchEnd(cocos2d::Touch* touch, cocos2d::Event* event)
 		if (_clickCnt == FAST_CLICK)
 		{
 			_s_fontBoard->setVisible(true);	// 説明文の板表示
-			CharaText();					// キャラ説明文
+			//CharaText();					// キャラ説明文
+		
 		}
 		else if (_clickCnt == SECOND_CLICK)
 		{
+			CharaText();					// キャラ説明文
 			AddTeam();						// チーム追加用
-			_clickCnt = FAST_CLICK;
-		}
-		else if (_clickCnt < FAST_CLICK)
-		{
-			// 何もなし
+			_clickCnt = FAST_CLICK;		
 		}
 	}
 	else
 	{
 		_s_fontBoard->setVisible(false);	// 説明文の板非表示
+		
 	}
 }
 
@@ -494,17 +492,19 @@ void CharaSelectScene::AddTeam()
 	
 		log("追加されました。%d", i);
 		// 例外処理入れてね　おんなじキャラ選べないとか
-		//サイズ超えていないか
+		// サイズ超えていないか
 		if (CharaData.size() == TEAM_MEMBER)
 		{
 			log("メンバーが揃いました", CharaData);
-			//TeamDraw();		
+			//TeamDraw();	
+			CharaData.data();
+			pushStart(this);
 			break;
 		}
 		CharaData.push_back(static_cast<CharaName> (i));
 		//addChildする
-		teamData[static_cast<CharaName>(i)]->setPosition(TEAM_BOX_OFFSET_X + (TEAM_BOX_X * i), (TEAM_BOX_Y));
-		this->addChild(teamData[static_cast<CharaName>(i)]);
+		//teamData[static_cast<CharaName> (i)]->setPosition(TEAM_BOX_OFFSET_X + (TEAM_BOX_X * i), (TEAM_BOX_Y));
+		//this->addChild(teamData[static_cast<CharaName> (i)]);
 	}
 }
 

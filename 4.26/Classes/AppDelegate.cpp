@@ -1,5 +1,8 @@
 #include "AppDelegate.h"
 #include "TitleScene.h"
+#include "Swipe.h"
+#include "CharaSelectScene.h"
+
 
 // #define USE_AUDIO_ENGINE 1
 // #define USE_SIMPLE_AUDIO_ENGINE 1
@@ -98,6 +101,8 @@ bool AppDelegate::applicationDidFinishLaunching() {
     // create a scene. it's an autorelease object
 	///
     auto scene = TitleScene::createScene();
+	//auto scene = CharaSelectScene::createScene();
+	//auto scene = Swipe::createScene();
 
     // run
     director->runWithScene(scene);

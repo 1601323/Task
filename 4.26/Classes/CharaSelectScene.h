@@ -20,7 +20,7 @@ public:
 	void pushStart(Ref *pSender);
 	void backStart(Ref *pSender);
 	// 選択されたキャラ情報格納
-	static const std::vector<CharaName>& GetCharaData();
+	 const std::vector<CharaName>& GetCharaData();
 
 private:
 	unsigned int _clickCnt = 0;		// クリック回数を保存
@@ -67,8 +67,8 @@ private:
 	void TouchEnd(cocos2d::Touch* touch, cocos2d::Event* event);	// 離した瞬間
 
 	//// 保存する用のデータ
-	static std::vector<CharaName> CharaData;
-	static std::map<CharaName,Sprite *> teamData;
+	 std::vector<CharaName> CharaData;
+	 std::map<CharaName,Sprite *> teamData;
 	//Sprite *teamData;
 	// click判定
 	EventListenerTouchOneByOne *_listener = EventListenerTouchOneByOne::create();
